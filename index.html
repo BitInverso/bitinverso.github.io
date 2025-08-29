@@ -42,45 +42,39 @@
     .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
     /* ===== Botão ParaleLOGRAMO robusto (sem skew no container) ===== */
 a.btn-diag {
-  --btn-bg: #ec4899;      /* cor de fundo (muda nas variantes) */
-  --btn-fg: #000;         /* cor do texto */
-  --btn-border: #ec4899;  /* cor da borda */
-  --btn-slant: 12px;      /* obliquidade da quina direita/baixa */
+  --btn-bg: #ec4899;
+  --btn-fg: #000;
+  --btn-slant: 12px;
 
   position: relative;
   display: inline-block;
   vertical-align: middle;
   text-decoration: none;
   color: var(--btn-fg);
-  border: 2px solid var(--btn-border);
-  overflow: hidden;           /* esconde o fundo cortado pelo clip-path */
-  border-radius: 10px;        /* arredonda cantos (opcional) */
-  transition: transform .2s ease, box-shadow .2s ease, color .2s ease, border-color .2s ease;
+  overflow: hidden;
+  border-radius: 10px;      /* opcional */
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
-/* Fundo em forma de paralelogramo */
 a.btn-diag::before {
   content: "";
   position: absolute;
   inset: 0;
   background: var(--btn-bg);
-  /* paralelogramo (bico na quina inferior direita) */
   clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
   z-index: 0;
 }
 
-/* Conteúdo reto e com padding controlando a altura */
 a.btn-diag > span {
   position: relative;
   z-index: 1;
   display: inline-block;
-  padding: 0.75rem 2rem;     /* ~12px 32px, responsivo */
+  padding: 0.75rem 2rem;
   font-weight: 800;
   letter-spacing: .15em;
   line-height: 1;
   text-transform: uppercase;
-  white-space: nowrap;       /* não quebra no mobile */
-}
+} 
 
 /* Hover padrão: inverte para outline “neon” */
 a.btn-diag:hover {
