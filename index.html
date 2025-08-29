@@ -23,7 +23,8 @@
     .navbar { backdrop-filter: blur(10px); background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(0,255,255,.2); z-index: 50; }
 
     .clip-path-button {
-        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+      border-radius: 0; /* evita cantos arredondados */
     }
 
     /* HERO VIDEO BACKGROUND (sem parallax) */
@@ -53,7 +54,7 @@
       text-decoration: none;
       color: var(--btn-fg);
       overflow: hidden;
-      border-radius: 0;                 /* sem cantos arredondados */
+      border-radius: 0; /* sem cantos arredondados */
       transition: transform .2s ease, box-shadow .2s ease;
     }
     /* forma do paralelogramo */
@@ -64,7 +65,7 @@
       background: var(--btn-bg);
       clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
       z-index: 0;
-      border-radius: 0;                 /* garante sem arredondamento */
+      border-radius: 0; /* garante sem arredondamento */
     }
     a.btn-diag > span {
       position: relative;
@@ -90,9 +91,17 @@
     a.btn-green  { --btn-bg: #22c55e; --btn-fg: #000; }
     a.btn-yellow { --btn-bg: #facc15; --btn-fg: #000; }
 
+    /* Respiro consistente do bloco de CTAs (e botão menos “achatado” no desktop) */
+    .cta-row { margin-top: 1.5rem; }
+    @media (min-width: 1024px) {
+      .cta-row { margin-top: 2rem; }
+      a.btn-diag { --btn-slant: 16px; }
+      a.btn-diag > span { padding: 0.9rem 2.25rem; font-size: 1rem; }
+    }
+
     #about, #values, #contact {
       scroll-margin-top: calc(var(--nav-h) + 16px);
-    } /* <-- faltava esta chave fechando o bloco */
+    }
 
     @media (min-width: 768px) { .mobile-menu { display: none !important; } }
     @media (max-width: 767px) {
@@ -171,12 +180,12 @@
         <br />
         <span class="text-cyan-400">Contamos histórias com humor ácido, drama e reviravoltas.</span>
       </h2>
-      <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center px-4">
-          <button disabled class="group px-6 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button text-sm md:text-base" title="Em breve...">
-              NOSSOS JOGOS
-              <span class="text-xs block mt-1">EM BREVE</span>
-          </button>
-          <a href="#about" class="btn-diag btn-pink"><span>Saiba Mais</span></a>
+      <div class="cta-row flex flex-col sm:flex-row items-center gap-4 md:gap-6 justify-center px-4">
+        <button disabled class="group px-6 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button text-sm md:text-base" title="Em breve...">
+          NOSSOS JOGOS
+          <span class="text-xs block mt-1">EM BREVE</span>
+        </button>
+        <a href="#about" class="btn-diag btn-pink"><span>Saiba Mais</span></a>
       </div>
     </div>
   </section>
@@ -236,66 +245,66 @@
 
   <!-- Contact -->
   <section id="contact" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
-      <div class="max-w-6xl mx-auto">
-          <div class="text-center mb-16">
-              <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
-              <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                  Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
-                  <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
-              </p>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-16 items-center">
-              <div class="space-y-8">
-                  <div class="text-center md:text-left">
-                      <h4 class="text-2xl md:text-3xl font-bold mb-6 text-pink-500 tracking-wider">VAMOS CONVERSAR</h4>
-                      <div class="space-y-6">
-                          <div class="group p-6 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden">
-                              <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
-                              <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL</div>
-                              <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300">
-                                  wesley@bitinverso.com
-                              </a>
-                          </div>
-                          <div class="space-y-4">
-                              <div class="text-lg font-bold text-gray-400 tracking-wider">OU NOS SIGA:</div>
-                              <div class="flex flex-col sm:flex-row gap-4">
-                                  <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
-                                      <span class="text-pink-500 group-hover:text-black">@bitinverso</span> no TikTok
-                                  </a>
-                                  <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
-                                      <span class="text-cyan-400 group-hover:text-black">@bitinverso</span> no Instagram
-                                  </a>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-
-              <div class="relative">
-                  <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
-                      <div class="absolute inset-0 opacity-10">
-                          <div class="grid grid-cols-6 gap-1 h-full" id="contact-pixel-pattern"></div>
-                      </div>
-                      <div class="relative flex items-center justify-center h-64 md:h-80">
-                          <div class="text-center">
-                              <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
-                              <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
-                              <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
-                          </div>
-                      </div>
-                  </div>
-                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse pixel-art"></div>
-                  <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
-                  <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
-              </div>
-          </div>
-
-          <div class="text-center mt-16">
-              <p class="text-gray-400 mb-6 text-lg leading-relaxed">Respondemos a todos os e-mails! Pode levar um tempo, mas valorizamos cada mensagem.</p>
-              <a href="mailto:wesley@bitinverso.com?subject=Olá, Bit Inverso!" class="inline-block px-12 py-4 border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button">ENVIAR EMAIL</a>
-          </div>
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
+        <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+          Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
+          <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
+        </p>
       </div>
+
+      <div class="grid md:grid-cols-2 gap-16 items-center">
+        <div class="space-y-8">
+          <div class="text-center md:text-left">
+            <h4 class="text-2xl md:text-3xl font-bold mb-6 text-pink-500 tracking-wider">VAMOS CONVERSAR</h4>
+            <div class="space-y-6">
+              <div class="group p-6 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL</div>
+                <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300">
+                  wesley@bitinverso.com
+                </a>
+              </div>
+              <div class="space-y-4">
+                <div class="text-lg font-bold text-gray-400 tracking-wider">OU NOS SIGA:</div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                  <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                    <span class="text-pink-500 group-hover:text-black">@bitinverso</span> no TikTok
+                  </a>
+                  <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                    <span class="text-cyan-400 group-hover:text-black">@bitinverso</span> no Instagram
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+              <div class="grid grid-cols-6 gap-1 h-full" id="contact-pixel-pattern"></div>
+            </div>
+            <div class="relative flex items-center justify-center h-64 md:h-80">
+              <div class="text-center">
+                <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
+                <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
+                <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
+              </div>
+            </div>
+          </div>
+          <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse pixel-art"></div>
+          <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+          <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-16">
+        <p class="text-gray-400 mb-6 text-lg leading-relaxed">Respondemos a todos os e-mails! Pode levar um tempo, mas valorizamos cada mensagem.</p>
+        <a href="mailto:wesley@bitinverso.com?subject=Olá, Bit Inverso!" class="inline-block px-12 py-4 border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button">ENVIAR EMAIL</a>
+      </div>
+    </div>
   </section>
 
   <footer class="relative z-10 py-12 px-6 border-t-4 border-gray-800 text-center">
