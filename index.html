@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Vídeo em Loop - Tela Cheia</title>
+  <style>
+    html, body { height: 100%; margin: 0; background: #000; }
+    body { overflow: hidden; }
+    .wrap { position: fixed; inset: 0; }
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover; /* preenche a tela mantendo o aspecto */
+      object-position: center center;
+      display: block;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <video id="bgVideo"
+           autoplay
+           muted
+           loop
+           playsinline
+           webkit-playsinline
+           preload="auto"
+           controlslist="nodownload noremoteplayback"
+           disablepictureinpicture>
+      <source src="video.mp4" type="video/mp4">
+      Seu navegador não suporta vídeo HTML5.
+    </video>
+  </div>
+
+  <script>
+    (function() {
+      const v = document.getElementById('bgVideo');
+
+      // Tenta iniciar a reprodução imediatamente
+      function ensurePlay() {
+        if (v && v.paused) {
+          v.play().catch(() => {});
+        }
+      }
+
+      // Em alguns navegadores móveis, é preciso um gesto do usuário
+      ['click','touchstart','keydown'].forEach(ev => {
+        window.addEventListener(ev, ensurePlay, { once: true });
+      });
+
+      // Ao voltar ao app/aba, garante que continua tocando
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) ensurePlay();
+      });
+
+      // Se a janela mudar de tamanho/orientação, mantém tela cheia
+      window.addEventListener('resize', () => {
+        // Apenas reforce o play; o CSS já cuida do dimensionamento
+        ensurePlay();
+      });
+
+      // Em iOS, garantir inline
+      v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
+    })();
+  </script>
+</body>
+</html>
