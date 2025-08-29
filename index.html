@@ -40,69 +40,59 @@
 
     /* Glows decorativos (parallax de mouse REMOVIDO) */
     .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
-    /* ===== Botão ParaleLOGRAMO robusto (sem skew no container) ===== */
-a.btn-diag {
-  --btn-bg: #ec4899;
-  --btn-fg: #000;
-  --btn-slant: 12px;
 
-  position: relative;
-  display: inline-block;
-  vertical-align: middle;
-  text-decoration: none;
-  color: var(--btn-fg);
-  overflow: hidden;
-  border-radius: 10px;      /* opcional */
-  transition: transform .2s ease, box-shadow .2s ease;
-}
+    /* ===== Botão paralelogramo robusto (sem skew no container) ===== */
+    a.btn-diag {
+      --btn-bg: #ec4899;
+      --btn-fg: #000;
+      --btn-slant: 12px;
 
-a.btn-diag::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--btn-bg);
-  clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
-  z-index: 0;
-}
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+      text-decoration: none;
+      color: var(--btn-fg);
+      overflow: hidden;
+      border-radius: 0;                 /* sem cantos arredondados */
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    /* forma do paralelogramo */
+    a.btn-diag::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--btn-bg);
+      clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
+      z-index: 0;
+      border-radius: 0;                 /* garante sem arredondamento */
+    }
+    a.btn-diag > span {
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      line-height: 1;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    a.btn-diag:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25);
+    }
+    a.btn-diag:hover::before { background: transparent; }
+    a.btn-diag:hover { color: #fff; }
 
-a.btn-diag > span {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  font-weight: 800;
-  letter-spacing: .15em;
-  line-height: 1;
-  text-transform: uppercase;
-} 
+    /* ===== VARIANTES ===== */
+    a.btn-pink   { --btn-bg: #ec4899; --btn-fg: #000; }
+    a.btn-cyan   { --btn-bg: #06b6d4; --btn-fg: #000; }
+    a.btn-green  { --btn-bg: #22c55e; --btn-fg: #000; }
+    a.btn-yellow { --btn-bg: #facc15; --btn-fg: #000; }
 
-/* Hover padrão: inverte para outline “neon” */
-a.btn-diag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25);
-}
-a.btn-diag:hover::before {
-  background: transparent;
-}
-a.btn-diag:hover {
-  color: #fff;               /* texto branco no hover */
-}
-
-/* ===== VARIANTES ===== */
-
-/* Rosa */
-a.btn-pink { --btn-bg: #ec4899; --btn-fg: #000; --btn-border: #ec4899; }
-
-/* Ciano (se precisar) */
-a.btn-cyan { --btn-bg: #06b6d4; --btn-fg: #000; --btn-border: #06b6d4; }
-
-/* Verde (opcional) */
-a.btn-green { --btn-bg: #22c55e; --btn-fg: #000; --btn-border: #22c55e; }
-
-/* Amarelo (opcional) */
-a.btn-yellow { --btn-bg: #facc15; --btn-fg: #000; --btn-border: #facc15; }
     #about, #values, #contact {
-      scroll-margin-top: calc(var(--nav-h) + 16px)
+      scroll-margin-top: calc(var(--nav-h) + 16px);
+    } /* <-- faltava esta chave fechando o bloco */
 
     @media (min-width: 768px) { .mobile-menu { display: none !important; } }
     @media (max-width: 767px) {
