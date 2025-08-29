@@ -1,94 +1,537 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+    <meta charset="UTF-8">
+    <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
 
-  <!-- SEO -->
-  <meta name="keywords" content="Studio Bit Inverso, jogos indie, anime games, humor ácido, sátira, crítica social, game studio, indie dev">
-  <meta name="author" content="Studio Bit Inverso">
+    <!-- SEO -->
+    <meta name="keywords" content="Studio Bit Inverso, jogos indie, anime games, humor ácido, sátira, crítica social, game studio, indie dev">
+    <meta name="author" content="Studio Bit Inverso">
 
-  <!-- Open Graph (Facebook, LinkedIn, etc.) -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Studio Bit Inverso">
-  <meta property="og:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-  <meta property="og:url" content="https://bitinverso.com">
-  <meta property="og:image" content="https://bitinverso.com/assets/og-image.jpg"> <!-- Substituir pela URL real da imagem -->
-  <meta property="og:site_name" content="Studio Bit Inverso">
+    <!-- Open Graph (Facebook, LinkedIn, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Studio Bit Inverso">
+    <meta property="og:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+    <meta property="og:url" content="https://bitinverso.com">
+    <meta property="og:image" content="https://bitinverso.com/assets/og-image.jpg">
+    <meta property="og:site_name" content="Studio Bit Inverso">
 
-  <!-- Twitter Cards -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Studio Bit Inverso">
-  <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-  <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.jpg"> <!-- Substituir pela URL real da imagem -->
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Studio Bit Inverso">
+    <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+    <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.jpg">
 
-  <!-- Extra para Google -->
-  <meta itemprop="name" content="Studio Bit Inverso">
-  <meta itemprop="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-  <meta itemprop="image" content="https://bitinverso.com/assets/og-image.jpg">
-  <title>Studio BitInverso</title>
-  <style>
-    html, body { height: 100%; margin: 0; background: #000; }
-    body { overflow: hidden; }
-    .wrap { position: fixed; inset: 0; }
-    video {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover; /* preenche a tela mantendo o aspecto */
-      object-position: center center;
-      display: block;
-      background: #000;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <video id="bgVideo"
-           autoplay
-           muted
-           loop
-           playsinline
-           webkit-playsinline
-           preload="auto"
-           controlslist="nodownload noremoteplayback"
-           disablepictureinpicture>
-      <source src="video.mp4" type="video/mp4">
-      Seu navegador não suporta vídeo HTML5.
-    </video>
-  </div>
-
-  <script>
-    (function() {
-      const v = document.getElementById('bgVideo');
-
-      // Tenta iniciar a reprodução imediatamente
-      function ensurePlay() {
-        if (v && v.paused) {
-          v.play().catch(() => {});
+    <!-- Extra para Google -->
+    <meta itemprop="name" content="Studio Bit Inverso">
+    <meta itemprop="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+    <meta itemprop="image" content="https://bitinverso.com/assets/og-image.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bit Inverso - Gaming Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        * {
+            font-family: 'JetBrains Mono', monospace;
         }
-      }
+        
+        .glitch-text {
+            text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080;
+        }
 
-      // Em alguns navegadores móveis, é preciso um gesto do usuário
-      ['click','touchstart','keydown'].forEach(ev => {
-        window.addEventListener(ev, ensurePlay, { once: true });
-      });
+        .logo-header {
+            height: 26rem;
+        }
+        
+        .pixel-art {
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .clip-path-button {
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
 
-      // Ao voltar ao app/aba, garante que continua tocando
-      document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) ensurePlay();
-      });
+        /* Menu Mobile CORRIGIDO */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 60;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            display: none;
+        }
+        
+        .mobile-menu.active {
+            transform: translateX(0);
+            display: block;
+        }
+        
+        /* Hamburger */
+        .hamburger {
+            z-index: 70;
+            position: relative;
+            padding: 10px;
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+        
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(-45deg) translate(-5px, 6px);
+            background: #ff00ff;
+        }
+        
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(45deg) translate(-5px, -6px);
+            background: #00ffff;
+        }
+        
+        /* Menu fixo */
+        .navbar {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            z-index: 50;
+        }
+        
+        /* Esconder no desktop */
+        @media (min-width: 768px) {
+            .mobile-menu {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-black text-white relative overflow-x-hidden">
+    
+    <!-- Pixel Grid Background -->
+    <div class="fixed inset-0 opacity-5 pointer-events-none">
+        <div class="grid grid-cols-20 gap-px h-full">
+            <!-- Grid cells geradas via JavaScript -->
+        </div>
+    </div>
 
-      // Se a janela mudar de tamanho/orientação, mantém tela cheia
-      window.addEventListener('resize', () => {
-        // Apenas reforce o play; o CSS já cuida do dimensionamento
-        ensurePlay();
-      });
+    <!-- Glitch Effect Elements -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div id="glitch1" class="absolute top-20 left-10 w-32 h-32 bg-cyan-400 opacity-10 blur-xl animate-pulse"></div>
+        <div id="glitch2" class="absolute top-1/2 right-20 w-24 h-24 bg-pink-500 opacity-20 blur-lg animate-bounce" style="animation-delay: 1s;"></div>
+        <div id="glitch3" class="absolute bottom-20 left-1/3 w-40 h-40 bg-green-400 opacity-5 blur-2xl animate-ping" style="animation-delay: 2s;"></div>
+    </div>
 
-      // Em iOS, garantir inline
-      v.setAttribute('playsinline', '');
-      v.setAttribute('webkit-playsinline', '');
-    })();
-  </script>
+    <!-- Menu Fixo -->
+    <nav class="navbar fixed top-0 left-0 w-full z-50 px-4 py-3 transition-all duration-300">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <!-- Logo -->
+            <div class="flex items-center">
+                <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-24 w-auto" />
+            </div>
+            
+            <!-- Menu Desktop -->
+            <div class="hidden md:flex space-x-8">
+                <a href="#home" onclick="scrollToHome()" class="hover:text-cyan-400 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-cyan-400">
+                    HOME
+                </a>
+                <a href="#about" onclick="scrollToAbout()" class="hover:text-pink-500 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-pink-500">
+                    QUEM SOMOS
+                </a>
+                <a href="#values" onclick="scrollToValues()" class="hover:text-green-400 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-green-400">
+                    NOSSOS VALORES
+                </a>
+            </div>
+            
+            <!-- Botão Hamburger Mobile -->
+            <div class="md:hidden">
+                <button id="hamburger" class="hamburger focus:outline-none" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Mobile Overlay SEPARADO -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="flex flex-col items-center justify-center h-full space-y-12">
+            <!-- Botão Fechar -->
+            <button onclick="closeMobileMenu()" class="absolute top-6 right-6 text-white text-3xl">×</button>
+            
+            <!-- Links de Navegação -->
+            <a href="#home" onclick="scrollToHome(); closeMobileMenu();" class="text-white hover:text-cyan-400 transition-colors duration-300 text-3xl font-bold tracking-wider">
+                HOME
+            </a>
+            <a href="#about" onclick="scrollToAbout(); closeMobileMenu();" class="text-white hover:text-pink-500 transition-colors duration-300 text-3xl font-bold tracking-wider">
+                QUEM SOMOS
+            </a>
+            <a href="#values" onclick="scrollToValues(); closeMobileMenu();" class="text-white hover:text-green-400 transition-colors duration-300 text-3xl font-bold tracking-wider">
+                NOSSOS VALORES
+            </a>
+            
+            <!-- Redes Sociais -->
+            <div class="flex flex-col space-y-4 mt-8">
+                <a 
+                    href="https://www.tiktok.com/@bitinverso" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-gray-400 hover:text-pink-500 transition-colors duration-300 text-xl font-bold tracking-wider text-center"
+                >
+                    TIKTOK
+                </a>
+                <a 
+                    href="https://www.instagram.com/bitinverso" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-xl font-bold tracking-wider text-center"
+                >
+                    INSTAGRAM
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
+        <div class="transition-all duration-2000 delay-300 opacity-0 translate-y-20" id="hero-content">
+            
+            <!-- Main Logo Area -->
+            <div class="mb-12">
+                <div class="relative inline-block">
+                    <h1 class="text-6xl md:text-9xl font-bold tracking-wider mb-4 glitch-text">
+                        0s e 1s
+                    </h1>
+                    <div class="text-pink-500 text-lg md:text-2xl font-bold tracking-widest">
+                        NÃO SÃO O SUFICIENTE PARA NÓS
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="text-xl md:text-3xl font-medium mb-12 text-gray-300 max-w-4xl mx-auto leading-relaxed">
+                Um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.
+                <br />
+                <span class="text-cyan-400">Contamos histórias com humor ácido, drama e reviravoltas.</span>
+            </h2>
+
+            <div class="flex flex-col sm:flex-row gap-6 justify-center">
+                <!-- Botão NOSSOS JOGOS - INATIVO -->
+                <button 
+                    disabled
+                    class="group px-10 py-4 bg-gray-600 text-gray-400 font-bold tracking-widest border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button"
+                    title="Em breve..."
+                >
+                    NOSSOS JOGOS
+                    <span class="text-xs block mt-1">EM BREVE</span>
+                </button>
+                
+                <!-- Botão SAIBA MAIS - ATIVO com scroll -->
+                <button 
+                    onclick="scrollToAbout()"
+                    class="group px-10 py-4 border-2 border-pink-500 hover:bg-pink-500 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button"
+                >
+                    SAIBA MAIS
+                </button>
+            </div>
+        </div>
+
+        <!-- Pixel Art Elements -->
+        <div class="absolute top-1/4 left-10 animate-pulse">
+            <div class="w-4 h-4 bg-cyan-400 shadow-lg pixel-art"></div>
+        </div>
+        <div class="absolute top-1/3 right-16 animate-pulse" style="animation-delay: 1s;">
+            <div class="w-3 h-3 bg-pink-500 shadow-lg pixel-art"></div>
+        </div>
+        <div class="absolute bottom-1/4 left-1/4 animate-pulse" style="animation-delay: 2s;">
+            <div class="w-5 h-5 bg-green-400 shadow-lg pixel-art"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="transition-all duration-1000 opacity-0 -translate-x-20" id="about-text">
+                    <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">
+                        QUEM SOMOS
+                    </h2>
+                    
+                    <div class="space-y-6 text-gray-300 leading-relaxed">
+                        <p class="text-lg md:text-xl font-medium">
+                            O Bit Inverso é um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.
+                        </p>
+                        
+                        <p class="text-base md:text-lg">
+                            <span class="text-pink-500 font-bold">Contamos histórias</span> com um toque de humor ácido, drama e reviravoltas, sempre com <span class="text-cyan-400 font-bold">mundos e personagens cativantes</span>.
+                        </p>
+                        
+                        <p class="text-base md:text-lg">
+                            Nosso foco é criar <span class="text-green-400 font-bold">jogos visualmente únicos</span> e deixar uma boa lembrança para quem joga.
+                        </p>
+                        
+                        <p class="text-base md:text-lg text-gray-400">
+                            Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.
+                        </p>
+                    </div>
+
+                    <div class="mt-12 grid grid-cols-3 gap-8 text-center">
+                        <div class="group border border-cyan-400 p-4 hover:bg-cyan-400 hover:text-black transition-all duration-300">
+                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
+                            <div class="text-xs tracking-widest font-bold">PROJETOS</div>
+                        </div>
+                        <div class="group border border-pink-500 p-4 hover:bg-pink-500 hover:text-black transition-all duration-300">
+                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
+                            <div class="text-xs tracking-widest font-bold">ANOS</div>
+                        </div>
+                        <div class="group border border-green-400 p-4 hover:bg-green-400 hover:text-black transition-all duration-300">
+                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">∞</div>
+                            <div class="text-xs tracking-widest font-bold">PAIXÃO</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transition-all duration-1000 delay-300 opacity-0 translate-x-20" id="about-logo">
+                    <div class="relative">
+                        <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10">
+                                <div class="grid grid-cols-8 gap-1 h-full" id="pixel-pattern">
+                                    <!-- Pattern gerado via JavaScript -->
+                                </div>
+                            </div>
+                            
+                            <div class="relative flex items-center justify-center h-64 md:h-80">
+                                <div class="text-center w-full">
+                                    <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100" />
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse pixel-art"></div>
+                        <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+                        <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section id="values" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
+        <div class="max-w-6xl mx-auto">
+            <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">
+                NOSSOS VALORES
+            </h3>
+            
+            <div class="grid md:grid-cols-3 gap-8" id="values-grid">
+                <div class="group p-6 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400 group-hover:text-black tracking-wider">
+                        CRIATIVIDADE
+                    </h4>
+                    <p class="leading-relaxed font-medium group-hover:text-black">
+                        Cada jogo é uma nova oportunidade de inovar e surpreender, explorando territórios inexplorados da imaginação com pixel art única.
+                    </p>
+                </div>
+                
+                <div class="group p-6 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500 group-hover:text-black tracking-wider">
+                        QUALIDADE
+                    </h4>
+                    <p class="leading-relaxed font-medium group-hover:text-black">
+                        Preferimos lançar menos jogos, mas com uma qualidade excepcional que honre o tempo investido pelos jogadores.
+                    </p>
+                </div>
+                
+                <div class="group p-6 border-2 border-green-400 bg-gray-900/50 hover:bg-green-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400 group-hover:text-black tracking-wider">
+                        COMUNIDADE
+                    </h4>
+                    <p class="leading-relaxed font-medium group-hover:text-black">
+                        Construímos jogos junto com nossa comunidade, ouvindo feedback e criando experiências verdadeiramente colaborativas.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-12 px-6 border-t-4 border-gray-800">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="text-2xl md:text-3xl font-bold mb-4 tracking-wider glitch-text">
+                BIT INVERSO
+            </div>
+            <p class="text-gray-400 mb-6 font-medium">
+                Criando o futuro dos jogos indie, um pixel de cada vez.
+            </p>
+            <div class="flex justify-center space-x-8">
+                <a 
+                    href="https://www.tiktok.com/@bitinverso" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-gray-400 hover:text-pink-500 transition-colors duration-300 text-sm font-bold tracking-wider border-b border-transparent hover:border-pink-500"
+                >
+                    TIKTOK
+                </a>
+                <a 
+                    href="https://www.instagram.com/bitinverso" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-sm font-bold tracking-wider border-b border-transparent hover:border-cyan-400"
+                >
+                    INSTAGRAM
+                </a>
+            </div>
+            <div class="mt-8 text-xs text-gray-500 font-bold tracking-widest">
+                © 2025 BIT INVERSO. TODOS OS DIREITOS RESERVADOS.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Inicialização das animações
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animar hero content
+            setTimeout(() => {
+                const heroContent = document.getElementById('hero-content');
+                heroContent.classList.remove('opacity-0', 'translate-y-20');
+            }, 800);
+            
+            // Observer para animações on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target.id === 'about-text') {
+                            entry.target.classList.remove('opacity-0', '-translate-x-20');
+                        }
+                        if (entry.target.id === 'about-logo') {
+                            entry.target.classList.remove('opacity-0', 'translate-x-20');
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(document.getElementById('about-text'));
+            observer.observe(document.getElementById('about-logo'));
+            
+            // Gerar pattern de pixels
+            const pixelPattern = document.getElementById('pixel-pattern');
+            for (let i = 0; i < 64; i++) {
+                const pixel = document.createElement('div');
+                const colors = ['bg-cyan-400', 'bg-pink-500', 'bg-green-400'];
+                pixel.className = colors[i % 3];
+                pixelPattern.appendChild(pixel);
+            }
+            
+            // Parallax effect
+            document.addEventListener('mousemove', (e) => {
+                const glitch1 = document.getElementById('glitch1');
+                const glitch2 = document.getElementById('glitch2');
+                const glitch3 = document.getElementById('glitch3');
+                
+                const x = e.clientX * 0.01;
+                const y = e.clientY * 0.01;
+                
+                glitch1.style.transform = `translate(${x}px, ${y}px)`;
+                glitch2.style.transform = `translate(${x * 0.5}px, ${y * 0.5}px)`;
+                glitch3.style.transform = `translate(${x * 1.5}px, ${y * 1.5}px)`;
+            });
+        });
+        
+        // Funções de navegação
+        function scrollToHome() {
+            document.getElementById('home').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function scrollToAbout() {
+            document.getElementById('about').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        function scrollToValues() {
+            document.getElementById('values').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        // Funções do menu mobile CORRIGIDAS
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburger = document.getElementById('hamburger');
+            
+            if (!mobileMenu || !hamburger) return;
+            
+            const isActive = mobileMenu.classList.contains('active');
+            
+            if (isActive) {
+                // Fechar menu
+                mobileMenu.classList.remove('active');
+                hamburger.classList.remove('active');
+                document.body.style.overflow = '';
+                document.body.style.position = '';
+                document.body.style.width = '';
+            } else {
+                // Abrir menu
+                mobileMenu.classList.add('active');
+                hamburger.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
+            }
+        }
+        
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburger = document.getElementById('hamburger');
+            
+            if (!mobileMenu || !hamburger) return;
+            
+            mobileMenu.classList.remove('active');
+            hamburger.classList.remove('active');
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+        }
+        
+        // Fechar menu mobile com ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+        
+        // Debug para verificar se o menu existe
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburger = document.getElementById('hamburger');
+            console.log('Menu mobile encontrado:', !!mobileMenu);
+            console.log('Hamburger encontrado:', !!hamburger);
+        });
+    </script>
 </body>
 </html>
