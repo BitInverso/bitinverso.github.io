@@ -40,84 +40,75 @@
 
     /* Glows decorativos (parallax de mouse REMOVIDO) */
     .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
-    #about, #values, #contact {
-      scroll-margin-top: calc(var(--nav-h) + 16px);
-    }
-
-    /* Botão paralelogramo */
-    /* Base do botão diagonal */
+    /* ===== Botão ParaleLOGRAMO robusto (sem skew no container) ===== */
 a.btn-diag {
-  display: inline-flex;          /* evita gap de baseline */
-  align-items: center;           /* centraliza verticalmente */
-  justify-content: center;
-  vertical-align: middle;        /* alinha com vizinhos inline */
-  text-decoration: none;         /* tira sublinhado */
-  transform: skewX(-10deg);      /* inclinação do container */
-  border: 2px solid currentColor;
-  line-height: 0;                /* zera espaço fantasma */
-  transition: all 0.3s ease;
-  cursor: pointer;
+  --btn-bg: #ec4899;      /* cor de fundo (muda nas variantes) */
+  --btn-fg: #000;         /* cor do texto */
+  --btn-border: #ec4899;  /* cor da borda */
+  --btn-slant: 12px;      /* obliquidade da quina direita/baixa */
+
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  text-decoration: none;
+  color: var(--btn-fg);
+  border: 2px solid var(--btn-border);
+  overflow: hidden;           /* esconde o fundo cortado pelo clip-path */
+  border-radius: 10px;        /* arredonda cantos (opcional) */
+  transition: transform .2s ease, box-shadow .2s ease, color .2s ease, border-color .2s ease;
 }
 
-/* Conteúdo reto dentro do paralelogramo */
+/* Fundo em forma de paralelogramo */
+a.btn-diag::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--btn-bg);
+  /* paralelogramo (bico na quina inferior direita) */
+  clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
+  z-index: 0;
+}
+
+/* Conteúdo reto e com padding controlando a altura */
 a.btn-diag > span {
+  position: relative;
+  z-index: 1;
   display: inline-block;
-  transform: skewX(10deg);       /* desfaz a inclinação do texto */
-  padding: 0.75rem 2rem;         /* responsivo (~12px 32px) */
+  padding: 0.75rem 2rem;     /* ~12px 32px, responsivo */
   font-weight: 800;
   letter-spacing: .15em;
   line-height: 1;
   text-transform: uppercase;
-  white-space: nowrap;           /* impede quebra em mobile */
+  white-space: nowrap;       /* não quebra no mobile */
 }
 
-/* Variante Rosa */
-a.btn-pink {
-  background: #ec4899;
-  color: #000;
-  border-color: #ec4899;
+/* Hover padrão: inverte para outline “neon” */
+a.btn-diag:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25);
 }
-a.btn-pink:hover {
-  background: #000;
-  color: #fff;
-  border-color: #ec4899;
+a.btn-diag:hover::before {
+  background: transparent;
 }
-
-/* Variante Ciano */
-a.btn-cyan {
-  background: #06b6d4;
-  color: #000;
-  border-color: #06b6d4;
-}
-a.btn-cyan:hover {
-  background: #000;
-  color: #fff;
-  border-color: #06b6d4;
+a.btn-diag:hover {
+  color: #fff;               /* texto branco no hover */
 }
 
-/* Variante Verde (se quiser usar) */
-a.btn-green {
-  background: #22c55e;
-  color: #000;
-  border-color: #22c55e;
-}
-a.btn-green:hover {
-  background: #000;
-  color: #fff;
-  border-color: #22c55e;
-}
+/* ===== VARIANTES ===== */
 
-/* Variante Amarela */
-a.btn-yellow {
-  background: #facc15;
-  color: #000;
-  border-color: #facc15;
-}
-a.btn-yellow:hover {
-  background: #000;
-  color: #fff;
-  border-color: #facc15;
-}
+/* Rosa */
+a.btn-pink { --btn-bg: #ec4899; --btn-fg: #000; --btn-border: #ec4899; }
+
+/* Ciano (se precisar) */
+a.btn-cyan { --btn-bg: #06b6d4; --btn-fg: #000; --btn-border: #06b6d4; }
+
+/* Verde (opcional) */
+a.btn-green { --btn-bg: #22c55e; --btn-fg: #000; --btn-border: #22c55e; }
+
+/* Amarelo (opcional) */
+a.btn-yellow { --btn-bg: #facc15; --btn-fg: #000; --btn-border: #facc15; }
+    #about, #values, #contact {
+      scroll-margin-top: calc(var(--nav-h) + 16px)
 
     @media (min-width: 768px) { .mobile-menu { display: none !important; } }
     @media (max-width: 767px) {
