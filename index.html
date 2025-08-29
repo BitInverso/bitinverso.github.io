@@ -45,29 +45,79 @@
     }
 
     /* Botão paralelogramo */
-    a.btn-diag {
-      display: inline-flex;          /* evita baseline gap */
-      align-items: center;           /* centraliza verticalmente */
-      vertical-align: middle;        /* alinha com o vizinho */
-      text-decoration: none;         /* tira sublinhado */
-      transform: skewX(-10deg);
-      border: 2px solid currentColor;
-      line-height: 0;                /* <<< zera line-height do container (elimina o “espaço fantasma”) */
-    }
+    /* Base do botão diagonal */
+a.btn-diag {
+  display: inline-flex;          /* evita gap de baseline */
+  align-items: center;           /* centraliza verticalmente */
+  justify-content: center;
+  vertical-align: middle;        /* alinha com vizinhos inline */
+  text-decoration: none;         /* tira sublinhado */
+  transform: skewX(-10deg);      /* inclinação do container */
+  border: 2px solid currentColor;
+  line-height: 0;                /* zera espaço fantasma */
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
 
-    /* conteúdo reto dentro do paralelogramo */
-    a.btn-diag > span {
-      display: inline-block;
-      transform: skewX(10deg);       /* desfaz a inclinação no texto */
-      padding: 12px 40px;
-      font-weight: 800;
-      letter-spacing: .15em;
-      line-height: 1;                /* <<< altura certinha do texto */
-    }
+/* Conteúdo reto dentro do paralelogramo */
+a.btn-diag > span {
+  display: inline-block;
+  transform: skewX(10deg);       /* desfaz a inclinação do texto */
+  padding: 0.75rem 2rem;         /* responsivo (~12px 32px) */
+  font-weight: 800;
+  letter-spacing: .15em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;           /* impede quebra em mobile */
+}
 
-    /* variações de cor (exemplo do rosa) */
-    a.btn-pink { background:#ec4899; color:#000; border-color:#ec4899; }
-    a.btn-pink:hover { background:#000; color:#fff; border-color:#ec4899; }
+/* Variante Rosa */
+a.btn-pink {
+  background: #ec4899;
+  color: #000;
+  border-color: #ec4899;
+}
+a.btn-pink:hover {
+  background: #000;
+  color: #fff;
+  border-color: #ec4899;
+}
+
+/* Variante Ciano */
+a.btn-cyan {
+  background: #06b6d4;
+  color: #000;
+  border-color: #06b6d4;
+}
+a.btn-cyan:hover {
+  background: #000;
+  color: #fff;
+  border-color: #06b6d4;
+}
+
+/* Variante Verde (se quiser usar) */
+a.btn-green {
+  background: #22c55e;
+  color: #000;
+  border-color: #22c55e;
+}
+a.btn-green:hover {
+  background: #000;
+  color: #fff;
+  border-color: #22c55e;
+}
+
+/* Variante Amarela */
+a.btn-yellow {
+  background: #facc15;
+  color: #000;
+  border-color: #facc15;
+}
+a.btn-yellow:hover {
+  background: #000;
+  color: #fff;
+  border-color: #facc15;
+}
 
     @media (min-width: 768px) { .mobile-menu { display: none !important; } }
     @media (max-width: 767px) {
