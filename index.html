@@ -1,580 +1,381 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+  <meta charset="UTF-8">
+  <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bit Inverso - Gaming Studio</title>
 
-    <!-- SEO -->
-    <meta name="keywords" content="Studio Bit Inverso, jogos indie, anime games, humor ácido, sátira, crítica social, game studio, indie dev">
-    <meta name="author" content="Studio Bit Inverso">
+  <!-- Tailwind (ok para dev; em produção compile) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Open Graph (Facebook, LinkedIn, etc.) -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Studio Bit Inverso">
-    <meta property="og:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-    <meta property="og:url" content="https://bitinverso.com">
-    <meta property="og:image" content="https://bitinverso.com/assets/og-image.jpg">
-    <meta property="og:site_name" content="Studio Bit Inverso">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+    :root { --nav-h: 80px; }
+    html { scroll-padding-top: var(--nav-h); }
+    section { scroll-margin-top: var(--nav-h); }
 
-    <!-- Twitter Cards -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Studio Bit Inverso">
-    <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-    <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.jpg">
+    * { font-family: 'JetBrains Mono', monospace; box-sizing: border-box; }
+    html, body { overflow-x: hidden; max-width: 100vw; scroll-behavior: smooth; }
+    .glitch-text { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080; }
 
-    <!-- Extra para Google -->
-    <meta itemprop="name" content="Studio Bit Inverso">
-    <meta itemprop="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-    <meta itemprop="image" content="https://bitinverso.com/assets/og-image.jpg">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bit Inverso - Gaming Studio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-        
-        * {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        
-        .glitch-text {
-            text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080;
-        }
+    /* Navbar */
+    .navbar { backdrop-filter: blur(10px); background: rgba(0,0,0,0.9); border-bottom: 1px solid rgba(0,255,255,.2); z-index: 50; }
 
-        html, body {
-            overflow-x: hidden;
-            max-width: 100vw;
-        }
-        
-        .logo-header {
-            height: 26rem;
-            max-width: 90vw;
-        }
-        
-        .pixel-art {
-            image-rendering: pixelated;
-            image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-        }
-        
-        .clip-path-button {
-            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
-        }
-        
-        html {
-            scroll-behavior: smooth;
-        }
+    .clip-path-button {
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
+    }
 
-        /* Menu Mobile CORRIGIDO */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.98);
-            z-index: 60;
-            transform: translateX(-100%);
-            transition: transform 0.3s ease-in-out;
-            display: none;
-            overflow: hidden;
-        }
-        
-        .mobile-menu.active {
-            transform: translateX(0);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        /* Hamburger */
-        .hamburger {
-            z-index: 70;
-            position: relative;
-            padding: 8px;
-            background: none;
-            border: none;
-        }
-        
-        .hamburger span {
-            display: block;
-            width: 25px;
-            height: 3px;
-            background: white;
-            margin: 3px 0;
-            transition: 0.3s;
-        }
-        
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(-45deg) translate(-5px, 6px);
-            background: #ff00ff;
-        }
-        
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(45deg) translate(-5px, -6px);
-            background: #00ffff;
-        }
-        
-        /* Menu fixo */
-        .navbar {
-            backdrop-filter: blur(10px);
-            background: rgba(0, 0, 0, 0.9);
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            z-index: 50;
-        }
-        
-        /* Corrigir elementos que vazam */
-        * {
-            box-sizing: border-box;
-        }
-        
-        .container {
-            max-width: 100vw;
-            overflow-x: hidden;
-        }
-        
-        /* Esconder no desktop */
-        @media (min-width: 768px) {
-            .mobile-menu {
-                display: none !important;
-            }
-            .logo-header {
-                height: auto;
-                max-height: 20vh;
-            }
-        }
-        
-        /* Mobile específico */
-        @media (max-width: 767px) {
-            .logo-header {
-                height: auto;
-                max-height: 60vh;
-                width: auto;
-                max-width: 85vw;
-            }
-            
-            .text-6xl {
-                font-size: 3rem;
-            }
-            
-            .text-9xl {
-                font-size: 4rem;
-            }
-        }
-    </style>
+    /* HERO VIDEO BACKGROUND (sem parallax) */
+    #home { position: relative; padding-top: calc(var(--nav-h) + 2rem); }
+    .hero-media-wrapper { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+    .hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(1) contrast(1.05); }
+    .hero-overlay {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background:
+        radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.75));
+    }
+    #hero-content { position: relative; z-index: 2; }
+
+    /* Glows decorativos (parallax de mouse REMOVIDO) */
+    .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
+    #about, #values, #contact {
+      scroll-margin-top: calc(var(--nav-h) + 16px);
+    }
+
+    /* Botão paralelogramo */
+    a.btn-diag {
+      display: inline-flex;          /* evita baseline gap */
+      align-items: center;           /* centraliza verticalmente */
+      vertical-align: middle;        /* alinha com o vizinho */
+      text-decoration: none;         /* tira sublinhado */
+      transform: skewX(-10deg);
+      border: 2px solid currentColor;
+      line-height: 0;                /* <<< zera line-height do container (elimina o “espaço fantasma”) */
+    }
+
+    /* conteúdo reto dentro do paralelogramo */
+    a.btn-diag > span {
+      display: inline-block;
+      transform: skewX(10deg);       /* desfaz a inclinação no texto */
+      padding: 12px 40px;
+      font-weight: 800;
+      letter-spacing: .15em;
+      line-height: 1;                /* <<< altura certinha do texto */
+    }
+
+    /* variações de cor (exemplo do rosa) */
+    a.btn-pink { background:#ec4899; color:#000; border-color:#ec4899; }
+    a.btn-pink:hover { background:#000; color:#fff; border-color:#ec4899; }
+
+    @media (min-width: 768px) { .mobile-menu { display: none !important; } }
+    @media (max-width: 767px) {
+      .text-6xl { font-size: 3rem; }
+      .text-9xl { font-size: 4rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-bounce, .animate-pulse, .animate-ping { animation: none !important; }
+      .hero-video { animation: none !important; }
+    }
+  </style>
 </head>
 <body class="min-h-screen bg-black text-white relative overflow-x-hidden">
-    
-    <!-- Pixel Grid Background -->
-    <div class="fixed inset-0 opacity-5 pointer-events-none">
-        <div class="grid grid-cols-20 gap-px h-full">
-            <!-- Grid cells geradas via JavaScript -->
-        </div>
+
+  <!-- Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div id="glow1" class="glow bg-cyan-400 w-32 h-32 top-20 left-10 animate-pulse"></div>
+    <div id="glow2" class="glow bg-pink-500 w-24 h-24 top-1/2 right-20 animate-bounce" style="animation-delay:1s;"></div>
+    <div id="glow3" class="glow bg-green-400 w-40 h-40 bottom-20 left-1/3 animate-ping" style="animation-delay:2s;"></div>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar fixed top-0 left-0 w-full px-4 py-3 transition-all duration-300">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+      <div class="flex items-center">
+        <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-24 w-auto" />
+      </div>
+      <div class="hidden md:flex space-x-8">
+        <a href="#home" class="hover:text-cyan-400">HOME</a>
+        <a href="#about" class="hover:text-pink-500">QUEM SOMOS</a>
+        <a href="#values" class="hover:text-green-400">NOSSOS VALORES</a>
+        <a href="#contact" class="hover:text-yellow-400">CONTATO</a>
+      </div>
+      <div class="md:hidden">
+        <button id="hamburger" class="relative p-2">
+          <span class="block w-6 h-0.5 bg-white my-1"></span>
+          <span class="block w-6 h-0.5 bg-white my-1"></span>
+          <span class="block w-6 h-0.5 bg-white my-1"></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="fixed inset-0 bg-black/95 z-40 hidden">
+    <div class="flex flex-col items-center justify-center h-full space-y-10">
+      <a href="#home" class="text-3xl font-bold" onclick="closeMobileMenu()">HOME</a>
+      <a href="#about" class="text-3xl font-bold" onclick="closeMobileMenu()">QUEM SOMOS</a>
+      <a href="#values" class="text-3xl font-bold" onclick="closeMobileMenu()">NOSSOS VALORES</a>
+      <a href="#contact" class="text-3xl font-bold" onclick="closeMobileMenu()">CONTATO</a>
+      <button onclick="closeMobileMenu()" class="absolute top-6 right-6 text-3xl">×</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section id="home" class="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 md:px-6 text-center pt-16 overflow-hidden">
+    <div class="hero-media-wrapper" aria-hidden="true">
+      <video
+        id="heroVideo"
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster="assets/hero-poster.jpg"
+        data-src-webm="assets/hero-background.webm"
+        data-src-mp4="assets/hero-background.mp4"
+      ></video>
+      <div class="hero-overlay"></div>
     </div>
 
-    <!-- Glitch Effect Elements -->
-    <div class="fixed inset-0 overflow-hidden pointer-events-none">
-        <div id="glitch1" class="absolute top-20 left-10 w-32 h-32 bg-cyan-400 opacity-10 blur-xl animate-pulse"></div>
-        <div id="glitch2" class="absolute top-1/2 right-20 w-24 h-24 bg-pink-500 opacity-20 blur-lg animate-bounce" style="animation-delay: 1s;"></div>
-        <div id="glitch3" class="absolute bottom-20 left-1/3 w-40 h-40 bg-green-400 opacity-5 blur-2xl animate-ping" style="animation-delay: 2s;"></div>
+    <div id="hero-content" class="transition-all duration-1000 delay-300 opacity-0 translate-y-6 max-w-full">
+      <h2 class="text-lg md:text-xl lg:text-3xl font-medium mb-8 md:mb-12 text-gray-300 max-w-full lg:max-w-4xl mx-auto leading-relaxed px-2">
+        Um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.
+        <br />
+        <span class="text-cyan-400">Contamos histórias com humor ácido, drama e reviravoltas.</span>
+      </h2>
+      <div class="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center px-4">
+          <button disabled class="group px-6 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button text-sm md:text-base" title="Em breve...">
+              NOSSOS JOGOS
+              <span class="text-xs block mt-1">EM BREVE</span>
+          </button>
+          <a href="#about" class="btn-diag group px-6 md:px-10 py-3 md:py-4 border-2 border-pink-500 hover:bg-pink-500 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button text-sm md:text-base">
+              SAIBA MAIS
+          </a>
+      </div>
     </div>
+  </section>
 
-    <!-- Menu Fixo -->
-    <nav class="navbar fixed top-0 left-0 w-full z-50 px-4 py-3 transition-all duration-300">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <!-- Logo -->
-            <div class="flex items-center">
-                <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-24 w-auto" />
-            </div>
-            
-            <!-- Menu Desktop -->
-            <div class="hidden md:flex space-x-8">
-                <a href="#home" onclick="scrollToHome()" class="hover:text-cyan-400 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-cyan-400">
-                    HOME
-                </a>
-                <a href="#about" onclick="scrollToAbout()" class="hover:text-pink-500 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-pink-500">
-                    QUEM SOMOS
-                </a>
-                <a href="#values" onclick="scrollToValues()" class="hover:text-green-400 transition-colors duration-300 text-sm font-medium tracking-wider border-b border-transparent hover:border-green-400">
-                    NOSSOS VALORES
-                </a>
-            </div>
-            
-            <!-- Botão Hamburger Mobile -->
-            <div class="md:hidden">
-                <button id="hamburger" class="hamburger focus:outline-none" onclick="toggleMobileMenu()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-            </div>
+  <!-- About -->
+  <section id="about" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
+    <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+      <div id="about-text" class="transition-all duration-700 opacity-0 -translate-x-6">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">QUEM SOMOS</h2>
+        <div class="space-y-6 text-gray-300 leading-relaxed">
+          <p class="text-lg md:text-xl font-medium">O Bit Inverso é um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.</p>
+          <p class="text-base md:text-lg"><span class="text-pink-500 font-bold">Contamos histórias</span> com um toque de humor ácido, drama e reviravoltas, sempre com <span class="text-cyan-400 font-bold">mundos e personagens cativantes</span>.</p>
+          <p class="text-base md:text-lg">Nosso foco é criar <span class="text-green-400 font-bold">jogos visualmente únicos</span> e deixar uma boa lembrança para quem joga.</p>
+          <p class="text-base md:text-lg text-gray-400">Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.</p>
         </div>
-    </nav>
-
-    <!-- Menu Mobile Overlay SEPARADO -->
-    <div id="mobile-menu" class="mobile-menu">
-        <div class="flex flex-col items-center justify-center h-full space-y-12">
-            <!-- Botão Fechar -->
-            <button onclick="closeMobileMenu()" class="absolute top-6 right-6 text-white text-3xl">×</button>
-            
-            <!-- Links de Navegação -->
-            <a href="#home" onclick="scrollToHome(); closeMobileMenu();" class="text-white hover:text-cyan-400 transition-colors duration-300 text-3xl font-bold tracking-wider">
-                HOME
-            </a>
-            <a href="#about" onclick="scrollToAbout(); closeMobileMenu();" class="text-white hover:text-pink-500 transition-colors duration-300 text-3xl font-bold tracking-wider">
-                QUEM SOMOS
-            </a>
-            <a href="#values" onclick="scrollToValues(); closeMobileMenu();" class="text-white hover:text-green-400 transition-colors duration-300 text-3xl font-bold tracking-wider">
-                NOSSOS VALORES
-            </a>
-            
-            <!-- Redes Sociais -->
-            <div class="flex flex-col space-y-4 mt-8">
-                <a 
-                    href="https://www.tiktok.com/@bitinverso" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-pink-500 transition-colors duration-300 text-xl font-bold tracking-wider text-center"
-                >
-                    TIKTOK
-                </a>
-                <a 
-                    href="https://www.instagram.com/bitinverso" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-xl font-bold tracking-wider text-center"
-                >
-                    INSTAGRAM
-                </a>
+      </div>
+      <div id="about-logo" class="transition-all duration-700 delay-150 opacity-0 translate-x-6">
+        <div class="relative">
+          <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+              <div class="grid grid-cols-8 gap-1 h-full" id="pixel-pattern"></div>
             </div>
+            <div class="relative flex items-center justify-center h-64 md:h-80">
+              <div class="text-center w-full">
+                <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100" />
+              </div>
+            </div>
+          </div>
+          <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse"></div>
+          <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay:1s;"></div>
+          <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse" style="animation-delay:2s;"></div>
         </div>
+      </div>
     </div>
+  </section>
 
-<!-- Hero Section -->
-    <section class="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center">
-        <div class="transition-all duration-2000 delay-300 opacity-0 translate-y-20" id="hero-content">
-            
-            <!-- Main Logo Area -->
-            <div class="mb-12">
-                <div class="relative inline-block">
-                    <h1 class="text-6xl md:text-9xl font-bold tracking-wider mb-4 glitch-text">
-                        0s e 1s
-                    </h1>
-                    <div class="text-pink-500 text-lg md:text-2xl font-bold tracking-widest">
-                        NÃO SÃO O SUFICIENTE PARA NÓS
-                    </div>
-                </div>
-            </div>
-            
-            <h2 class="text-xl md:text-3xl font-medium mb-12 text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                Um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.
-                <br />
-                <span class="text-cyan-400">Contamos histórias com humor ácido, drama e reviravoltas.</span>
-            </h2>
-
-            <div class="flex flex-col sm:flex-row gap-6 justify-center">
-                <!-- Botão NOSSOS JOGOS - INATIVO -->
-                <button 
-                    disabled
-                    class="group px-10 py-4 bg-gray-600 text-gray-400 font-bold tracking-widest border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button"
-                    title="Em breve..."
-                >
-                    NOSSOS JOGOS
-                    <span class="text-xs block mt-1">EM BREVE</span>
-                </button>
-                
-                <!-- Botão SAIBA MAIS - ATIVO com scroll -->
-                <button 
-                    onclick="scrollToAbout()"
-                    class="group px-10 py-4 border-2 border-pink-500 hover:bg-pink-500 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button"
-                >
-                    SAIBA MAIS
-                </button>
-            </div>
+  <!-- Values -->
+  <section id="values" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
+    <div class="max-w-6xl mx-auto">
+      <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">NOSSOS VALORES</h3>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-6 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black transition-all duration-300">
+          <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400">CRIATIVIDADE</h4>
+          <p class="leading-relaxed">Cada jogo é uma nova oportunidade de inovar e surpreender.</p>
         </div>
-
-        <!-- Pixel Art Elements -->
-        <div class="absolute top-1/4 left-10 animate-pulse">
-            <div class="w-4 h-4 bg-cyan-400 shadow-lg pixel-art"></div>
+        <div class="p-6 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black transition-all duration-300">
+          <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500">QUALIDADE</h4>
+          <p class="leading-relaxed">Preferimos lançar menos jogos, mas com qualidade excepcional.</p>
         </div>
-        <div class="absolute top-1/3 right-16 animate-pulse" style="animation-delay: 1s;">
-            <div class="w-3 h-3 bg-pink-500 shadow-lg pixel-art"></div>
+        <div class="p-6 border-2 border-green-400 bg-gray-900/50 hover:bg-green-400 hover:text-black transition-all duration-300">
+          <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400">COMUNIDADE</h4>
+          <p class="leading-relaxed">Construímos experiências colaborativas com nossa comunidade.</p>
         </div>
-        <div class="absolute bottom-1/4 left-1/4 animate-pulse" style="animation-delay: 2s;">
-            <div class="w-5 h-5 bg-green-400 shadow-lg pixel-art"></div>
-        </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- About Section -->
-    <section id="about" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid md:grid-cols-2 gap-16 items-center">
-                <div class="transition-all duration-1000 opacity-0 -translate-x-20" id="about-text">
-                    <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">
-                        QUEM SOMOS
-                    </h2>
-                    
-                    <div class="space-y-6 text-gray-300 leading-relaxed">
-                        <p class="text-lg md:text-xl font-medium">
-                            O Bit Inverso é um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.
-                        </p>
-                        
-                        <p class="text-base md:text-lg">
-                            <span class="text-pink-500 font-bold">Contamos histórias</span> com um toque de humor ácido, drama e reviravoltas, sempre com <span class="text-cyan-400 font-bold">mundos e personagens cativantes</span>.
-                        </p>
-                        
-                        <p class="text-base md:text-lg">
-                            Nosso foco é criar <span class="text-green-400 font-bold">jogos visualmente únicos</span> e deixar uma boa lembrança para quem joga.
-                        </p>
-                        
-                        <p class="text-base md:text-lg text-gray-400">
-                            Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.
-                        </p>
-                    </div>
+  <!-- Contact -->
+  <section id="contact" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
+      <div class="max-w-6xl mx-auto">
+          <div class="text-center mb-16">
+              <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
+              <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                  Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
+                  <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
+              </p>
+          </div>
 
-                    <div class="mt-12 grid grid-cols-3 gap-8 text-center">
-                        <div class="group border border-cyan-400 p-4 hover:bg-cyan-400 hover:text-black transition-all duration-300">
-                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
-                            <div class="text-xs tracking-widest font-bold">PROJETOS</div>
-                        </div>
-                        <div class="group border border-pink-500 p-4 hover:bg-pink-500 hover:text-black transition-all duration-300">
-                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
-                            <div class="text-xs tracking-widest font-bold">ANOS</div>
-                        </div>
-                        <div class="group border border-green-400 p-4 hover:bg-green-400 hover:text-black transition-all duration-300">
-                            <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">∞</div>
-                            <div class="text-xs tracking-widest font-bold">PAIXÃO</div>
-                        </div>
-                    </div>
-                </div>
+          <div class="grid md:grid-cols-2 gap-16 items-center">
+              <div class="space-y-8">
+                  <div class="text-center md:text-left">
+                      <h4 class="text-2xl md:text-3xl font-bold mb-6 text-pink-500 tracking-wider">VAMOS CONVERSAR</h4>
+                      <div class="space-y-6">
+                          <div class="group p-6 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden">
+                              <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                              <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL</div>
+                              <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300">
+                                  wesley@bitinverso.com
+                              </a>
+                          </div>
+                          <div class="space-y-4">
+                              <div class="text-lg font-bold text-gray-400 tracking-wider">OU NOS SIGA:</div>
+                              <div class="flex flex-col sm:flex-row gap-4">
+                                  <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                                      <span class="text-pink-500 group-hover:text-black">@bitinverso</span> no TikTok
+                                  </a>
+                                  <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                                      <span class="text-cyan-400 group-hover:text-black">@bitinverso</span> no Instagram
+                                  </a>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
 
-                <div class="transition-all duration-1000 delay-300 opacity-0 translate-x-20" id="about-logo">
-                    <div class="relative">
-                        <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
-                            <div class="absolute inset-0 opacity-10">
-                                <div class="grid grid-cols-8 gap-1 h-full" id="pixel-pattern">
-                                    <!-- Pattern gerado via JavaScript -->
-                                </div>
-                            </div>
-                            
-                            <div class="relative flex items-center justify-center h-64 md:h-80">
-                                <div class="text-center w-full">
-                                    <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100" />
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse pixel-art"></div>
-                        <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
-                        <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+              <div class="relative">
+                  <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
+                      <div class="absolute inset-0 opacity-10">
+                          <div class="grid grid-cols-6 gap-1 h-full" id="contact-pixel-pattern"></div>
+                      </div>
+                      <div class="relative flex items-center justify-center h-64 md:h-80">
+                          <div class="text-center">
+                              <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
+                              <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
+                              <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse pixel-art"></div>
+                  <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+                  <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+              </div>
+          </div>
 
-    <!-- Values Section -->
-    <section id="values" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800">
-        <div class="max-w-6xl mx-auto">
-            <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">
-                NOSSOS VALORES
-            </h3>
-            
-            <div class="grid md:grid-cols-3 gap-8" id="values-grid">
-                <div class="group p-6 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
-                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400 group-hover:text-black tracking-wider">
-                        CRIATIVIDADE
-                    </h4>
-                    <p class="leading-relaxed font-medium group-hover:text-black">
-                        Cada jogo é uma nova oportunidade de inovar e surpreender, explorando territórios inexplorados da imaginação com pixel art única.
-                    </p>
-                </div>
-                
-                <div class="group p-6 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
-                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500 group-hover:text-black tracking-wider">
-                        QUALIDADE
-                    </h4>
-                    <p class="leading-relaxed font-medium group-hover:text-black">
-                        Preferimos lançar menos jogos, mas com uma qualidade excepcional que honre o tempo investido pelos jogadores.
-                    </p>
-                </div>
-                
-                <div class="group p-6 border-2 border-green-400 bg-gray-900/50 hover:bg-green-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
-                    <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400 group-hover:text-black tracking-wider">
-                        COMUNIDADE
-                    </h4>
-                    <p class="leading-relaxed font-medium group-hover:text-black">
-                        Construímos jogos junto com nossa comunidade, ouvindo feedback e criando experiências verdadeiramente colaborativas.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+          <div class="text-center mt-16">
+              <p class="text-gray-400 mb-6 text-lg leading-relaxed">Respondemos a todos os e-mails! Pode levar um tempo, mas valorizamos cada mensagem.</p>
+              <a href="mailto:wesley@bitinverso.com?subject=Olá, Bit Inverso!" class="inline-block px-12 py-4 border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button">ENVIAR EMAIL</a>
+          </div>
+      </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="relative z-10 py-12 px-6 border-t-4 border-gray-800">
-        <div class="max-w-6xl mx-auto text-center">
-            <div class="text-2xl md:text-3xl font-bold mb-4 tracking-wider glitch-text">
-                BIT INVERSO
-            </div>
-            <p class="text-gray-400 mb-6 font-medium">
-                Criando o futuro dos jogos indie, um pixel de cada vez.
-            </p>
-            <div class="flex justify-center space-x-8">
-                <a 
-                    href="https://www.tiktok.com/@bitinverso" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-pink-500 transition-colors duration-300 text-sm font-bold tracking-wider border-b border-transparent hover:border-pink-500"
-                >
-                    TIKTOK
-                </a>
-                <a 
-                    href="https://www.instagram.com/bitinverso" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-sm font-bold tracking-wider border-b border-transparent hover:border-cyan-400"
-                >
-                    INSTAGRAM
-                </a>
-            </div>
-            <div class="mt-8 text-xs text-gray-500 font-bold tracking-widest">
-                © 2025 BIT INVERSO. TODOS OS DIREITOS RESERVADOS.
-            </div>
-        </div>
-    </footer>
+  <footer class="relative z-10 py-12 px-6 border-t-4 border-gray-800 text-center">
+    <div class="text-2xl md:text-3xl font-bold mb-4 glitch-text">BIT INVERSO</div>
+    <p class="text-gray-400 mb-6">Criando o futuro dos jogos indie, um pixel de cada vez.</p>
+    <div class="flex justify-center gap-8">
+      <a href="https://www.tiktok.com/@bitinverso" target="_blank" class="hover:text-pink-500">TIKTOK</a>
+      <a href="https://www.instagram.com/bitinverso" target="_blank" class="hover:text-cyan-400">INSTAGRAM</a>
+    </div>
+    <div class="mt-8 text-xs text-gray-500 font-bold tracking-widest">© 2025 BIT INVERSO. TODOS OS DIREITOS RESERVADOS.</div>
+  </footer>
 
-    <script>
-        // Inicialização das animações
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animar hero content
-            setTimeout(() => {
-                const heroContent = document.getElementById('hero-content');
-                heroContent.classList.remove('opacity-0', 'translate-y-20');
-            }, 800);
-            
-            // Observer para animações on scroll
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        if (entry.target.id === 'about-text') {
-                            entry.target.classList.remove('opacity-0', '-translate-x-20');
-                        }
-                        if (entry.target.id === 'about-logo') {
-                            entry.target.classList.remove('opacity-0', 'translate-x-20');
-                        }
-                    }
-                });
-            });
-            
-            observer.observe(document.getElementById('about-text'));
-            observer.observe(document.getElementById('about-logo'));
-            
-            // Gerar pattern de pixels
-            const pixelPattern = document.getElementById('pixel-pattern');
-            for (let i = 0; i < 64; i++) {
-                const pixel = document.createElement('div');
-                const colors = ['bg-cyan-400', 'bg-pink-500', 'bg-green-400'];
-                pixel.className = colors[i % 3];
-                pixelPattern.appendChild(pixel);
-            }
-            
-            // Parallax effect
-            document.addEventListener('mousemove', (e) => {
-                const glitch1 = document.getElementById('glitch1');
-                const glitch2 = document.getElementById('glitch2');
-                const glitch3 = document.getElementById('glitch3');
-                
-                const x = e.clientX * 0.01;
-                const y = e.clientY * 0.01;
-                
-                glitch1.style.transform = `translate(${x}px, ${y}px)`;
-                glitch2.style.transform = `translate(${x * 0.5}px, ${y * 0.5}px)`;
-                glitch3.style.transform = `translate(${x * 1.5}px, ${y * 1.5}px)`;
-            });
+  <script>
+    // ===== Helpers =====
+    const $ = (s, root=document) => root.querySelector(s);
+
+    // Ajuste de --nav-h (para scroll-padding)
+    function setNavHeightVar(){
+      const navbar = $('.navbar');
+      const h = (navbar && navbar.offsetHeight) ? navbar.offsetHeight : 80;
+      document.documentElement.style.setProperty('--nav-h', h + 'px');
+    }
+    window.addEventListener('resize', setNavHeightVar);
+    document.addEventListener('DOMContentLoaded', setNavHeightVar);
+
+    // Mobile menu
+    const hamburger = $('#hamburger');
+    const mobileMenu = $('#mobile-menu');
+    if (hamburger && mobileMenu) {
+      hamburger.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+    function closeMobileMenu(){ if(mobileMenu) mobileMenu.classList.add('hidden'); }
+    window.closeMobileMenu = closeMobileMenu;
+
+    // Fade-in simples do hero content (sem parallax)
+    document.addEventListener('DOMContentLoaded', () => {
+      const heroContent = $('#hero-content');
+      setTimeout(() => heroContent && heroContent.classList.remove('opacity-0','translate-y-6'), 300);
+    });
+
+    // Lazy attach das fontes do vídeo + play/pause fora de visão
+    (function setupHeroVideo(){
+      const video = $('#heroVideo');
+      if(!video) return;
+
+      let sourcesAttached = false;
+      function attachSourcesOnce(){
+        if (sourcesAttached) return;
+        const webm = video.dataset.srcWebm;
+        const mp4  = video.dataset.srcMp4;
+        if (webm) {
+          const s = document.createElement('source');
+          s.src = webm;
+          s.type = 'video/webm';
+          video.appendChild(s);
+        }
+        if (mp4) {
+          const s2 = document.createElement('source');
+          s2.src = mp4;
+          s2.type = 'video/mp4';
+          video.appendChild(s2);
+        }
+        sourcesAttached = true;
+        video.load();
+      }
+
+      // IO: só carrega e dá play quando ~40% visível; pausa quando sai
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && e.intersectionRatio >= 0.4) {
+            attachSourcesOnce();
+            video.muted = true;
+            video.setAttribute('playsinline','');
+            video.play().catch(()=>{});
+          } else {
+            try { video.pause(); } catch(_){}
+          }
+        }
+      }, { threshold: [0, .4, .6, 1], rootMargin: '0px 0px 0px 0px' });
+
+      io.observe($('#home'));
+
+      // Pausa ao trocar de aba
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { try { video.pause(); } catch(_){}; }
+      }, false);
+
+      // Garantia de autoplay quando pronto
+      video.addEventListener('canplay', () => {
+        if (!document.hidden) video.play().catch(()=>{});
+      }, { once: true });
+    })();
+
+    // Entrada animada de seções (leve, sem scroll listeners pesados)
+    (function revealOnScroll(){
+      const els = ['#about-text', '#about-logo'];
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) e.target.classList.remove('opacity-0','-translate-x-6','translate-x-6');
         });
-        
-        // Funções de navegação
-        function scrollToHome() {
-            document.getElementById('home').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-        
-        function scrollToAbout() {
-            document.getElementById('about').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-        
-        function scrollToValues() {
-            document.getElementById('values').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-        
-        // Funções do menu mobile CORRIGIDAS
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburger = document.getElementById('hamburger');
-            
-            if (!mobileMenu || !hamburger) return;
-            
-            const isActive = mobileMenu.classList.contains('active');
-            
-            if (isActive) {
-                // Fechar menu
-                mobileMenu.classList.remove('active');
-                hamburger.classList.remove('active');
-                document.body.style.overflow = '';
-                document.body.style.position = '';
-                document.body.style.width = '';
-            } else {
-                // Abrir menu
-                mobileMenu.classList.add('active');
-                hamburger.classList.add('active');
-                document.body.style.overflow = 'hidden';
-                document.body.style.position = 'fixed';
-                document.body.style.width = '100%';
-            }
-        }
-        
-        function closeMobileMenu() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburger = document.getElementById('hamburger');
-            
-            if (!mobileMenu || !hamburger) return;
-            
-            mobileMenu.classList.remove('active');
-            hamburger.classList.remove('active');
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-        }
-        
-        // Fechar menu mobile com ESC
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeMobileMenu();
-            }
-        });
-        
-        // Debug para verificar se o menu existe
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const hamburger = document.getElementById('hamburger');
-            console.log('Menu mobile encontrado:', !!mobileMenu);
-            console.log('Hamburger encontrado:', !!hamburger);
-        });
-    </script>
+      }, { threshold: 0.15 });
+      els.forEach(sel => { const el = $(sel); if (el) io.observe(el); });
+    })();
+  </script>
 </body>
 </html>
