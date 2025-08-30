@@ -6,72 +6,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bit Inverso - Gaming Studio</title>
 
-  <!-- Tailwind para dev (em produção, compile). -->
+  <!-- Tailwind para dev (em produção, compile) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
 
     :root { --nav-h: 80px; }
-    /* Não usamos scroll-padding global para não somar offsets */
-    /* html { scroll-padding-top: var(--nav-h); } */
-    section { scroll-margin-top: var(--nav-h); }
 
     * { font-family: 'JetBrains Mono', monospace; box-sizing: border-box; }
     html, body { overflow-x: hidden; max-width: 100vw; scroll-behavior: smooth; background:#000; color:#fff; }
+
+    /* Usamos somente scroll-margin nas seções (sem scroll-padding no html) para evitar somas */
+    section { scroll-margin-top: var(--nav-h); }
+
     .glitch-text { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080; }
 
     /* ===== Navbar ===== */
-    .navbar {
+    .navbar{
       position: fixed; top:0; left:0; right:0;
       display:flex; align-items:center;
       backdrop-filter: blur(10px);
-      background: rgba(0,0,0,0.95);
+      background: rgba(0,0,0,.95);
       border-bottom: 1px solid rgba(0,255,255,.2);
-      z-index: 50; padding: 12px 16px;
+      z-index: 50;
+      padding: 12px 16px;
     }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
 
-    /* ===== HERO ===== */
-    #home {
-      position: relative;
+    /* ===== Seções âncora ===== */
+    .section-fill{
+      min-height: calc(var(--vh, 100dvh) - var(--nav-h));
+      display:flex; flex-direction:column; justify-content:center;
+      padding-block: clamp(56px, 8vh, 96px);
+      overflow:hidden;                /* corta decorações da seção anterior */
+    }
+    @supports (height: 100svh) {.section-fill{ min-height: calc(100svh - var(--nav-h)); }}
+    @supports (height: 100dvh) {.section-fill{ min-height: calc(100dvh - var(--nav-h)); }}
+    .section-divider{ border-top:2px solid #1f2937; } /* gray-800 */
+
+    /* ===== HERO (vídeo + carrossel) ===== */
+    #home{
+      position:relative;
       padding-top: calc(var(--nav-h) + 2rem);
       min-height: calc(var(--vh, 100dvh) * 1);
-      overflow: hidden;
+      overflow:hidden;
     }
     @supports (height: 100svh) { #home { min-height: 100svh; } }
     @supports (height: 100dvh) { #home { min-height: 100dvh; } }
 
-    .hero-media-wrapper { position:absolute; inset:0; z-index:0; overflow:hidden; }
-    .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1) contrast(1.05); }
-    .hero-overlay {
-      position:absolute; inset:0; pointer-events:none; z-index:1;
+    .hero-media-wrapper{ position:absolute; inset:0; z-index:0; overflow:hidden; }
+    .hero-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1) contrast(1.05); }
+    .hero-overlay{
+      position:absolute; inset:0; z-index:1; pointer-events:none;
       background:
-        radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%),
+        radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%),
         linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.75));
     }
 
-    /* Conteúdo textual do slide */
-    .hero-slide {
-      position: relative; z-index: 2;
-      display:grid; place-items:center;
-      text-align:center; padding: 0 1rem;
-      width:100%;
-    }
+    /* Carrossel */
+    .carousel{ position:relative; width:100%; height:100%; }
+    .carousel-track{ height:100%; display:flex; transition: transform 600ms ease; }
+    .carousel-item{ flex:0 0 100%; display:grid; place-items:center; }
+    .hero-slide{ position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem; width:100%; }
 
-    /* Carrossel: container e slides */
-    .carousel {
-      position: relative; width:100%; height:100%;
-    }
-    .carousel-track {
-      height:100%;
-      display:flex; transition: transform 600ms ease;
-    }
-    .carousel-item {
-      flex: 0 0 100%;
-      display:grid; place-items:center;
-    }
-
-    /* Setas do carrossel (ficam por cima) */
+    /* Setas */
     .carousel-nav-btn{
       position:absolute; top:50%; transform:translateY(-50%);
       width:56px; height:56px; border-radius:9999px;
@@ -80,10 +79,10 @@
       z-index:40; transition:all .2s ease;
     }
     .carousel-nav-btn:hover{ background:rgba(0,0,0,.6); box-shadow:0 0 24px rgba(6,182,212,.35); }
-    .carousel-prev { left:1rem; }
-    .carousel-next { right:1rem; }
+    .carousel-prev{ left:1rem; }
+    .carousel-next{ right:1rem; }
 
-    /* === Camada de UI do herói: empilha Conteúdo (1fr) / CTAs (auto) / Dots (auto) === */
+    /* UI do herói empilhada (texto → CTAs → dots) */
     .hero-ui{
       position:absolute; inset:0; z-index:30;
       display:grid; grid-template-rows: 1fr auto auto;
@@ -98,9 +97,8 @@
       display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;
       margin-bottom: clamp(8px, 3vh, 24px);
     }
-
     .hero-ui .carousel-indicators{
-      position: static; transform:none;
+      position:static; transform:none;
       margin-bottom: clamp(8px, 2.5vh, 20px);
       background: rgba(0,0,0,.5);
       padding: 12px 20px; border-radius: 20px;
@@ -112,67 +110,72 @@
     }
     .carousel-indicator.active, .carousel-indicator:hover{ background:#00ffff; }
 
-    /* Botão clip (NOSSOS JOGOS) */
-    .clip-path-button {
+    /* Botão com clip (NOSSOS JOGOS) */
+    .clip-path-button{
       clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
-      border-radius: 0;
+      border-radius:0;
     }
 
-    /* Botão paralelogramo (SAIBA MAIS) */
-    a.btn-diag {
-      --btn-bg: #ec4899; --btn-fg: #000; --btn-slant: 12px;
-      position: relative; display:inline-block; text-decoration:none; color:var(--btn-fg);
-      overflow:hidden; transition: transform .2s ease, box-shadow .2s ease, color .2s ease;
+    /* Paralelogramo (SAIBA MAIS) */
+    a.btn-diag{
+      --btn-bg:#ec4899; --btn-fg:#000; --btn-slant:12px;
+      position:relative; display:inline-block; color:var(--btn-fg); text-decoration:none; overflow:hidden;
+      transition: transform .2s ease, box-shadow .2s ease, color .2s ease;
     }
     a.btn-diag::before{
       content:""; position:absolute; inset:0; z-index:0; background:var(--btn-bg);
       clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
     }
-    a.btn-diag > span{
+    a.btn-diag>span{
       position:relative; z-index:1; display:inline-block;
-      padding: 0.9rem 2.25rem; font-weight:800; letter-spacing:.15em; line-height:1; text-transform:uppercase; white-space:nowrap;
+      padding:.9rem 2.25rem; font-weight:800; letter-spacing:.15em; line-height:1; text-transform:uppercase; white-space:nowrap;
     }
     a.btn-diag:hover{ transform:translateY(-2px); box-shadow:0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25); color:#fff; }
-    a.btn-diag:hover::before{ background:transparent; }
-    a.btn-pink { --btn-bg:#ec4899; --btn-fg:#000; }
-
-    /* ===== Seções âncora (ocupam viewport - navbar) e centralizam verticalmente ===== */
-    .section-fill{
-      min-height: calc(var(--vh, 100dvh) - var(--nav-h));
-      display: flex; flex-direction: column; justify-content: center;
-    }
-    @supports (height: 100svh) {
-      .section-fill{ min-height: calc(100svh - var(--nav-h)); }
-    }
-    @supports (height: 100dvh) {
-      .section-fill{ min-height: calc(100dvh - var(--nav-h)); }
-    }
+    a.btn-pink{ --btn-bg:#ec4899; --btn-fg:#000; }
 
     /* Glows decorativos (opcional) */
-    .glow { position:absolute; border-radius:9999px; filter:blur(40px); opacity:.18; }
+    .glow{ position:absolute; border-radius:9999px; filter:blur(40px); opacity:.18; }
 
-    /* Utilitários */
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
+    /* responsivo de títulos do herói */
+    @media (max-width: 767px){
+      .hero-title { font-size: 3rem; }
+      .hero-sub   { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
+  <!-- NAVBAR -->
   <nav class="navbar">
     <div class="container w-full flex items-center justify-between">
-      <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-20 w-auto" />
+      <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-16 md:h-20 w-auto" />
       <div class="hidden md:flex gap-8 text-sm tracking-widest">
         <a href="#home" class="hover:text-cyan-400">HOME</a>
         <a href="#about" class="hover:text-pink-500">QUEM SOMOS</a>
         <a href="#values" class="hover:text-green-400">NOSSOS VALORES</a>
         <a href="#contact" class="hover:text-yellow-400">CONTATO</a>
       </div>
+      <button id="hamburger" class="md:hidden inline-grid gap-1 p-2" aria-label="Abrir menu">
+        <span class="w-7 h-0.5 bg-white"></span>
+        <span class="w-7 h-0.5 bg-white"></span>
+        <span class="w-7 h-0.5 bg-white"></span>
+      </button>
     </div>
   </nav>
 
-  <!-- HERO / CARROSSEL -->
+  <!-- MENU MOBILE -->
+  <div id="mobile-menu" class="fixed inset-0 bg-black/95 z-60 hidden items-center justify-center">
+    <nav class="flex flex-col items-center gap-8 text-2xl font-bold tracking-widest">
+      <a href="#home"    data-close>HOME</a>
+      <a href="#about"   data-close>QUEM SOMOS</a>
+      <a href="#values"  data-close>NOSSOS VALORES</a>
+      <a href="#contact" data-close>CONTATO</a>
+      <button data-close class="mt-8 text-4xl" aria-label="Fechar menu">×</button>
+    </nav>
+  </div>
+
+  <!-- HERO (VÍDEO + CARROSSEL) -->
   <section id="home">
-    <!-- media -->
     <div class="hero-media-wrapper" aria-hidden="true">
       <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
              poster="assets/hero-poster.jpg"
@@ -181,16 +184,15 @@
       <div class="hero-overlay"></div>
     </div>
 
-    <!-- carrossel -->
     <div class="carousel container" id="heroCarousel">
       <div class="carousel-track" id="carouselTrack">
         <!-- Slide 1 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
-            <h2 class="text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
+            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
+            <h2 class="hero-sub text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
-              Jogos que desafiam convenções.<br>
+              Jogos que desafiam convenções.<br />
               <span class="text-green-400">Narrativas que ficam na memória.</span>
             </p>
           </div>
@@ -198,7 +200,7 @@
         <!-- Slide 2 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
+            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
               Visual retrô com energia moderna e <span class="text-cyan-400">estética anime</span>.
             </p>
@@ -207,7 +209,7 @@
         <!-- Slide 3 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
+            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
               Humor ácido, drama e reviravoltas — <span class="text-pink-500">em cada pixel</span>.
             </p>
@@ -220,20 +222,16 @@
       <button class="carousel-nav-btn carousel-next" aria-label="Próximo"  onclick="nextSlide()">›</button>
     </div>
 
-    <!-- UI empilhada: CTAs + Dots (sem sobrepor textos) -->
+    <!-- UI empilhada (CTAs + dots) -->
     <div class="hero-ui">
       <div></div> <!-- espaçador 1fr -->
-
       <div class="cta-stack">
         <button disabled
           class="group px-8 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest
                  border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button
-                 backdrop-blur-sm"
-          title="Em breve...">
-          NOSSOS JOGOS
-          <span class="text-xs block mt-1">EM BREVE</span>
+                 backdrop-blur-sm" title="Em breve...">
+          NOSSOS JOGOS <span class="block text-xs mt-1">EM BREVE</span>
         </button>
-
         <a href="#about" class="btn-diag btn-pink"><span>Saiba Mais</span></a>
       </div>
 
@@ -246,7 +244,7 @@
   </section>
 
   <!-- ABOUT -->
-  <section id="about" class="section-fill border-t-2 border-gray-800">
+  <section id="about" class="section-fill section-divider">
     <div class="container grid md:grid-cols-2 gap-16 items-center">
       <div>
         <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">QUEM SOMOS</h2>
@@ -257,36 +255,33 @@
           <p class="text-base md:text-lg text-gray-400">Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.</p>
         </div>
       </div>
-
-      <div>
-        <div class="relative">
-          <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
-            <div class="relative flex items-center justify-center h-64 md:h-80">
-              <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100 mx-auto" />
-            </div>
+      <div class="relative">
+        <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
+          <div class="relative flex items-center justify-center h-64 md:h-80">
+            <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100 mx-auto" />
           </div>
-          <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse"></div>
-          <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay:1s;"></div>
-          <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse" style="animation-delay:2s;"></div>
         </div>
+        <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse"></div>
+        <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay:1s;"></div>
+        <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse" style="animation-delay:2s;"></div>
       </div>
     </div>
   </section>
 
   <!-- VALUES -->
-  <section id="values" class="section-fill border-t-2 border-gray-800">
+  <section id="values" class="section-fill section-divider">
     <div class="container">
       <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">NOSSOS VALORES</h3>
       <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-6 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black transition-all duration-300">
+        <div class="p-6 border-2 border-cyan-400 bg-gray-900/50">
           <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400">CRIATIVIDADE</h4>
           <p class="leading-relaxed">Cada jogo é uma nova oportunidade de inovar e surpreender.</p>
         </div>
-        <div class="p-6 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black transition-all duration-300">
+        <div class="p-6 border-2 border-pink-500 bg-gray-900/50">
           <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500">QUALIDADE</h4>
           <p class="leading-relaxed">Preferimos lançar menos jogos, mas com qualidade excepcional.</p>
         </div>
-        <div class="p-6 border-2 border-green-400 bg-gray-900/50 hover:bg-green-400 hover:text-black transition-all duration-300">
+        <div class="p-6 border-2 border-green-400 bg-gray-900/50">
           <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400">COMUNIDADE</h4>
           <p class="leading-relaxed">Construímos experiências colaborativas com nossa comunidade.</p>
         </div>
@@ -295,7 +290,7 @@
   </section>
 
   <!-- CONTACT -->
-  <section id="contact" class="section-fill border-t-2 border-gray-800">
+  <section id="contact" class="section-fill section-divider">
     <div class="container">
       <div class="text-center mb-16">
         <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
@@ -329,17 +324,20 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="relative">
-          <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
-            <div class="relative flex items-center justify-center h-64 md:h-80">
-              <div class="text-center">
-                <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
-                <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
-                <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
+          <div class="relative">
+            <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
+              <div class="relative flex items-center justify-center h-64 md:h-80">
+                <div class="text-center">
+                  <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
+                  <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
+                  <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
+                </div>
               </div>
             </div>
+            <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse"></div>
+            <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay: 1s;"></div>
+            <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse" style="animation-delay: 2s;"></div>
           </div>
         </div>
       </div>
@@ -363,11 +361,11 @@
   </footer>
 
   <script>
-    // ===== util =====
+    // ===== helpers =====
     const $  = (s, r=document) => r.querySelector(s);
     const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-    // Ajusta --nav-h (offset de âncora)
+    // define --nav-h (para âncoras)
     function setNavHeightVar(){
       const h = $('.navbar')?.offsetHeight || 80;
       document.documentElement.style.setProperty('--nav-h', h + 'px');
@@ -375,7 +373,7 @@
     window.addEventListener('resize', setNavHeightVar);
     document.addEventListener('DOMContentLoaded', setNavHeightVar);
 
-    // Fallback de viewport height (resolve 100vh no mobile e “modo desktop” do mobile)
+    // fallback de viewport height (corrige 100vh no mobile/“modo desktop”)
     (function fixViewportHeight(){
       const setVH = () => {
         const h = (window.visualViewport && window.visualViewport.height)
@@ -392,7 +390,19 @@
       }
     })();
 
-    // Lazy attach vídeo + play/pause fora de visão
+    // ===== menu mobile =====
+    (function mobileMenu(){
+      const ham  = $('#hamburger');
+      const menu = $('#mobile-menu');
+      if(!ham || !menu) return;
+      const open  = () => { menu.classList.remove('hidden'); menu.classList.add('flex'); };
+      const close = () => { menu.classList.add('hidden');   menu.classList.remove('flex'); };
+      ham.addEventListener('click', open);
+      menu.addEventListener('click', (e)=>{ if(e.target.closest('[data-close]')) close(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+    })();
+
+    // ===== vídeo do herói (lazy + pause off-viewport) =====
     (function setupHeroVideo(){
       const video = $('#heroVideo');
       if(!video) return;
@@ -407,7 +417,9 @@
       const io = new IntersectionObserver((entries)=>{
         entries.forEach(e=>{
           if (e.isIntersecting && e.intersectionRatio >= .4) {
-            attachSourcesOnce(); video.muted = true; video.setAttribute('playsinline',''); video.play().catch(()=>{});
+            attachSourcesOnce();
+            video.muted = true; video.setAttribute('playsinline','');
+            video.play().catch(()=>{});
           } else { try{ video.pause(); }catch{} }
         });
       }, { threshold:[0,.4,.6,1]});
@@ -431,15 +443,14 @@
     function nextSlide(){ goToSlide(index + 1); }
     function prevSlide(){ goToSlide(index - 1); }
 
-    // autoplay leve (opcional)
+    // autoplay leve
     let auto = setInterval(nextSlide, 6000);
-    // pausa quando perde foco (economia)
     document.addEventListener('visibilitychange', ()=>{
       if (document.hidden) { clearInterval(auto); }
       else { auto = setInterval(nextSlide, 6000); }
     });
 
-    // Expondo p/ HTML
+    // expõe para HTML
     window.goToSlide = goToSlide;
     window.nextSlide = nextSlide;
     window.prevSlide = prevSlide;
