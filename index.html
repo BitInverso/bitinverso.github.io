@@ -27,7 +27,7 @@
   <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." />
   <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.jpg" />
 
-  <!-- PWA / colores -->
+  <!-- PWA / cores -->
   <meta name="theme-color" content="#000000" />
   <meta name="application-name" content="Bit Inverso" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="image" href="assets/hero-poster.jpg" />
 
-  <!-- Tailwind (dev; em produção compile) -->
+  <!-- Tailwind (dev; em produção, compile localmente) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -46,10 +46,11 @@
 
     :root { --nav-h: 80px; }
 
-    * { font-family: 'JetBrains Mono', monospace; box-sizing: border-box; }
+    * { box-sizing: border-box; }
     html, body { overflow-x: hidden; max-width: 100vw; background:#000; color:#fff; scroll-behavior: smooth; }
+    body, button, a { font-family: 'JetBrains Mono', monospace; }
 
-    /* usamos scroll-margin nas seções para compensar a navbar fixa */
+    /* Compensa a navbar fixa nas âncoras */
     section { scroll-margin-top: var(--nav-h); }
 
     .glitch-text { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080; }
@@ -57,8 +58,8 @@
 
     /* NAVBAR */
     .navbar{
-      position: fixed; inset: 0 0 auto 0;
-      display:flex; align-items:center; z-index: 100; /* fica alto, mas o overlay fica acima */
+      position:fixed; inset:0 0 auto 0;
+      display:flex; align-items:center; z-index:100;
       padding: 12px 0;
       background: rgba(0,0,0,.95);
       backdrop-filter: blur(10px);
@@ -94,11 +95,17 @@
     .carousel{ position:relative; width:100%; height:100%; }
     .carousel-track{ height:100%; display:flex; transition: transform 600ms ease; }
     .carousel-item{ flex:0 0 100%; display:grid; place-items:center; }
-    .hero-slide{ position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem; }
+    .hero-slide{
+      position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem;
+      /* Reserva espaço para CTAs e dots que ficam sobrepostos mais abaixo */
+      padding-bottom: clamp(110px, 22vh, 160px);
+    }
 
     /* SETAS */
     .carousel-nav-btn{
-      position:absolute; top:50%; transform:translateY(-50%);
+      position:absolute;
+      top: calc(50% + 6vh); /* meio “óptico” em mobile */
+      transform:translateY(-50%);
       width:56px; height:56px; border-radius:9999px;
       border:2px solid #06b6d4; color:#06b6d4; background:rgba(0,0,0,.35);
       display:grid; place-items:center; font-size:28px; line-height:1;
@@ -107,6 +114,7 @@
     .carousel-nav-btn:hover{ background:rgba(0,0,0,.6); box-shadow:0 0 24px rgba(6,182,212,.35); }
     .carousel-prev{ left:1rem; }
     .carousel-next{ right:1rem; }
+    @media (min-width:768px){ .carousel-nav-btn{ top:50%; } }
 
     /* UI do herói empilhada (texto → CTAs → dots) */
     .hero-ui{
@@ -121,13 +129,14 @@
 
     .cta-stack{
       display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;
-      margin-bottom: clamp(8px, 3vh, 24px);
+      margin-bottom: clamp(8px, 1.6vh, 14px); /* mais compacto */
     }
     .hero-ui .carousel-indicators{
       position:static; transform:none;
-      margin-bottom: clamp(8px, 2.5vh, 20px);
+      margin-bottom: clamp(6px, 1.4vh, 12px); /* mais compacto */
       background: rgba(0,0,0,.5);
-      padding: 12px 20px; border-radius: 20px;
+      padding: 10px 18px;
+      border-radius: 20px;
       border: 1px solid #00ffff; display:flex; gap:10px;
     }
     .carousel-indicator{
@@ -154,13 +163,7 @@
     a.btn-diag:hover{ transform:translateY(-2px); box-shadow:0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25); color:#fff; }
 
     /* OVERLAY do menu mobile SEMPRE ACIMA */
-    #mobile-menu{ z-index: 9999; } /* resolve ficar atrás do herói/CTAs */
-
-    /* Títulos responsivos do herói */
-    @media (max-width: 767px){
-      .hero-title { font-size: 3rem; }
-      .hero-sub   { font-size: 1rem; }
-    }
+    #mobile-menu{ z-index: 9999; }
   </style>
 </head>
 <body>
@@ -209,8 +212,8 @@
         <!-- Slide 1 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
-            <h2 class="hero-sub text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
+            <h2 class="text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
               Jogos que desafiam convenções.<br />
               <span class="text-green-400">Narrativas que ficam na memória.</span>
@@ -220,7 +223,7 @@
         <!-- Slide 2 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
               Visual retrô com energia moderna e <span class="text-cyan-400">estética anime</span>.
             </p>
@@ -229,7 +232,7 @@
         <!-- Slide 3 -->
         <div class="carousel-item">
           <div class="hero-slide">
-            <h1 class="hero-title text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
             <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
               Humor ácido, drama e reviravoltas — <span class="text-pink-500">em cada pixel</span>.
             </p>
@@ -420,6 +423,8 @@
       ham.addEventListener('click', open);
       menu.addEventListener('click', (e)=>{ if(e.target.closest('[data-close]')) close(); });
       document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+      // expõe para onclick inline (fallback)
+      window.closeMobileMenu = close;
     })();
 
     // vídeo do herói (lazy + pause off-viewport)
