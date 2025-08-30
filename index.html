@@ -2,11 +2,43 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bit Inverso - Gaming Studio</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-  <!-- Tailwind para dev (em produção, compile) -->
+  <title>Bit Inverso — Gaming Studio</title>
+  <meta name="description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel.">
+  <meta name="keywords" content="Bit Inverso, jogos indie, pixel art, anime, sátira, humor ácido, games, estúdio de jogos">
+  <meta name="author" content="Bit Inverso" />
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+  <link rel="canonical" href="https://bitinverso.com/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Bit Inverso" />
+  <meta property="og:title" content="Bit Inverso — Gaming Studio" />
+  <meta property="og:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." />
+  <meta property="og:url" content="https://bitinverso.com/" />
+  <meta property="og:image" content="https://bitinverso.com/assets/og-image.jpg" />
+  <meta property="og:locale" content="pt_BR" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Bit Inverso — Gaming Studio" />
+  <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." />
+  <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.jpg" />
+
+  <!-- PWA / colores -->
+  <meta name="theme-color" content="#000000" />
+  <meta name="application-name" content="Bit Inverso" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+  <!-- Preconnect + poster -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="image" href="assets/hero-poster.jpg" />
+
+  <!-- Tailwind (dev; em produção compile) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -15,62 +47,56 @@
     :root { --nav-h: 80px; }
 
     * { font-family: 'JetBrains Mono', monospace; box-sizing: border-box; }
-    html, body { overflow-x: hidden; max-width: 100vw; scroll-behavior: smooth; background:#000; color:#fff; }
+    html, body { overflow-x: hidden; max-width: 100vw; background:#000; color:#fff; scroll-behavior: smooth; }
 
-    /* Usamos somente scroll-margin nas seções (sem scroll-padding no html) para evitar somas */
+    /* usamos scroll-margin nas seções para compensar a navbar fixa */
     section { scroll-margin-top: var(--nav-h); }
 
     .glitch-text { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080; }
+    .container { max-width: 1200px; margin-inline: auto; padding-inline: 1.25rem; }
 
-    /* ===== Navbar ===== */
+    /* NAVBAR */
     .navbar{
-      position: fixed; top:0; left:0; right:0;
-      display:flex; align-items:center;
-      backdrop-filter: blur(10px);
+      position: fixed; inset: 0 0 auto 0;
+      display:flex; align-items:center; z-index: 100; /* fica alto, mas o overlay fica acima */
+      padding: 12px 0;
       background: rgba(0,0,0,.95);
+      backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(0,255,255,.2);
-      z-index: 50;
-      padding: 12px 16px;
     }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem; }
 
-    /* ===== Seções âncora ===== */
+    /* SEÇÕES “full” (sem vazar ornamentos) */
     .section-fill{
       min-height: calc(var(--vh, 100dvh) - var(--nav-h));
       display:flex; flex-direction:column; justify-content:center;
       padding-block: clamp(56px, 8vh, 96px);
-      overflow:hidden;                /* corta decorações da seção anterior */
-    }
-    @supports (height: 100svh) {.section-fill{ min-height: calc(100svh - var(--nav-h)); }}
-    @supports (height: 100dvh) {.section-fill{ min-height: calc(100dvh - var(--nav-h)); }}
-    .section-divider{ border-top:2px solid #1f2937; } /* gray-800 */
-
-    /* ===== HERO (vídeo + carrossel) ===== */
-    #home{
-      position:relative;
-      padding-top: calc(var(--nav-h) + 2rem);
-      min-height: calc(var(--vh, 100dvh) * 1);
       overflow:hidden;
     }
-    @supports (height: 100svh) { #home { min-height: 100svh; } }
-    @supports (height: 100dvh) { #home { min-height: 100dvh; } }
+    @supports (height: 100svh){ .section-fill{ min-height: calc(100svh - var(--nav-h)); } }
+    @supports (height: 100dvh){ .section-fill{ min-height: calc(100dvh - var(--nav-h)); } }
+    .section-divider{ border-top: 2px solid #1f2937; } /* gray-800 */
 
-    .hero-media-wrapper{ position:absolute; inset:0; z-index:0; overflow:hidden; }
-    .hero-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1) contrast(1.05); }
-    .hero-overlay{
+    /* HERO (vídeo + overlay) */
+    #home { position:relative; padding-top: calc(var(--nav-h) + 2rem); min-height: 100vh; overflow:hidden; }
+    @supports (height: 100svh){ #home{ min-height: 100svh; } }
+    @supports (height: 100dvh){ #home{ min-height: 100dvh; } }
+
+    .hero-media-wrapper { position:absolute; inset:0; z-index: 0; overflow:hidden; }
+    .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1) contrast(1.05); }
+    .hero-overlay {
       position:absolute; inset:0; z-index:1; pointer-events:none;
       background:
         radial-gradient(60% 60% at 50% 40%, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.85) 100%),
         linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.75));
     }
 
-    /* Carrossel */
+    /* CARROSSEL */
     .carousel{ position:relative; width:100%; height:100%; }
     .carousel-track{ height:100%; display:flex; transition: transform 600ms ease; }
     .carousel-item{ flex:0 0 100%; display:grid; place-items:center; }
-    .hero-slide{ position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem; width:100%; }
+    .hero-slide{ position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem; }
 
-    /* Setas */
+    /* SETAS */
     .carousel-nav-btn{
       position:absolute; top:50%; transform:translateY(-50%);
       width:56px; height:56px; border-radius:9999px;
@@ -110,13 +136,8 @@
     }
     .carousel-indicator.active, .carousel-indicator:hover{ background:#00ffff; }
 
-    /* Botão com clip (NOSSOS JOGOS) */
-    .clip-path-button{
-      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%);
-      border-radius:0;
-    }
-
-    /* Paralelogramo (SAIBA MAIS) */
+    /* BOTÕES */
+    .clip-path-button{ clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%); border-radius:0; }
     a.btn-diag{
       --btn-bg:#ec4899; --btn-fg:#000; --btn-slant:12px;
       position:relative; display:inline-block; color:var(--btn-fg); text-decoration:none; overflow:hidden;
@@ -131,12 +152,11 @@
       padding:.9rem 2.25rem; font-weight:800; letter-spacing:.15em; line-height:1; text-transform:uppercase; white-space:nowrap;
     }
     a.btn-diag:hover{ transform:translateY(-2px); box-shadow:0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25); color:#fff; }
-    a.btn-pink{ --btn-bg:#ec4899; --btn-fg:#000; }
 
-    /* Glows decorativos (opcional) */
-    .glow{ position:absolute; border-radius:9999px; filter:blur(40px); opacity:.18; }
+    /* OVERLAY do menu mobile SEMPRE ACIMA */
+    #mobile-menu{ z-index: 9999; } /* resolve ficar atrás do herói/CTAs */
 
-    /* responsivo de títulos do herói */
+    /* Títulos responsivos do herói */
     @media (max-width: 767px){
       .hero-title { font-size: 3rem; }
       .hero-sub   { font-size: 1rem; }
@@ -146,25 +166,25 @@
 <body>
 
   <!-- NAVBAR -->
-  <nav class="navbar">
+  <header class="navbar">
     <div class="container w-full flex items-center justify-between">
       <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-16 md:h-20 w-auto" />
-      <div class="hidden md:flex gap-8 text-sm tracking-widest">
+      <nav class="hidden md:flex gap-8 text-sm tracking-widest">
         <a href="#home" class="hover:text-cyan-400">HOME</a>
         <a href="#about" class="hover:text-pink-500">QUEM SOMOS</a>
         <a href="#values" class="hover:text-green-400">NOSSOS VALORES</a>
         <a href="#contact" class="hover:text-yellow-400">CONTATO</a>
-      </div>
+      </nav>
       <button id="hamburger" class="md:hidden inline-grid gap-1 p-2" aria-label="Abrir menu">
         <span class="w-7 h-0.5 bg-white"></span>
         <span class="w-7 h-0.5 bg-white"></span>
         <span class="w-7 h-0.5 bg-white"></span>
       </button>
     </div>
-  </nav>
+  </header>
 
   <!-- MENU MOBILE -->
-  <div id="mobile-menu" class="fixed inset-0 bg-black/95 z-60 hidden items-center justify-center">
+  <div id="mobile-menu" class="fixed inset-0 bg-black/95 hidden items-center justify-center">
     <nav class="flex flex-col items-center gap-8 text-2xl font-bold tracking-widest">
       <a href="#home"    data-close>HOME</a>
       <a href="#about"   data-close>QUEM SOMOS</a>
@@ -174,7 +194,7 @@
     </nav>
   </div>
 
-  <!-- HERO (VÍDEO + CARROSSEL) -->
+  <!-- HERO -->
   <section id="home">
     <div class="hero-media-wrapper" aria-hidden="true">
       <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
@@ -222,9 +242,9 @@
       <button class="carousel-nav-btn carousel-next" aria-label="Próximo"  onclick="nextSlide()">›</button>
     </div>
 
-    <!-- UI empilhada (CTAs + dots) -->
+    <!-- CTAs e dots EMPILHADOS, sempre visíveis -->
     <div class="hero-ui">
-      <div></div> <!-- espaçador 1fr -->
+      <div></div>
       <div class="cta-stack">
         <button disabled
           class="group px-8 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest
@@ -232,7 +252,7 @@
                  backdrop-blur-sm" title="Em breve...">
           NOSSOS JOGOS <span class="block text-xs mt-1">EM BREVE</span>
         </button>
-        <a href="#about" class="btn-diag btn-pink"><span>Saiba Mais</span></a>
+        <a href="#about" class="btn-diag"><span>Saiba Mais</span></a>
       </div>
 
       <div class="carousel-indicators" id="carouselIndicators">
@@ -361,11 +381,11 @@
   </footer>
 
   <script>
-    // ===== helpers =====
+    // helpers
     const $  = (s, r=document) => r.querySelector(s);
     const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 
-    // define --nav-h (para âncoras)
+    // ajusta --nav-h (âncoras corretas)
     function setNavHeightVar(){
       const h = $('.navbar')?.offsetHeight || 80;
       document.documentElement.style.setProperty('--nav-h', h + 'px');
@@ -373,7 +393,7 @@
     window.addEventListener('resize', setNavHeightVar);
     document.addEventListener('DOMContentLoaded', setNavHeightVar);
 
-    // fallback de viewport height (corrige 100vh no mobile/“modo desktop”)
+    // fallback de 100vh no mobile/“modo desktop”
     (function fixViewportHeight(){
       const setVH = () => {
         const h = (window.visualViewport && window.visualViewport.height)
@@ -390,7 +410,7 @@
       }
     })();
 
-    // ===== menu mobile =====
+    // menu mobile
     (function mobileMenu(){
       const ham  = $('#hamburger');
       const menu = $('#mobile-menu');
@@ -402,7 +422,7 @@
       document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
     })();
 
-    // ===== vídeo do herói (lazy + pause off-viewport) =====
+    // vídeo do herói (lazy + pause off-viewport)
     (function setupHeroVideo(){
       const video = $('#heroVideo');
       if(!video) return;
@@ -428,7 +448,7 @@
       video.addEventListener('canplay', ()=>{ if(!document.hidden) video.play().catch(()=>{}); }, {once:true});
     })();
 
-    // ===== Carrossel simples =====
+    // carrossel
     const track  = $('#carouselTrack');
     const slides = $$('.carousel-item', track);
     const dots   = $$('#carouselIndicators .carousel-indicator');
@@ -443,7 +463,6 @@
     function nextSlide(){ goToSlide(index + 1); }
     function prevSlide(){ goToSlide(index - 1); }
 
-    // autoplay leve
     let auto = setInterval(nextSlide, 6000);
     document.addEventListener('visibilitychange', ()=>{
       if (document.hidden) { clearInterval(auto); }
