@@ -12,7 +12,7 @@
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
   <link rel="canonical" href="https://bitinverso.com/" />
 
-  <!-- Open Graph -->
+  <!-- OG/Twitter -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Bit Inverso" />
   <meta property="og:title" content="Bit Inverso — Gaming Studio" />
@@ -20,8 +20,6 @@
   <meta property="og:url" content="https://bitinverso.com/" />
   <meta property="og:image" content="https://bitinverso.com/assets/og-image.jpg" />
   <meta property="og:locale" content="pt_BR" />
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Bit Inverso — Gaming Studio" />
   <meta name="twitter:description" content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." />
@@ -38,19 +36,39 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="preload" as="image" href="assets/hero-poster.jpg" />
 
-  <!-- Tailwind (dev; em produção, compile localmente) -->
+  <!-- Tailwind (dev) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+    /* === Scroll Reveal ======================================================= */
+    [data-reveal]{
+    opacity: 0;
+    transform: translateY(16px) scale(.985);
+    transition: transform .8s cubic-bezier(.22,.61,.36,1), opacity .8s ease;
+    will-change: transform, opacity;
+    }
+    [data-reveal].is-visible{
+    opacity: 1;
+    transform: none;
+    }
 
-    :root { --nav-h: 80px; }
+    /* Direções */
+    [data-reveal-from="up"]     { transform: translateY(22px); }
+    [data-reveal-from="down"]   { transform: translateY(-22px); }
+    [data-reveal-from="left"]   { transform: translateX(28px); }
+    [data-reveal-from="right"]  { transform: translateX(-28px); }
+    [data-reveal-from="zoom"]   { transform: scale(.96); }
+
+    /* Duração opcional */
+    [data-reveal][data-reveal-dur="fast"] { transition-duration: .5s; }
+    [data-reveal][data-reveal-dur="slow"] { transition-duration: 1.2s; }
+
+    :root { --nav-h: 80px; --hero-ui-gap: 120px; }
 
     * { box-sizing: border-box; }
     html, body { overflow-x: hidden; max-width: 100vw; background:#000; color:#fff; scroll-behavior: smooth; }
     body, button, a { font-family: 'JetBrains Mono', monospace; }
-
-    /* Compensa a navbar fixa nas âncoras */
     section { scroll-margin-top: var(--nav-h); }
 
     .glitch-text { text-shadow: 2px 0 #00ff00, -2px 0 #ff00ff, 0 2px #00ffff, 0 -2px #ff0080; }
@@ -58,31 +76,37 @@
 
     /* NAVBAR */
     .navbar{
-      position:fixed; inset:0 0 auto 0;
-      display:flex; align-items:center; z-index:100;
-      padding: 12px 0;
-      background: rgba(0,0,0,.95);
-      backdrop-filter: blur(10px);
+      position:fixed; inset:0 0 auto 0; z-index:100;
+      display:flex; align-items:center; padding:12px 0;
+      background: rgba(0,0,0,.95); backdrop-filter: blur(10px);
       border-bottom: 1px solid rgba(0,255,255,.2);
     }
 
-    /* SEÇÕES “full” (sem vazar ornamentos) */
-    .section-fill{
-      min-height: calc(var(--vh, 100dvh) - var(--nav-h));
-      display:flex; flex-direction:column; justify-content:center;
-      padding-block: clamp(56px, 8vh, 96px);
+    /* HERO */
+    #home{
+      position:relative;
+      min-height:100vh;             /* a seção ocupa a tela toda */
+      isolation:isolate;
       overflow:hidden;
+      /* sem padding-top aqui, para não deslocar o centro vertical */
     }
-    @supports (height: 100svh){ .section-fill{ min-height: calc(100svh - var(--nav-h)); } }
-    @supports (height: 100dvh){ .section-fill{ min-height: calc(100dvh - var(--nav-h)); } }
-    .section-divider{ border-top: 2px solid #1f2937; } /* gray-800 */
+    @supports (height: 100svh){ #home{ min-height:100svh; } }
+    @supports (height: 100dvh){ #home{ min-height:100dvh; } }
 
-    /* HERO (vídeo + overlay) */
-    #home { position:relative; padding-top: calc(var(--nav-h) + 2rem); min-height: 100vh; overflow:hidden; }
-    @supports (height: 100svh){ #home{ min-height: 100svh; } }
-    @supports (height: 100dvh){ #home{ min-height: 100dvh; } }
+    /* viewport interno = altura da tela - navbar */
+    .hero-viewport{
+      position:relative;
+      height: calc(var(--vh, 100dvh) - var(--nav-h));
+      /* fallback para navegadores com svh/dvh */
+    }
+    @supports (height: 100svh){
+      .hero-viewport{ height: calc(100svh - var(--nav-h)); }
+    }
+    @supports (height: 100dvh){
+      .hero-viewport{ height: calc(100dvh - var(--nav-h)); }
+    }
 
-    .hero-media-wrapper { position:absolute; inset:0; z-index: 0; overflow:hidden; }
+    .hero-media-wrapper { position:absolute; inset:0; z-index:0; overflow:hidden; }
     .hero-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1) contrast(1.05); }
     .hero-overlay {
       position:absolute; inset:0; z-index:1; pointer-events:none;
@@ -92,35 +116,55 @@
     }
 
     /* CARROSSEL */
-    .carousel{ position:relative; width:100%; height:100%; }
-    .carousel-track{ height:100%; display:flex; transition: transform 600ms ease; }
-    .carousel-item{ flex:0 0 100%; display:grid; place-items:center; }
-    .hero-slide{
-      position:relative; z-index:2; display:grid; place-items:center; text-align:center; padding:0 1rem;
-      /* Reserva espaço para CTAs e dots que ficam sobrepostos mais abaixo */
-      padding-bottom: clamp(110px, 22vh, 160px);
+    .carousel{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+    }
+    .carousel-track{
+      display:flex;
+      height:100%;
+      transition: transform 600ms ease;
+      will-change: transform;
+    }
+    .carousel-item{
+      flex:0 0 100%;
+      min-width:100%;
+      height:100%;
     }
 
-    /* SETAS */
+    /* Conteúdo do slide centralizado no “miolo”: 100% - hero-ui-gap */
+    .hero-slide{
+      height: calc(100% - var(--hero-ui-gap));
+      display:flex; flex-direction:column;
+      justify-content:center; align-items:center;
+      text-align:center; padding:0 1rem;
+      min-height:0;      /* evita overflow por conteúdo */
+    }
+    .hero-slide h1{ margin-bottom:.5rem; }
+    .hero-slide h2{ margin-bottom:.75rem; }
+
+    /* Setas: centro exato do miolo */
     .carousel-nav-btn{
       position:absolute;
-      top: calc(50% + 6vh); /* meio “óptico” em mobile */
-      transform:translateY(-50%);
+      top: calc(50% - var(--hero-ui-gap)/2);
+      transform: translateY(-50%);
       width:56px; height:56px; border-radius:9999px;
       border:2px solid #06b6d4; color:#06b6d4; background:rgba(0,0,0,.35);
       display:grid; place-items:center; font-size:28px; line-height:1;
       z-index:40; transition:all .2s ease;
     }
-    .carousel-nav-btn:hover{ background:rgba(0,0,0,.6); box-shadow:0 0 24px rgba(6,182,212,.35); }
     .carousel-prev{ left:1rem; }
     .carousel-next{ right:1rem; }
-    @media (min-width:768px){ .carousel-nav-btn{ top:50%; } }
+    .carousel-nav-btn:hover{ background:rgba(0,0,0,.6); box-shadow:0 0 24px rgba(6,182,212,.35); }
 
-    /* UI do herói empilhada (texto → CTAs → dots) */
+    /* UI fixa (CTAs + dots) no rodapé do hero */
     .hero-ui{
       position:absolute; inset:0; z-index:30;
-      display:grid; grid-template-rows: 1fr auto auto;
+      display:grid; grid-template-rows:1fr auto auto;
       justify-items:center; align-items:end;
+      padding-bottom: env(safe-area-inset-bottom, 0);
       pointer-events:none;
     }
     .hero-ui .cta-stack,
@@ -129,11 +173,10 @@
 
     .cta-stack{
       display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;
-      margin-bottom: clamp(8px, 1.6vh, 14px); /* mais compacto */
+      margin-bottom: clamp(8px, 1.6vh, 14px);
     }
-    .hero-ui .carousel-indicators{
-      position:static; transform:none;
-      margin-bottom: clamp(6px, 1.4vh, 12px); /* mais compacto */
+    .carousel-indicators{
+      margin-bottom: clamp(6px, 1.4vh, 12px);
       background: rgba(0,0,0,.5);
       padding: 10px 18px;
       border-radius: 20px;
@@ -145,11 +188,29 @@
     }
     .carousel-indicator.active, .carousel-indicator:hover{ background:#00ffff; }
 
-    /* BOTÕES */
-    .clip-path-button{ clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%); border-radius:0; }
+    /* Botões */
+  .clip-path-button {
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 100%, 10px 100%); 
+    border-radius: 0;
+    min-width: 140px;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }    
+
     a.btn-diag{
       --btn-bg:#ec4899; --btn-fg:#000; --btn-slant:12px;
-      position:relative; display:inline-block; color:var(--btn-fg); text-decoration:none; overflow:hidden;
+      position:relative;
+      display:inline-flex;              /* <— era inline-block */
+      align-items:center;               /* <— centraliza vertical no a */
+      justify-content:center;
+      vertical-align:middle;
+      line-height:1;
+      color:var(--btn-fg);
+      text-decoration:none;
+      overflow:hidden;
       transition: transform .2s ease, box-shadow .2s ease, color .2s ease;
     }
     a.btn-diag::before{
@@ -157,24 +218,135 @@
       clip-path: polygon(0 0, calc(100% - var(--btn-slant)) 0, 100% 100%, var(--btn-slant) 100%);
     }
     a.btn-diag>span{
-      position:relative; z-index:1; display:inline-block;
-      padding:.9rem 2.25rem; font-weight:800; letter-spacing:.15em; line-height:1; text-transform:uppercase; white-space:nowrap;
+      position:relative; z-index:1;
+      display:inline-flex;              /* <— span também vira flex */
+      align-items:center;               /* <— e centraliza o texto */
+      justify-content:center;
+      padding:.9rem 2.25rem;
+      font-weight:800; letter-spacing:.15em; text-transform:uppercase;
+      white-space:nowrap; line-height:1;
     }
     a.btn-diag:hover{ transform:translateY(-2px); box-shadow:0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25); color:#fff; }
+    /* Glows decorativos */
+    .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
 
-    /* OVERLAY do menu mobile SEMPRE ACIMA */
+    /* Outras seções (exemplo) */
+    .section-divider{ border-top: 2px solid #1f2937; }
+    .section-fill{
+      min-height: calc(var(--vh, 100dvh) - var(--nav-h));
+      display:flex; flex-direction:column; justify-content:center;
+      padding-block: clamp(56px, 8vh, 96px);
+      overflow:hidden;
+    }
+    @supports (height: 100svh){ .section-fill{ min-height: calc(100svh - var(--nav-h)); } }
+
+    /* Menu mobile acima de tudo */
     #mobile-menu{ z-index: 9999; }
+
+    /* GAMES CARDS - Flip 3D OTIMIZADO */
+    .game-card {
+      position: relative; 
+      height: 400px; 
+      perspective: 1000px; 
+      cursor: pointer;
+      border: 2px solid transparent; 
+      transition: border-color 0.3s ease;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .game-card:hover { 
+      border-color: rgba(6,182,212,0.5); 
+    }
+
+    .card-3d {
+      position: relative; 
+      width: 100%; 
+      height: 100%;
+      transform-style: preserve-3d; 
+      transition: transform 0.75s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+
+    .game-card.is-flipped .card-3d { 
+      transform: rotateY(180deg); 
+    }
+
+    .card-face {
+      position: absolute; 
+      inset: 0; 
+      backface-visibility: hidden;
+      border: 2px solid; 
+      overflow: hidden;
+      background: rgba(17,24,39,0.95); 
+      backdrop-filter: blur(8px);
+      display: flex; 
+      flex-direction: column;
+      border-radius: 6px;
+    }
+
+    .card-front { 
+      border-color: #06b6d4; 
+    }
+
+    .card-back { 
+      border-color: #ec4899; 
+      transform: rotateY(180deg); 
+    }
+
+    /* Indicador visual para o card ativo */
+    .game-card.is-flipped {
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+      transform: translateY(-2px);
+      transition: all 0.3s ease;
+    }
+
+    /* Correção específica para o CTA da seção Games */
+    #games .text-center {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #games .text-center p {
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #games .text-center .flex {
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+}
+
   </style>
 </head>
-<body>
+<body class="min-h-screen bg-black text-white relative overflow-x-hidden">
+  <!-- Pixel Grid Background -->
+  <div class="fixed inset-0 opacity-5 pointer-events-none">
+      <div class="grid grid-cols-20 gap-px h-full">
+          <!-- Grid cells geradas via JavaScript -->
+      </div>
+  </div>
+
+  <!-- Glitch Effect Elements -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div id="glitch1" class="glow bg-cyan-400 w-32 h-32 top-20 left-10 animate-pulse"></div>
+      <div id="glitch2" class="glow bg-pink-500 w-24 h-24 top-1/2 right-20 animate-bounce" style="animation-delay: 1s;"></div>
+      <div id="glitch3" class="glow bg-green-400 w-40 h-40 bottom-20 left-1/3 animate-ping" style="animation-delay: 2s;"></div>
+  </div>
 
   <!-- NAVBAR -->
   <header class="navbar">
     <div class="container w-full flex items-center justify-between">
-      <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-16 md:h-20 w-auto" />
+      <img src="assets/logo_branca.png" alt="Bit Inverso" class="h-32 w-auto" />
       <nav class="hidden md:flex gap-8 text-sm tracking-widest">
         <a href="#home" class="hover:text-cyan-400">HOME</a>
         <a href="#about" class="hover:text-pink-500">QUEM SOMOS</a>
+        <a href="#games" class="hover:text-cyan-400">NOSSOS JOGOS</a>
         <a href="#values" class="hover:text-green-400">NOSSOS VALORES</a>
         <a href="#contact" class="hover:text-yellow-400">CONTATO</a>
       </nav>
@@ -191,6 +363,7 @@
     <nav class="flex flex-col items-center gap-8 text-2xl font-bold tracking-widest">
       <a href="#home"    data-close>HOME</a>
       <a href="#about"   data-close>QUEM SOMOS</a>
+      <a href="#games"   data-close>NOSSOS JOGOS</a>
       <a href="#values"  data-close>NOSSOS VALORES</a>
       <a href="#contact" data-close>CONTATO</a>
       <button data-close class="mt-8 text-4xl" aria-label="Fechar menu">×</button>
@@ -198,180 +371,374 @@
   </div>
 
   <!-- HERO -->
-  <section id="home">
-    <div class="hero-media-wrapper" aria-hidden="true">
-      <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
-             poster="assets/hero-poster.jpg"
-             data-src-webm="assets/hero-background.webm"
-             data-src-mp4="assets/hero-background.mp4"></video>
-      <div class="hero-overlay"></div>
-    </div>
+  <section id="home" data-reveal data-reveal-from="left" data-reveal-dur="slow">
+    <div class="hero-viewport">
+      <div class="hero-media-wrapper" aria-hidden="true">
+        <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
+               poster="assets/hero-poster.jpg"
+               data-src-webm="assets/hero-background.webm"
+               data-src-mp4="assets/hero-background.mp4"></video>
+        <div class="hero-overlay"></div>
+      </div>
 
-    <div class="carousel container" id="heroCarousel">
-      <div class="carousel-track" id="carouselTrack">
-        <!-- Slide 1 -->
-        <div class="carousel-item">
-          <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
-            <h2 class="text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
-            <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
-              Jogos que desafiam convenções.<br />
-              <span class="text-green-400">Narrativas que ficam na memória.</span>
-            </p>
+      <div class="carousel container" id="heroCarousel">
+        <div class="carousel-track" id="carouselTrack">
+          <!-- Slide 1 -->
+          <div class="carousel-item">
+            <div class="hero-slide">
+              <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">INDIE</h1>
+              <h2 class="text-xl md:text-2xl text-yellow-400 tracking-[.25em] mb-8">GAMES WITH ATTITUDE</h2>
+              <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
+                Jogos que desafiam convenções.<br />
+                <span class="text-green-400">Narrativas que ficam na memória.</span>
+              </p>
+            </div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="carousel-item">
+            <div class="hero-slide">
+              <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
+              <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
+                Visual retrô com energia moderna e <span class="text-cyan-400">estética anime</span>.
+              </p>
+            </div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="carousel-item">
+            <div class="hero-slide">
+              <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
+              <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
+                Humor ácido, drama e reviravoltas — <span class="text-pink-500">em cada pixel</span>.
+              </p>
+            </div>
           </div>
         </div>
-        <!-- Slide 2 -->
-        <div class="carousel-item">
-          <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">PIXEL ART</h1>
-            <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
-              Visual retrô com energia moderna e <span class="text-cyan-400">estética anime</span>.
-            </p>
-          </div>
+
+        <!-- Setas -->
+        <button class="carousel-nav-btn carousel-prev" aria-label="Anterior" onclick="prevSlide()">‹</button>
+        <button class="carousel-nav-btn carousel-next" aria-label="Próximo"  onclick="nextSlide()">›</button>
+      </div>
+
+      <!-- CTAs e dots -->
+      <div class="hero-ui">
+        <div></div>
+        <div class="cta-stack">
+          <a href="#games"
+            class="group px-8 md:px-10 py-3 md:py-4 bg-black text-white font-bold tracking-widest
+                    border-2 border-cyan-400 hover:bg-cyan-400 hover:text-black clip-path-button
+                    backdrop-blur-sm transition-all duration-200">
+            NOSSOS JOGOS
+          </a>
+          <a href="#about" class="btn-diag"><span>Saiba Mais</span></a>
         </div>
-        <!-- Slide 3 -->
-        <div class="carousel-item">
-          <div class="hero-slide">
-            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 glitch-text">SÁTIRA</h1>
-            <p class="text-lg md:text-2xl text-gray-200 leading-relaxed max-w-3xl">
-              Humor ácido, drama e reviravoltas — <span class="text-pink-500">em cada pixel</span>.
-            </p>
-          </div>
+
+        <div class="carousel-indicators" id="carouselIndicators">
+          <div class="carousel-indicator active" onclick="goToSlide(0)"></div>
+          <div class="carousel-indicator"        onclick="goToSlide(1)"></div>
+          <div class="carousel-indicator"        onclick="goToSlide(2)"></div>
         </div>
       </div>
 
-      <!-- Setas -->
-      <button class="carousel-nav-btn carousel-prev" aria-label="Anterior" onclick="prevSlide()">‹</button>
-      <button class="carousel-nav-btn carousel-next" aria-label="Próximo"  onclick="nextSlide()">›</button>
-    </div>
-
-    <!-- CTAs e dots EMPILHADOS, sempre visíveis -->
-    <div class="hero-ui">
-      <div></div>
-      <div class="cta-stack">
-        <button disabled
-          class="group px-8 md:px-10 py-3 md:py-4 bg-gray-600 text-gray-400 font-bold tracking-widest
-                 border-2 border-gray-600 cursor-not-allowed opacity-50 clip-path-button
-                 backdrop-blur-sm" title="Em breve...">
-          NOSSOS JOGOS <span class="block text-xs mt-1">EM BREVE</span>
-        </button>
-        <a href="#about" class="btn-diag"><span>Saiba Mais</span></a>
+      <div class="absolute top-1/4 left-4 md:left-10 animate-pulse">
+          <div class="w-3 h-3 md:w-4 md:h-4 bg-cyan-400 shadow-lg pixel-art"></div>
       </div>
-
-      <div class="carousel-indicators" id="carouselIndicators">
-        <div class="carousel-indicator active" onclick="goToSlide(0)"></div>
-        <div class="carousel-indicator"        onclick="goToSlide(1)"></div>
-        <div class="carousel-indicator"        onclick="goToSlide(2)"></div>
+      <div class="absolute top-1/3 right-4 md:right-16 animate-pulse" style="animation-delay: 1s;">
+          <div class="w-2 h-2 md:w-3 md:h-3 bg-pink-500 shadow-lg pixel-art"></div>
+      </div>
+      <div class="absolute bottom-1/4 left-1/4 animate-pulse" style="animation-delay: 2s;">
+          <div class="w-4 h-4 md:w-5 md:h-5 bg-green-400 shadow-lg pixel-art"></div>
       </div>
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section id="about" class="section-fill section-divider">
-    <div class="container grid md:grid-cols-2 gap-16 items-center">
-      <div>
-        <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">QUEM SOMOS</h2>
-        <div class="space-y-6 text-gray-300 leading-relaxed">
-          <p class="text-lg md:text-xl font-medium">O Bit Inverso é um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.</p>
-          <p class="text-base md:text-lg"><span class="text-pink-500 font-bold">Contamos histórias</span> com um toque de humor ácido, drama e reviravoltas, sempre com <span class="text-cyan-400 font-bold">mundos e personagens cativantes</span>.</p>
-          <p class="text-base md:text-lg">Nosso foco é criar <span class="text-green-400 font-bold">jogos visualmente únicos</span> e deixar uma boa lembrança para quem joga.</p>
-          <p class="text-base md:text-lg text-gray-400">Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.</p>
-        </div>
-      </div>
-      <div class="relative">
-        <div class="bg-gray-900 border-4 border-cyan-400 p-8 md:p-12 relative overflow-hidden">
-          <div class="relative flex items-center justify-center h-64 md:h-80">
-            <img src="assets/logo_colorida.png" alt="Bit Inverso" class="max-w-full h-auto max-h-100 mx-auto" />
+  <!-- About Section -->
+  <section id="about" class="section-fill section-divider relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800" data-reveal data-reveal-from="right" data-reveal-dur="slow">
+      <div class="max-w-6xl mx-auto">
+          <div class="grid md:grid-cols-1 gap-16 items-center">
+              <div class="transition-all duration-1000 opacity-0 -translate-x-20" id="about-text">
+                  <h2 class="text-4xl md:text-6xl font-bold mb-8 text-cyan-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">QUEM SOMOS</h2>
+                  <div class="space-y-6 text-gray-300 leading-relaxed">
+                      <p class="text-lg md:text-xl font-medium">O Bit Inverso é um estúdio indie apaixonado por pixel art e pela linguagem visual dos animes.</p>
+                      <p class="text-base md:text-lg"><span class="text-pink-500 font-bold">Contamos histórias</span> com um toque de humor ácido, drama e reviravoltas, sempre com <span class="text-cyan-400 font-bold">mundos e personagens cativantes</span>.</p>
+                      <p class="text-base md:text-lg">Nosso foco é criar <span class="text-green-400 font-bold">jogos visualmente únicos</span> e deixar uma boa lembrança para quem joga.</p>
+                      <p class="text-base md:text-lg text-gray-400">Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.</p>
+                  </div>
+                  <div class="mt-12 grid grid-cols-3 gap-8 text-center">
+                      <div class="group border border-cyan-400 p-4 hover:bg-cyan-400 hover:text-black transition-all duration-300">
+                          <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
+                          <div class="text-xs tracking-widest font-bold">PROJETOS</div>
+                      </div>
+                      <div class="group border border-pink-500 p-4 hover:bg-pink-500 hover:text-black transition-all duration-300">
+                          <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">0</div>
+                          <div class="text-xs tracking-widest font-bold">ANOS</div>
+                      </div>
+                      <div class="group border border-green-400 p-4 hover:bg-green-400 hover:text-black transition-all duration-300">
+                          <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">∞</div>
+                          <div class="text-xs tracking-widest font-bold">PAIXÃO</div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse pixel-art"></div>
+              <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+              <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
           </div>
-        </div>
-        <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse"></div>
-        <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay:1s;"></div>
-        <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse" style="animation-delay:2s;"></div>
       </div>
-    </div>
+  </section>
+
+  <!-- GAMES SECTION -->
+  <section id="games" class="section-fill section-divider relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800" data-reveal data-reveal-from="up" data-reveal-dur="slow">
+      <div class="max-w-6xl mx-auto">
+          <h2 class="text-4xl md:text-6xl font-bold mb-8 text-center text-green-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ffff;">NOSSOS JOGOS</h2>
+          <p class="text-lg md:text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto leading-relaxed">
+              Cada jogo é uma nova aventura visual com <span class="text-cyan-400 font-bold">pixel art única</span>, narrativas envolventes e 
+              <span class="text-pink-500 font-bold">muito humor ácido</span>. Explore nossos mundos!
+          </p>
+
+          <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-4" data-reveal-group="games" data-reveal-stagger="120">
+              <!-- Card 1 - ESTRUTURA CORRIGIDA -->
+              <div class="game-card" data-reveal>
+                  <div class="card-3d">
+                      <!-- Frente -->
+                      <div class="card-face card-front">
+                          <div class="relative h-52 overflow-hidden flex-shrink-0">
+                              <div class="absolute inset-0 bg-gradient-to-br from-cyan-900 to-cyan-600 flex items-center justify-center">
+                                  <div class="text-center">
+                                      <div class="text-6xl mb-2">🎮</div>
+                                      <div class="text-xl font-bold text-white">EM BREVE</div>
+                                  </div>
+                              </div>
+                              <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-400 text-black text-xs font-bold rounded">
+                                  DEVELOPMENT
+                              </div>
+                          </div>
+                          <div class="p-4 flex-1 flex flex-col">
+                              <h3 class="text-lg font-bold mb-2 text-cyan-400 tracking-wider">PROJETO SECRETO #1</h3>
+                              <p class="text-gray-300 text-sm leading-relaxed flex-1">
+                                  Um RPG pixel art com elementos de anime e muito humor ácido. Prepare-se para reviravoltas!
+                              </p>
+                          </div>
+                      </div>
+                      <!-- Verso -->
+                      <div class="card-face card-back">
+                          <div class="p-4 h-full flex flex-col justify-between">
+                              <div class="flex-1">
+                                  <h3 class="text-lg font-bold mb-3 text-pink-500 tracking-wider">DETALHES DO PROJETO</h3>
+                                  <ul class="space-y-1.5 text-xs text-gray-300">
+                                      <li>• <span class="text-green-400 font-semibold">Gênero:</span> RPG/Adventure</li>
+                                      <li>• <span class="text-cyan-400 font-semibold">Estilo:</span> Pixel Art + Anime</li>
+                                      <li>• <span class="text-pink-500 font-semibold">Narrativa:</span> Humor ácido & Drama</li>
+                                      <li>• <span class="text-yellow-400 font-semibold">Plataformas:</span> PC, Mobile</li>
+                                      <li>• <span class="text-green-400 font-semibold">Status:</span> Pré-produção</li>
+                                  </ul>
+                                  <div class="mt-4 p-3 bg-gray-800/50 rounded border border-pink-500/30">
+                                      <div class="text-xs text-gray-400 mb-1">LANÇAMENTO PREVISTO:</div>
+                                      <div class="text-lg font-bold text-pink-500 glitch-text">2025</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Card 2 - ESTRUTURA CORRIGIDA -->
+              <div class="game-card" data-reveal>
+                  <div class="card-3d">
+                      <!-- Frente -->
+                      <div class="card-face card-front">
+                          <div class="relative h-52 overflow-hidden flex-shrink-0">
+                              <div class="absolute inset-0 bg-gradient-to-br from-pink-900 to-pink-600 flex items-center justify-center">
+                                  <div class="text-center">
+                                      <div class="text-6xl mb-2">✨</div>
+                                      <div class="text-xl font-bold text-white">CONCEITO</div>
+                                  </div>
+                              </div>
+                              <div class="absolute top-2 right-2 px-2 py-1 bg-purple-400 text-black text-xs font-bold rounded">
+                                  CONCEPT
+                              </div>
+                          </div>
+                          <div class="p-4 flex-1 flex flex-col">
+                              <h3 class="text-lg font-bold mb-2 text-pink-500 tracking-wider">LOST IN LINGO</h3>
+                              <p class="text-gray-300 text-sm leading-relaxed flex-1">
+                                Uma nova forma de se aprender idiomas!
+                              </p>
+                          </div>
+                      </div>
+                      <!-- Verso -->
+                      <div class="card-face card-back">
+                          <div class="p-4 h-full flex flex-col justify-between">
+                              <div class="flex-1">
+                                  <h3 class="text-lg font-bold mb-3 text-cyan-400 tracking-wider">VISÃO GERAL</h3>
+                                  <ul class="space-y-1.5 text-xs text-gray-300">
+                                      <li>• <span class="text-green-400 font-semibold">Gênero:</span>???</li>
+                                      <li>• <span class="text-cyan-400 font-semibold">Tema:</span> ???</li>
+                                      <li>• <span class="text-pink-500 font-semibold">Gameplay:</span> ???</li>
+                                      <li>• <span class="text-yellow-400 font-semibold">Arte:</span>Pixel Art + ???</li>
+                                      <li>• <span class="text-green-400 font-semibold">Status:</span> Conceito</li>
+                                  </ul>
+                                  <div class="mt-4 p-3 bg-gray-800/50 rounded border border-cyan-400/30">
+                                      <div class="text-xs text-gray-400 mb-1">FASE DE DESENVOLVIMENTO:</div>
+                                      <div class="text-lg font-bold text-cyan-400 glitch-text">IDEAÇÃO</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Card 3 - ESTRUTURA CORRIGIDA -->
+              <div class="game-card" data-reveal>
+                  <div class="card-3d">
+                      <!-- Frente -->
+                      <div class="card-face card-front">
+                          <div class="relative h-52 overflow-hidden flex-shrink-0">
+                              <div class="absolute inset-0 bg-gradient-to-br from-green-900 to-green-600 flex items-center justify-center">
+                                  <div class="text-center">
+                                      <div class="text-6xl mb-2">🚀</div>
+                                      <div class="text-xl font-bold text-white">EM PLANEJAMENTO</div>
+                                  </div>
+                              </div>
+                              <div class="absolute top-2 right-2 px-2 py-1 bg-green-400 text-black text-xs font-bold rounded">
+                                  FUTURE
+                              </div>
+                          </div>
+                          <div class="p-4 flex-1 flex flex-col">
+                              <h3 class="text-lg font-bold mb-2 text-green-400 tracking-wider">PRÓXIMO NÍVEL</h3>
+                              <p class="text-gray-300 text-sm leading-relaxed flex-1">
+                                  Mais aventuras estão por vir! Acompanhe nossas redes para novidades sobre futuros projetos.
+                              </p>
+                          </div>
+                      </div>
+                      <!-- Verso -->
+                      <div class="card-face card-back">
+                          <div class="p-4 h-full flex flex-col justify-center text-center">
+                              <div>
+                                  <h3 class="text-xl font-bold mb-3 text-yellow-400 tracking-wider glitch-text">STAY TUNED</h3>
+                                  <p class="text-gray-300 mb-4 leading-relaxed text-sm">
+                                      Estamos sempre explorando novas ideias e mecânicas inovadoras. 
+                                      <span class="text-pink-500 font-bold">Sua opinião importa!</span>
+                                  </p>
+                                  <div class="space-y-2 text-xs">
+                                      <div class="text-cyan-400">📱 Siga no TikTok e Instagram</div>
+                                      <div class="text-green-400">💌 Envie suas ideias</div>
+                                      <div class="text-pink-500">🎮 Faça parte da jornada</div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="w-full flex flex-col items-center justify-center text-center mt-16">
+              <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed text-center">
+                  Quer acompanhar o desenvolvimento dos nossos jogos? <span class="text-cyan-400 font-bold">Conecte-se conosco!</span>
+              </p>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mx-auto">
+                  <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" 
+                    class="clip-path-button px-8 py-3 border-2 border-pink-500 hover:bg-pink-500 hover:text-black text-white font-bold tracking-widest transition-all duration-300">
+                      TIKTOK
+                  </a>
+                  <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer"
+                    class="clip-path-button px-8 py-3 border-2 border-cyan-400 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300">
+                      INSTAGRAM
+                  </a>
+              </div>
+          </div>
+
+          <div class="absolute top-10 right-8 w-4 h-4 bg-green-400 animate-pulse pixel-art"></div>
+          <div class="absolute bottom-10 left-8 w-3 h-3 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+          <div class="absolute top-1/2 right-4 w-2 h-8 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+      </div>
   </section>
 
   <!-- VALUES -->
-  <section id="values" class="section-fill section-divider">
-    <div class="container">
-      <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">NOSSOS VALORES</h3>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-6 border-2 border-cyan-400 bg-gray-900/50">
-          <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400">CRIATIVIDADE</h4>
-          <p class="leading-relaxed">Cada jogo é uma nova oportunidade de inovar e surpreender.</p>
-        </div>
-        <div class="p-6 border-2 border-pink-500 bg-gray-900/50">
-          <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500">QUALIDADE</h4>
-          <p class="leading-relaxed">Preferimos lançar menos jogos, mas com qualidade excepcional.</p>
-        </div>
-        <div class="p-6 border-2 border-green-400 bg-gray-900/50">
-          <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400">COMUNIDADE</h4>
-          <p class="leading-relaxed">Construímos experiências colaborativas com nossa comunidade.</p>
-        </div>
+  <section id="values" class="section-fill section-divider z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800" data-reveal data-reveal-from="top" data-reveal-dur="slow">
+      <div class="max-w-6xl mx-auto">
+          <h3 class="text-3xl md:text-5xl font-bold text-center mb-16 text-pink-500" style="text-shadow: 2px 0 #00ff00, -2px 0 #00ffff;">NOSSOS VALORES</h3>
+          <div class="grid md:grid-cols-3 gap-8" id="values-grid">
+              <div class="group p-6 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                  <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-400 group-hover:text-black tracking-wider">CRIATIVIDADE</h4>
+                  <p class="leading-relaxed font-medium group-hover:text-black">Cada jogo é uma nova oportunidade de inovar e surpreender, explorando territórios inexplorados da imaginação com pixel art única.</p>
+              </div>
+              <div class="group p-6 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                  <h4 class="text-xl md:text-2xl font-bold mb-4 text-pink-500 group-hover:text-black tracking-wider">QUALIDADE</h4>
+                  <p class="leading-relaxed font-medium group-hover:text-black">Preferimos lançar menos jogos, mas com uma qualidade excepcional que honre o tempo investido pelos jogadores.</p>
+              </div>
+              <div class="group p-6 border-2 border-green-400 bg-gray-900/50 hover:bg-green-400 hover:text-black transition-all duration-500 hover:transform hover:scale-105 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                  <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-400 group-hover:text-black tracking-wider">COMUNIDADE</h4>
+                  <p class="leading-relaxed font-medium group-hover:text-black">Construímos jogos junto com nossa comunidade, ouvindo feedback e criando experiências verdadeiramente colaborativas.</p>
+              </div>
+          </div>
       </div>
-    </div>
   </section>
 
-  <!-- CONTACT -->
-  <section id="contact" class="section-fill section-divider">
-    <div class="container">
-      <div class="text-center mb-16">
-        <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
-        <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-          Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
-          <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-16 items-center">
-        <div class="space-y-8">
-          <div class="text-center md:text-left">
-            <h4 class="text-2xl md:text-3xl font-bold mb-6 text-pink-500 tracking-wider">VAMOS CONVERSAR</h4>
-            <div class="space-y-6">
-              <div class="group p-6 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden">
-                <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL</div>
-                <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300">
-                  wesley@bitinverso.com
-                </a>
-              </div>
-              <div class="space-y-4">
-                <div class="text-lg font-bold text-gray-400 tracking-wider">OU NOS SIGA:</div>
-                <div class="flex flex-col sm:flex-row gap-4">
-                  <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
-                    <span class="text-pink-500 group-hover:text-black">@bitinverso</span> no TikTok
-                  </a>
-                  <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
-                    <span class="text-cyan-400 group-hover:text-black">@bitinverso</span> no Instagram
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="relative">
-            <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
-              <div class="relative flex items-center justify-center h-64 md:h-80">
-                <div class="text-center">
-                  <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
-                  <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
-                  <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
-                </div>
-              </div>
-            </div>
-            <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse"></div>
-            <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse" style="animation-delay: 1s;"></div>
-            <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse" style="animation-delay: 2s;"></div>
-          </div>
+  <section id="contact" class="relative z-10 py-20 px-6 md:px-12 lg:px-24 border-t-2 border-gray-800" data-reveal data-reveal-from="down" data-reveal-dur="slow">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+            <h3 class="text-3xl md:text-5xl font-bold mb-8 text-yellow-400" style="text-shadow: 2px 0 #ff00ff, -2px 0 #00ff00;">ENTRE EM CONTATO</h3>
+            <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
+                <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
+            </p>
         </div>
-      </div>
 
-      <div class="text-center mt-16">
-        <p class="text-gray-400 mb-6 text-lg leading-relaxed">Respondemos a todos os e-mails! Pode levar um tempo, mas valorizamos cada mensagem.</p>
-        <a href="mailto:wesley@bitinverso.com?subject=Olá, Bit Inverso!" class="inline-block px-12 py-4 border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button">ENVIAR EMAIL</a>
-      </div>
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div class="text-center md:text-left">
+                    <h4 class="text-2xl md:text-3xl font-bold mb-6 text-pink-500 tracking-wider">VAMOS CONVERSAR</h4>
+                    <div class="space-y-6">
+                        <div class="group p-6 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art"></div>
+                            <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL</div>
+                            <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300">
+                                wesley@bitinverso.com
+                            </a>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="text-lg font-bold text-gray-400 tracking-wider">OU NOS SIGA:</div>
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-pink-500 bg-gray-900/50 hover:bg-pink-500 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                                    <span class="text-pink-500 group-hover:text-black">@bitinverso</span> no TikTok
+                                </a>
+                                <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" class="group px-6 py-3 border-2 border-cyan-400 bg-gray-900/50 hover:bg-cyan-400 hover:text-black text-white font-bold tracking-wider transition-all duration-300 text-center">
+                                    <span class="text-cyan-400 group-hover:text-black">@bitinverso</span> no Instagram
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <div class="bg-gray-900 border-4 border-yellow-400 p-8 md:p-12 relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-10">
+                        <div class="grid grid-cols-6 gap-1 h-full" id="contact-pixel-pattern"></div>
+                    </div>
+                    <div class="relative flex items-center justify-center h-64 md:h-80">
+                        <div class="text-center">
+                            <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text">@</div>
+                            <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest">CONECTE-SE CONOSCO</div>
+                            <div class="mt-6 text-sm text-gray-500 font-mono">Pixel art • Anime • Indie Games</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse pixel-art"></div>
+                <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
+                <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+            </div>
+        </div>
+
+        <div class="text-center mt-16">
+            <p class="text-gray-400 mb-6 text-lg leading-relaxed">Respondemos a todos os e-mails! Pode levar um tempo, mas valorizamos cada mensagem.</p>
+            <a href="mailto:wesley@bitinverso.com?subject=Olá, Bit Inverso!" class="inline-block px-12 py-4 border-2 border-yellow-400 hover:bg-yellow-400 hover:text-black text-white font-bold tracking-widest transition-all duration-300 transform hover:scale-105 clip-path-button">ENVIAR EMAIL</a>
+        </div>
     </div>
   </section>
-
   <!-- FOOTER -->
   <footer class="py-12 px-6 border-t-4 border-gray-800 text-center">
     <div class="text-2xl md:text-3xl font-bold mb-4 glitch-text">BIT INVERSO</div>
@@ -392,11 +759,43 @@
     function setNavHeightVar(){
       const h = $('.navbar')?.offsetHeight || 80;
       document.documentElement.style.setProperty('--nav-h', h + 'px');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                if (entry.target.id === 'about-text') entry.target.classList.remove('opacity-0', '-translate-x-20');
+            }
+          });
+        });
+
+        const aboutText = document.getElementById('about-text');
+        const aboutLogo = document.getElementById('about-logo');
+        if (aboutText) observer.observe(aboutText);
+        if (aboutLogo) observer.observe(aboutLogo);
+
+        const pixelPattern = document.getElementById('pixel-pattern');
+        if (pixelPattern) {
+            for (let i = 0; i < 64; i++) {
+                const pixel = document.createElement('div');
+                const colors = ['bg-cyan-400', 'bg-pink-500', 'bg-green-400'];
+                pixel.className = colors[i % 3];
+                pixelPattern.appendChild(pixel);
+            }
+        }
+        const contactPixelPattern = document.getElementById('contact-pixel-pattern');
+        if (contactPixelPattern) {
+            for (let i = 0; i < 36; i++) {
+                const pixel = document.createElement('div');
+                const colors = ['bg-yellow-400', 'bg-pink-500', 'bg-cyan-400'];
+                pixel.className = colors[i % 3];
+                contactPixelPattern.appendChild(pixel);
+            }
+        }
     }
     window.addEventListener('resize', setNavHeightVar);
     document.addEventListener('DOMContentLoaded', setNavHeightVar);
 
-    // fallback de 100vh no mobile/“modo desktop”
+    // 100vh confiável em mobile (preenche --vh)
     (function fixViewportHeight(){
       const setVH = () => {
         const h = (window.visualViewport && window.visualViewport.height)
@@ -423,7 +822,6 @@
       ham.addEventListener('click', open);
       menu.addEventListener('click', (e)=>{ if(e.target.closest('[data-close]')) close(); });
       document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
-      // expõe para onclick inline (fallback)
       window.closeMobileMenu = close;
     })();
 
@@ -448,33 +846,237 @@
           } else { try{ video.pause(); }catch{} }
         });
       }, { threshold:[0,.4,.6,1]});
-      io.observe($('#home'));
+      io.observe($('.hero-viewport'));
       document.addEventListener('visibilitychange', ()=>{ if (document.hidden) try{video.pause()}catch{}; });
       video.addEventListener('canplay', ()=>{ if(!document.hidden) video.play().catch(()=>{}); }, {once:true});
     })();
 
-    // carrossel
+    // mede CTAs + dots e sincroniza --hero-ui-gap
+    (function syncHeroGap(){
+      const root = document.documentElement;
+      const cta  = document.querySelector('.hero-ui .cta-stack');
+      const dots = document.querySelector('.hero-ui .carousel-indicators');
+      if(!cta || !dots) return;
+
+      function measure(){
+        const h = Math.ceil(cta.getBoundingClientRect().height + dots.getBoundingClientRect().height + 16);
+        root.style.setProperty('--hero-ui-gap', Math.max(0, h) + 'px');
+      }
+      window.addEventListener('load', measure);
+      window.addEventListener('resize', measure);
+      new ResizeObserver(measure).observe(cta);
+      new ResizeObserver(measure).observe(dots);
+      measure();
+    })();
+
+    // === Scroll Reveal genérico ===============================================
+    (function scrollReveal(){
+      const els = Array.from(document.querySelectorAll('[data-reveal]'));
+      if (!els.length) return;
+
+      const byGroup = new Map(); // agrupa para stagger
+      els.forEach(el => {
+        const g = el.dataset.revealGroup || '_solo';
+        if (!byGroup.has(g)) byGroup.set(g, []);
+        byGroup.get(g).push(el);
+      });
+
+      // garante ordem estável dentro do grupo (DOM order)
+      for (const [g, arr] of byGroup) byGroup.set(g, arr.sort((a,b) =>
+        a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+      ));
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const el = entry.target;
+          if (!entry.isIntersecting) return;
+
+          // base delay do elemento
+          const base = Number(el.dataset.revealDelay || 0);
+
+          // stagger por grupo
+          let extra = 0;
+          const g = el.dataset.revealGroup;
+          if (g && byGroup.has(g)) {
+            const index = byGroup.get(g).indexOf(el);
+            const step = Number(el.dataset.revealStagger || 80); // ms
+            extra = Math.max(0, index) * step;
+          }
+
+          // aplica visibilidade com atraso calculado
+          setTimeout(() => el.classList.add('is-visible'), base + extra);
+
+          // anima apenas uma vez
+          io.unobserve(el);
+        });
+      }, {
+        threshold: 0.2,
+        rootMargin: '0px 0px -10% 0px'
+      });
+
+      els.forEach(el => io.observe(el));
+    })();
+
+    // Sistema de Flip Cards - UM ATIVO POR VEZ
+    (function gamesFlip(){
+      const cards = Array.from(document.querySelectorAll('.game-card'));
+      if (!cards.length) return;
+
+      const supportsHover = window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+      
+      let activeCard = null;
+      let isAnimating = false;
+
+      function setActiveCard(targetCard) {
+        if (isAnimating) return;
+        
+        isAnimating = true;
+        
+        // Se já é o card ativo, desativa (volta para front)
+        if (activeCard === targetCard) {
+          activeCard.classList.remove('is-flipped');
+          activeCard = null;
+        } else {
+          // Desativa o card anterior se existir
+          if (activeCard) {
+            activeCard.classList.remove('is-flipped');
+          }
+          // Ativa o novo card
+          if (targetCard) {
+            targetCard.classList.add('is-flipped');
+            activeCard = targetCard;
+          } else {
+            activeCard = null;
+          }
+        }
+        
+        setTimeout(() => {
+          isAnimating = false;
+        }, 750);
+      }
+
+      function resetAllCards() {
+        if (isAnimating) return;
+        
+        isAnimating = true;
+        cards.forEach(card => card.classList.remove('is-flipped'));
+        activeCard = null;
+        
+        setTimeout(() => {
+          isAnimating = false;
+        }, 750);
+      }
+
+      cards.forEach(card => {
+        if (supportsHover) {
+          // DESKTOP: hover para ativar, mouseleave global para resetar
+          card.addEventListener('mouseenter', () => {
+            setActiveCard(card);
+          });
+          
+          // Click como fallback
+          card.addEventListener('click', (e) => {
+            const isBtn = e.target.closest('a,button');
+            if (isBtn) return;
+            e.preventDefault();
+            setActiveCard(card);
+          });
+        } else {
+          // MOBILE: click para toggle
+          card.addEventListener('click', (e) => {
+            const isBtn = e.target.closest('a,button');
+            if (isBtn) return;
+            e.preventDefault();
+            setActiveCard(card);
+          });
+        }
+      });
+
+      // DESKTOP: mouse sai da área dos cards = reset todos
+      if (supportsHover) {
+        const gamesSection = document.getElementById('games');
+        if (gamesSection) {
+          gamesSection.addEventListener('mouseleave', resetAllCards);
+        }
+      }
+
+      // MOBILE: toque fora dos cards = reset todos
+      if (!supportsHover) {
+        document.addEventListener('click', (e) => {
+          const clickedCard = e.target.closest('.game-card');
+          if (!clickedCard) {
+            resetAllCards();
+          }
+        });
+      }
+    })();
+
+    // carrossel + autoplay com reset em interação do usuário
     const track  = $('#carouselTrack');
     const slides = $$('.carousel-item', track);
     const dots   = $$('#carouselIndicators .carousel-indicator');
+
     let index = 0;
 
+    // --- autoplay helpers
+    const AUTO_MS = 6000;
+    let auto = null;
+
+    function startAuto() {
+      stopAuto();
+      auto = setInterval(() => nextSlide(false), AUTO_MS); // false = não resetar (chamada automática)
+    }
+    function stopAuto() {
+      if (auto !== null) { clearInterval(auto); auto = null; }
+    }
+    function resetAuto() {
+      startAuto();
+    }
+
+    // --- nav
     function updateCarousel(){
       const offset = -index * 100;
-      track.style.transform = `translateX(${offset}%)`;
+      track.style.transform = `translate3d(${offset}%, 0, 0)`;
       dots.forEach((d,i)=> d.classList.toggle('active', i===index));
     }
-    function goToSlide(i){ index = (i + slides.length) % slides.length; updateCarousel(); }
-    function nextSlide(){ goToSlide(index + 1); }
-    function prevSlide(){ goToSlide(index - 1); }
+    function goToSlide(i){
+      index = (i + slides.length) % slides.length;
+      updateCarousel();
+    }
 
-    let auto = setInterval(nextSlide, 6000);
+    // userInitiated = true por padrão; quando for autoplay, passamos false
+    function nextSlide(userInitiated = true){
+      goToSlide(index + 1);
+      if (userInitiated) resetAuto();
+    }
+    function prevSlide(userInitiated = true){
+      goToSlide(index - 1);
+      if (userInitiated) resetAuto();
+    }
+
+    // inicia autoplay
+    startAuto();
+
+    // pausa/retoma ao trocar de aba
     document.addEventListener('visibilitychange', ()=>{
-      if (document.hidden) { clearInterval(auto); }
-      else { auto = setInterval(nextSlide, 6000); }
+      if (document.hidden) stopAuto();
+      else startAuto();
     });
 
-    // expõe para HTML
+    // garante reset em qualquer interação do usuário:
+    // 1) setas (mantém seus onclick existentes)
+    $('.carousel-prev')?.addEventListener('click', () => resetAuto());
+    $('.carousel-next')?.addEventListener('click', () => resetAuto());
+
+    // 2) indicadores (mesmo com onclick inline em cada dot)
+    $('#carouselIndicators')?.addEventListener('click', (e) => {
+      if (e.target?.classList?.contains('carousel-indicator')) {
+        // o onclick inline ainda chama goToSlide(n); aqui só garantimos o reset
+        resetAuto();
+      }
+    });
+
+    // expõe no window (mantendo compat com seus onclicks no HTML)
     window.goToSlide = goToSlide;
     window.nextSlide = nextSlide;
     window.prevSlide = prevSlide;
