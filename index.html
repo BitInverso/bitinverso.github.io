@@ -37,6 +37,7 @@
   <link rel="preload" as="image" href="assets/hero-poster.webp" />
   <!-- Tailwind (dev) -->
   <noscript></noscript>
+  <link rel="preload" href="assets/hero-background.webm" as="video" type="video/webm">
 </head>
 <body class="min-h-screen bg-black text-white relative overflow-x-hidden">
   <!-- Pixel Grid Background -->
@@ -85,7 +86,7 @@
         <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
                preload="metadata" poster="assets/hero-poster.webp"
                data-src-webm="assets/hero-background.webm"
-               data-src-mp4="assets/hero-background.mp4"></video>
+               data-src-mp4="assets/hero-background.mp4" fetchpriority="high"></video>
         <div class="hero-overlay"></div>
       </div>
       <div class="carousel container" id="heroCarousel">
@@ -725,5 +726,6 @@
     </div>
   </footer>
   <script src="assets/scripts.min.js" defer></script>
+<script>if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));}</script>
 </body>
 </html>
