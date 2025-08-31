@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+<<<<<<< Updated upstream
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -30,6 +31,20 @@ jobs:
       - name: Optimize (idempotent)
         run: |
           python tools/build.py
+=======
+      - name: Setup Node & Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps (Node + Python)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pillow
+          npm ci
+      - name: Build Tailwind CSS
+        run: |
+          npm run build --if-present && python tools/build.py
+>>>>>>> Stashed changes
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

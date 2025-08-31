@@ -1,0 +1,10 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utilities (safe) */
+@layer utilities {
+  .contain-paint { contain: paint; }
+  .backface-hidden { backface-visibility: hidden; }
+}

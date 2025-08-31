@@ -1,0 +1,16 @@
+{
+  "name": "video-loop-page",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.config.js -i ./src/tailwind.css -o ./assets/tailwind.min.css --minify",
+    "dev:css": "tailwindcss -c tailwind.config.js -i ./src/tailwind.css -o ./assets/tailwind.css --watch",
+    "build": "npm run build:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.10",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.45",
+    "cssnano": "^7.0.6"
+  }
+}
