@@ -58,3 +58,12 @@
   .carousel-indicators { min-height: 20px; }
 }
 
+
+
+@layer components {
+  .hero-viewport { contain: layout paint; }
+  .hero-media-wrapper { aspect-ratio: 2000/2000; }
+  .hero-video { width:100%; height:100%; object-fit:cover; }
+  .cta-stack { min-height: 96px; }
+  .carousel-indicators { min-height: 20px; }
+}
