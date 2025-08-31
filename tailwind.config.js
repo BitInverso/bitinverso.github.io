@@ -7,7 +7,14 @@ module.exports = {
     "./**/*.js"
   ],
   theme: {
-    extend: {}
+    extend: {},
+  safelist: [
+    'glitch-text',
+    'navbar',
+    'hero-viewport',
+    'hero-video',
+    'hero-overlay'
+  ]
   },
   corePlugins: {
     preflight: true
