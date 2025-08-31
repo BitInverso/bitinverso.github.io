@@ -64,13 +64,12 @@
       position:relative;
       isolation:isolate;
       overflow:hidden;
-      padding-top:0; /* sem padding que bagunça o centro */
+      padding-top:0;
       min-height:100vh;
     }
     @supports (height: 100svh){ #home{ min-height:100svh; } }
     @supports (height: 100dvh){ #home{ min-height:100dvh; } }
 
-    /* viewport = altura da tela - navbar */
     .hero-viewport{
       position:relative;
       height: calc(var(--vh, 100vh) - var(--nav-h));
@@ -95,8 +94,6 @@
     .carousel{ position:relative; width:100%; height:100%; overflow:hidden; }
     .carousel-track{ display:flex; height:100%; transition: transform 600ms ease; will-change: transform; }
     .carousel-item{ flex:0 0 100%; min-width:100%; height:100%; }
-
-    /* Slide centralizado no "miolo": 100% - hero-ui-gap */
     .hero-slide{
       height: calc(100% - var(--hero-ui-gap));
       display:flex; flex-direction:column; justify-content:center; align-items:center;
@@ -105,7 +102,6 @@
     .hero-slide h1{ margin-bottom:.5rem; }
     .hero-slide h2{ margin-bottom:.75rem; }
 
-    /* Setas */
     .carousel-nav-btn{
       position:absolute;
       top: calc(50% - var(--hero-ui-gap)/2);
@@ -119,7 +115,6 @@
     .carousel-next{ right:1rem; }
     .carousel-nav-btn:hover{ background:rgba(0,0,0,.6); box-shadow:0 0 24px rgba(6,182,212,.35); }
 
-    /* UI fixa (CTAs + dots) no rodapé do hero */
     .hero-ui{
       position:absolute; inset:0; z-index:30;
       display:grid; grid-template-rows:1fr auto auto;
@@ -170,13 +165,10 @@
     }
     a.btn-diag:hover{ transform:translateY(-2px); box-shadow:0 0 0 4px rgba(0,229,255,.15), 0 10px 30px rgba(255,45,170,.25); color:#fff; }
 
-    /* Glows decorativos */
     .glow { position: absolute; border-radius: 9999px; filter: blur(40px); opacity: .18; }
 
-    /* Scroll margin só onde precisa (ÂNCORAS) */
     #about, #games, #values, #contact { scroll-margin-top: var(--nav-h); }
 
-    /* === Scroll Reveal ======================================================= */
     [data-reveal]{ opacity:0; transform: translateY(16px) scale(.985); transition: transform .8s cubic-bezier(.22,.61,.36,1), opacity .8s ease; will-change: transform, opacity; }
     [data-reveal].is-visible{ opacity:1; transform:none; }
     [data-reveal-from="up"]     { transform: translateY(22px); }
@@ -187,270 +179,125 @@
     [data-reveal][data-reveal-dur="fast"] { transition-duration: .5s; }
     [data-reveal][data-reveal-dur="slow"] { transition-duration: 1.2s; }
 
-    /* GAMES CARDS - Flip 3D com animações fancy */
-    .game-card {
-      position: relative; 
-      height: 400px;
-      perspective: 1000px; 
-      cursor: pointer;
-      border: 2px solid transparent; 
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border-radius: 12px;
-      overflow: hidden;
-      transform: translateY(0);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-
-    /* Ajustes responsivos para altura */
+    .game-card { position: relative; height: 400px; perspective: 1000px; cursor: pointer; border: 2px solid transparent; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 12px; overflow: hidden; transform: translateY(0); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
     @media (min-width: 768px) { .game-card { height: 450px; } }
     @media (min-width: 1024px) { .game-card { height: 500px; } }
     @media (min-width: 1440px) { .game-card { height: 560px; } }
     @media (min-width: 2560px) { .game-card { height: 620px; } }
-
-    .game-card:hover { 
-      border-color: rgba(6,182,212,0.8);
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 
-        0 0 30px rgba(6,182,212,0.4),
-        0 20px 40px rgba(0,0,0,0.4);
-    }
-
-    .card-3d {
-      position: relative; 
-      width: 100%; 
-      height: 100%;
-      transform-style: preserve-3d; 
-      transition: transform 0.8s cubic-bezier(0.23, 1, 0.320, 1);
-      will-change: transform;
-    }
-
-    .game-card.is-flipped .card-3d { 
-      transform: rotateY(180deg); 
-    }
-
-    .card-face {
-      position: absolute; 
-      inset: 0; 
-      backface-visibility: hidden;
-      border: 2px solid; 
-      overflow: hidden;
-      background: rgba(17,24,39,0.95); 
-      backdrop-filter: blur(12px);
-      display: flex; 
-      flex-direction: column;
-      border-radius: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .card-front { 
-      border-color: #06b6d4;
-      background: linear-gradient(135deg, rgba(17,24,39,0.98), rgba(30,41,59,0.95));
-    }
-
-    .card-back { 
-      border-color: #ec4899; 
-      transform: rotateY(180deg);
-      background: linear-gradient(135deg, rgba(17,24,39,0.98), rgba(40,30,50,0.95));
-    }
-
-    /* Header dos cards - SEM gradiente */
-    .card-header {
-      background: rgba(30,41,59,0.9);
-      border-bottom: 1px solid rgba(6,182,212,0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(6,182,212,0.1), transparent);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { left: -100%; }
-      50% { left: -100%; }
-      100% { left: 100%; }
-    }
-
-    /* Animações de entrada para elementos internos */
-    .card-content {
-      animation: fadeInUp 0.6s ease-out;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Efeito de floating nos ícones */
-    .floating-icon {
-      animation: floating 3s ease-in-out infinite;
-    }
-
-    @keyframes floating {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    /* Texto com efeito de escrita */
-    .typewriter {
-      overflow: hidden;
-      white-space: nowrap;
-      animation: typing 2s steps(20, end), blink-caret 0.75s step-end infinite;
-    }
-
-    @keyframes typing {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-
-    @keyframes blink-caret {
-      from, to { border-color: transparent; }
-      50% { border-color: #06b6d4; }
-    }
-
-    /* Pulso suave nos badges */
-    .pulse-badge {
-      animation: pulseBadge 2s ease-in-out infinite;
-    }
-
-    @keyframes pulseBadge {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.8; }
-    }
-
-    /* Efeito de neon nos títulos */
-    .neon-text {
-      animation: neonGlow 2s ease-in-out infinite alternate;
-    }
-
-    @keyframes neonGlow {
-      from {
-        text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
-      }
-      to {
-        text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor;
-      }
-    }
-
-    /* Melhorias responsivas */
-    @media (min-width: 1440px) {
-      .card-face .p-4 { padding: 1.5rem; }
-      .card-face h3 { font-size: 1.25rem; margin-bottom: 1rem; }
-      .card-face p, .card-face li { font-size: 0.925rem; line-height: 1.6; }
-      .card-back ul { margin-bottom: 1.5rem; }
-      .card-back .mt-4 { margin-top: 1.5rem; padding: 1rem; }
-    }
-
-    /* NOVAS ANIMAÇÕES PARA SEÇÕES */
-    .slide-in-left {
-      animation: slideInLeft 1s ease-out;
-    }
-    
-    @keyframes slideInLeft {
-      from {
-        opacity: 0;
-        transform: translateX(-50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .pulse-grow {
-      animation: pulseGrow 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseGrow {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    .rotate-slow {
-      animation: rotateSlow 20s linear infinite;
-    }
-
-    @keyframes rotateSlow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .fade-in-scale {
-      animation: fadeInScale 0.8s ease-out;
-    }
-
-    @keyframes fadeInScale {
-      from {
-        opacity: 0;
-        transform: scale(0.9);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* Animação de progresso */
-    .progress-bar {
-      position: relative;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 4px;
-      background: linear-gradient(90deg, #06b6d4, #ec4899, #10b981);
-      border-radius: 10px;
-      transform-origin: left;
-      animation: progressFill 2s ease-out;
-    }
-
-    @keyframes progressFill {
-      from { transform: scaleX(0); }
-      to { transform: scaleX(1); }
-    }
-
-    /* Efeito de scan line */
-    .scan-line {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .scan-line::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #00ffff, transparent);
-      animation: scanLine 3s infinite;
-    }
-
-    @keyframes scanLine {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
-    /* Espaçamento padrão das seções (sem min-height gigante) */
+    .game-card:hover { border-color: rgba(6,182,212,0.8); transform: translateY(-8px) scale(1.02); box-shadow: 0 0 30px rgba(6,182,212,0.4), 0 20px 40px rgba(0,0,0,0.4); }
+    .card-3d { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.23, 1, 0.320, 1); will-change: transform; }
+    .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
+    .card-face { position: absolute; inset: 0; backface-visibility: hidden; border: 2px solid; overflow: hidden; background: rgba(17,24,39,0.95); backdrop-filter: blur(12px); display: flex; flex-direction: column; border-radius: 10px; transition: all 0.3s ease; }
+    .card-front { border-color: #06b6d4; background: linear-gradient(135deg, rgba(17,24,39,0.98), rgba(30,41,59,0.95)); }
+    .card-back { border-color: #ec4899; transform: rotateY(180deg); background: linear-gradient(135deg, rgba(17,24,39,0.98), rgba(40,30,50,0.95)); }
+    .card-header { background: rgba(30,41,59,0.9); border-bottom: 1px solid rgba(6,182,212,0.3); position: relative; overflow: hidden; }
+    .card-header::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(6,182,212,0.1), transparent); animation: shimmer 3s infinite; }
+    @keyframes shimmer { 0% { left: -100%; } 50% { left: -100%; } 100% { left: 100%; } }
+    .card-content { animation: fadeInUp 0.6s ease-out; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .floating-icon { animation: floating 3s ease-in-out infinite; }
+    @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .typewriter { overflow: hidden; white-space: nowrap; animation: typing 2s steps(20, end), blink-caret 0.75s step-end infinite; }
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    @keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: #06b6d4; } }
+    .pulse-badge { animation: pulseBadge 2s ease-in-out infinite; }
+    @keyframes pulseBadge { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+    .neon-text { animation: neonGlow 2s ease-in-out infinite alternate; }
+    @keyframes neonGlow { from { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor; } to { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; } }
+    @media (min-width: 1440px) { .card-face .p-4 { padding: 1.5rem; } .card-face h3 { font-size: 1.25rem; margin-bottom: 1rem; } .card-face p, .card-face li { font-size: 0.925rem; line-height: 1.6; } .card-back ul { margin-bottom: 1.5rem; } .card-back .mt-4 { margin-top: 1.5rem; padding: 1rem; } }
+    .slide-in-left { animation: slideInLeft 1s ease-out; }
+    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+    .pulse-grow { animation: pulseGrow 3s ease-in-out infinite; }
+    @keyframes pulseGrow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    .rotate-slow { animation: rotateSlow 20s linear infinite; }
+    @keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .fade-in-scale { animation: fadeInScale 0.8s ease-out; }
+    @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .progress-bar { position: relative; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 4px; background: linear-gradient(90deg, #06b6d4, #ec4899, #10b981); border-radius: 10px; transform-origin: left; animation: progressFill 2s ease-out; }
+    @keyframes progressFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .scan-line { position: relative; overflow: hidden; }
+    .scan-line::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #00ffff, transparent); animation: scanLine 3s infinite; }
+    @keyframes scanLine { 0% { left: -100%; } 100% { left: 100%; } }
     #about, #games, #values, #contact{ padding-block: clamp(56px, 8vh, 96px); border-top: 2px solid #1f2937; }
-
-    /* Menu mobile acima de tudo */
     #mobile-menu{ z-index: 9999; }
+
+    /* ====== FIX: decorativos do #contact sem vazamento em mobile ====== */
+    .contact-panel { position: relative; }
+
+    .contact-deco {
+      position: absolute;
+      pointer-events: none;
+      will-change: transform;
+      contain: layout paint; /* não influencia fora do painel */
+    }
+    .contact-deco.br { top: -0.25rem; right: 0; transform: translateX(0.375rem); }
+    .contact-deco.bl { bottom: -0.25rem; left: 0; transform: translateX(-0.5rem); }
+    .contact-deco.ml { top: 50%; left: 0; transform: translate(-0.25rem, -50%); }
+    .contact-deco.br { width: 1.5rem; height: 1.5rem; }
+    .contact-deco.bl { width: 1rem;  height: 1rem;  }
+    .contact-deco.ml { width: 0.75rem; height: 3rem; }
+    @media (min-width: 768px){
+      .contact-deco.br { right: -0.5rem; transform: none; }
+      .contact-deco.bl { left:  -0.5rem; transform: none; }
+      .contact-deco.ml { left:  -0.25rem; transform: translateY(-50%); }
+    }
+
+    /* ===================== CONTACT: LAYOUT ROBUSTO ===================== */
+    /* Evita quebra/estouro de elementos internos apenas nesta seção */
+    #contact * { min-width: 0; }
+
+    /* Grid controlado para o contact: 1 coluna no mobile; 1fr + painel fixo em desktop */
+    .contact-grid{
+      display: grid;
+      gap: 4rem; /* ~gap-16 */
+      align-items: start;
+      grid-template-columns: 1fr; /* mobile */
+    }
+    @media (min-width: 1024px){
+      .contact-grid{
+        grid-template-columns: minmax(0,1fr) minmax(0, 560px); /* conteúdo + painel com limite */
+        gap: 4rem;
+      }
+    }
+
+    /* Painel direito com largura máxima e sem overflow */
+    .contact-right{
+      width: 100%;
+      max-width: 560px;
+      min-width: 0;
+      overflow: hidden; /* garante que nada vaze */
+      margin-inline: auto; /* centraliza quando vira 1 coluna */
+    }
+
+    /* Cartão/terminal: segura conteúdo e evita crescimento inesperado */
+    .contact-terminal{
+      display: block;
+      width: 100%;
+      max-width: 560px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    /* Email/links/textos longos nunca estouram */
+    .contact-wrap{
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    /* Grid das estatísticas: escala 1→2→3 colunas */
+    .contact-stats{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 480px){
+      .contact-stats{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (min-width: 768px){
+      .contact-stats{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    /* =================================================================== */
   </style>
 </head>
 <body class="min-h-screen bg-black text-white relative overflow-x-hidden">
@@ -541,12 +388,10 @@
           </div>
         </div>
 
-        <!-- Setas -->
         <button class="carousel-nav-btn carousel-prev" aria-label="Anterior" onclick="prevSlide()">‹</button>
         <button class="carousel-nav-btn carousel-next" aria-label="Próximo"  onclick="nextSlide()">›</button>
       </div>
 
-      <!-- CTAs e dots -->
       <div class="hero-ui">
         <div></div>
         <div class="cta-stack">
@@ -566,7 +411,6 @@
         </div>
       </div>
 
-      <!-- Pixel decor -->
       <div class="absolute top-1/4 left-4 md:left-10 animate-pulse">
         <div class="w-3 h-3 md:w-4 md:h-4 bg-cyan-400 shadow-lg pixel-art"></div>
       </div>
@@ -593,32 +437,24 @@
             <p class="text-base md:text-lg text-gray-400 fade-in-scale" style="animation-delay: 0.8s;">Cada pixel é crafteado com carinho para transportar você para universos extraordinários cheios de personalidade.</p>
           </div>
 
-          <!-- Estatísticas Expandidas -->
-          <div class="mt-12 grid grid-cols-3 gap-6 text-center">
+          <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div class="group border border-cyan-400 p-4 hover:bg-cyan-400 hover:text-black transition-all duration-300 pulse-grow">
               <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">1</div>
               <div class="text-xs tracking-widest font-bold">PROJETOS</div>
-              <div class="progress-bar mt-2">
-                <div class="progress-fill" style="width: 10%;"></div>
-              </div>
+              <div class="progress-bar mt-2"><div class="progress-fill" style="width: 10%;"></div></div>
             </div>
             <div class="group border border-pink-500 p-4 hover:bg-pink-500 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 0.5s;">
               <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">1</div>
               <div class="text-xs tracking-widest font-bold">ANO</div>
-              <div class="progress-bar mt-2">
-                <div class="progress-fill" style="width: 100%; animation-delay: 0.5s;"></div>
-              </div>
+              <div class="progress-bar mt-2"><div class="progress-fill" style="width: 100%; animation-delay: 0.5s;"></div></div>
             </div>
             <div class="group border border-green-400 p-4 hover:bg-green-400 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 1s;">
               <div class="text-3xl font-bold mb-2 group-hover:scale-110 transition-transform duration-300">∞</div>
               <div class="text-xs tracking-widest font-bold">PAIXÃO</div>
-              <div class="progress-bar mt-2">
-                <div class="progress-fill" style="width: 100%; animation-delay: 1s;"></div>
-              </div>
+              <div class="progress-bar mt-2"><div class="progress-fill" style="width: 100%; animation-delay: 1s;"></div></div>
             </div>
           </div>
 
-          <!-- Nossa Missão -->
           <div class="mt-16 p-6 bg-gradient-to-r from-gray-900/80 to-gray-800/80 border border-cyan-400/30 rounded-lg backdrop-blur-sm fade-in-scale" style="animation-delay: 1.2s;">
             <h3 class="text-xl font-bold text-cyan-400 mb-4 neon-text">NOSSA MISSÃO</h3>
             <p class="text-gray-300 leading-relaxed">
@@ -630,7 +466,6 @@
 
         <!-- Painel Lateral -->
         <div class="space-y-8">
-          <!-- Team Info -->
           <div class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 p-8 rounded-lg border border-pink-500/30 backdrop-blur-sm fade-in-scale" style="animation-delay: 1.4s;">
             <h3 class="text-2xl font-bold text-pink-500 mb-6 neon-text">EQUIPE CORE</h3>
             <div class="space-y-4">
@@ -658,30 +493,24 @@
             </div>
           </div>
 
-          <!-- Ferramentas -->
           <div class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 p-8 rounded-lg border border-green-400/30 backdrop-blur-sm fade-in-scale" style="animation-delay: 1.6s;">
             <h3 class="text-2xl font-bold text-green-400 mb-6 neon-text">TECH STACK</h3>
             <div class="grid grid-cols-2 gap-4">
               <div class="text-center p-3 bg-gray-800/50 rounded border border-gray-600 hover:border-cyan-400 transition-all duration-300">
-                <div class="text-2xl mb-1">🎮</div>
-                <div class="text-xs font-bold">GODOT</div>
+                <div class="text-2xl mb-1">🎮</div><div class="text-xs font-bold">GODOT</div>
               </div>
               <div class="text-center p-3 bg-gray-800/50 rounded border border-gray-600 hover:border-pink-500 transition-all duration-300">
-                <div class="text-2xl mb-1">🎨</div>
-                <div class="text-xs font-bold">ASEPRITE</div>
+                <div class="text-2xl mb-1">🎨</div><div class="text-xs font-bold">ASEPRITE</div>
               </div>
               <div class="text-center p-3 bg-gray-800/50 rounded border border-gray-600 hover:border-green-400 transition-all duration-300">
-                <div class="text-2xl mb-1">🔊</div>
-                <div class="text-xs font-bold">FMOD</div>
+                <div class="text-2xl mb-1">🔊</div><div class="text-xs font-bold">FMOD</div>
               </div>
               <div class="text-center p-3 bg-gray-800/50 rounded border border-gray-600 hover:border-yellow-400 transition-all duration-300">
-                <div class="text-2xl mb-1">📝</div>
-                <div class="text-xs font-bold">NOTION</div>
+                <div class="text-2xl mb-1">📝</div><div class="text-xs font-bold">NOTION</div>
               </div>
             </div>
           </div>
 
-          <!-- Filosofia -->
           <div class="bg-gradient-to-br from-gray-900/90 to-gray-800/90 p-8 rounded-lg border border-yellow-400/30 backdrop-blur-sm fade-in-scale" style="animation-delay: 1.8s;">
             <h3 class="text-2xl font-bold text-yellow-400 mb-4 neon-text">FILOSOFIA</h3>
             <blockquote class="text-gray-300 italic leading-relaxed border-l-4 border-yellow-400 pl-4">
@@ -693,7 +522,6 @@
         </div>
       </div>
 
-      <!-- Elementos Decorativos Animados -->
       <div class="absolute -top-2 -right-2 w-6 h-6 bg-cyan-400 animate-pulse pixel-art"></div>
       <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art rotate-slow"></div>
       <div class="absolute top-1/2 -right-1 w-3 h-12 bg-green-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
@@ -710,19 +538,15 @@
           </p>
 
           <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16" data-reveal-group="games" data-reveal-stagger="120">
-              <!-- Card 1 - ANIMAÇÕES FANCY -->
               <div class="game-card" data-reveal>
                   <div class="card-3d">
-                      <!-- Frente -->
                       <div class="card-face card-front">
                           <div class="card-header flex items-center justify-center h-52">
                               <div class="text-center card-content">
                                   <div class="text-6xl lg:text-7xl mb-4 floating-icon">🎮</div>
                                   <div class="text-xl lg:text-2xl font-bold text-white neon-text">EM BREVE</div>
                               </div>
-                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-yellow-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge">
-                                  DEVELOPMENT
-                              </div>
+                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-yellow-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge">DEVELOPMENT</div>
                           </div>
                           <div class="p-4 lg:p-6 flex-1 flex flex-col justify-between card-content">
                               <div>
@@ -733,7 +557,6 @@
                               </div>
                           </div>
                       </div>
-                      <!-- Verso -->
                       <div class="card-face card-back">
                           <div class="p-4 lg:p-6 h-full flex flex-col justify-between card-content">
                               <div class="flex-1">
@@ -755,19 +578,15 @@
                   </div>
               </div>
 
-              <!-- Card 2 - ANIMAÇÕES FANCY -->
               <div class="game-card" data-reveal>
                   <div class="card-3d">
-                      <!-- Frente -->
                       <div class="card-face card-front">
                           <div class="card-header flex items-center justify-center h-52">
                               <div class="text-center card-content">
                                   <div class="text-6xl lg:text-7xl mb-4 floating-icon" style="animation-delay: 0.5s;">✨</div>
                                   <div class="text-xl lg:text-2xl font-bold text-white neon-text">CONCEITO</div>
                               </div>
-                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-purple-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge" style="animation-delay: 1s;">
-                                  CONCEPT
-                              </div>
+                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-purple-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge" style="animation-delay: 1s;">CONCEPT</div>
                           </div>
                           <div class="p-4 lg:p-6 flex-1 flex flex-col justify-between card-content">
                               <div>
@@ -778,7 +597,6 @@
                               </div>
                           </div>
                       </div>
-                      <!-- Verso -->
                       <div class="card-face card-back">
                           <div class="p-4 lg:p-6 h-full flex flex-col justify-between card-content">
                               <div class="flex-1">
@@ -800,19 +618,15 @@
                   </div>
               </div>
 
-              <!-- Card 3 - ANIMAÇÕES FANCY -->
               <div class="game-card" data-reveal>
                   <div class="card-3d">
-                      <!-- Frente -->
                       <div class="card-face card-front">
                           <div class="card-header flex items-center justify-center h-52">
                               <div class="text-center card-content">
                                   <div class="text-6xl lg:text-7xl mb-4 floating-icon" style="animation-delay: 1s;">🚀</div>
                                   <div class="text-xl lg:text-2xl font-bold text-white neon-text">EM PLANEJAMENTO</div>
                               </div>
-                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-green-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge" style="animation-delay: 1.5s;">
-                                  FUTURE
-                              </div>
+                              <div class="absolute top-3 right-3 px-3 py-1.5 bg-green-400 text-black text-xs lg:text-sm font-bold rounded pulse-badge" style="animation-delay: 1.5s;">FUTURE</div>
                           </div>
                           <div class="p-4 lg:p-6 flex-1 flex flex-col justify-between card-content">
                               <div>
@@ -823,7 +637,6 @@
                               </div>
                           </div>
                       </div>
-                      <!-- Verso -->
                       <div class="card-face card-back">
                           <div class="p-4 lg:p-6 h-full flex flex-col justify-center text-center card-content">
                               <div>
@@ -844,7 +657,6 @@
               </div>
           </div>
 
-          <!-- Call to Action - CORRIGIDO E CENTRALIZADO -->
           <div class="text-center">
               <p class="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
                   Quer acompanhar o desenvolvimento dos nossos jogos? <span class="text-cyan-400 font-bold">Conecte-se conosco!</span>
@@ -861,12 +673,12 @@
               </div>
           </div>
 
-          <!-- Decorative Elements -->
           <div class="absolute top-10 right-8 w-4 h-4 bg-green-400 animate-pulse pixel-art"></div>
           <div class="absolute bottom-10 left-8 w-3 h-3 bg-pink-500 animate-pulse pixel-art" style="animation-delay: 1s;"></div>
           <div class="absolute top-1/2 right-4 w-2 h-8 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
       </div>
   </section>
+
   <!-- VALUES -->
   <section id="values" class="relative z-10 px-6 md:px-12 lg:px-24" data-reveal data-reveal-from="top" data-reveal-dur="slow">
     <div class="max-w-6xl mx-auto py-20">
@@ -919,39 +731,30 @@
         </div>
       </div>
 
-      <!-- Processo Criativo -->
       <div class="bg-gradient-to-r from-gray-900/80 via-gray-800/80 to-gray-900/80 border border-gray-600 rounded-lg p-8 backdrop-blur-sm fade-in-scale" style="animation-delay: 0.6s;">
         <h4 class="text-2xl font-bold text-center mb-8 text-yellow-400 neon-text">NOSSO PROCESSO CRIATIVO</h4>
         
         <div class="grid md:grid-cols-4 gap-6">
           <div class="text-center group">
-            <div class="w-16 h-16 mx-auto mb-4 bg-cyan-400/20 border border-cyan-400 rounded-full flex items-center justify-center text-2xl hover:bg-cyan-400 hover:text-black transition-all duration-300 pulse-grow">
-              💡
-            </div>
+            <div class="w-16 h-16 mx-auto mb-4 bg-cyan-400/20 border border-cyan-400 rounded-full flex items-center justify-center text-2xl hover:bg-cyan-400 hover:text-black transition-all duration-300 pulse-grow">💡</div>
             <h5 class="font-bold text-cyan-400 mb-2">IDEAÇÃO</h5>
             <p class="text-sm text-gray-400">Brainstorming de conceitos únicos e mecânicas inovadoras</p>
           </div>
           
           <div class="text-center group">
-            <div class="w-16 h-16 mx-auto mb-4 bg-pink-500/20 border border-pink-500 rounded-full flex items-center justify-center text-2xl hover:bg-pink-500 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 0.5s;">
-              🎨
-            </div>
+            <div class="w-16 h-16 mx-auto mb-4 bg-pink-500/20 border border-pink-500 rounded-full flex items-center justify-center text-2xl hover:bg-pink-500 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 0.5s;">🎨</div>
             <h5 class="font-bold text-pink-500 mb-2">PROTOTIPAGEM</h5>
             <p class="text-sm text-gray-400">Desenvolvimento rápido de protótipos jogáveis</p>
           </div>
           
           <div class="text-center group">
-            <div class="w-16 h-16 mx-auto mb-4 bg-green-400/20 border border-green-400 rounded-full flex items-center justify-center text-2xl hover:bg-green-400 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 1s;">
-              🔧
-            </div>
+            <div class="w-16 h-16 mx-auto mb-4 bg-green-400/20 border border-green-400 rounded-full flex items-center justify-center text-2xl hover:bg-green-400 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 1s;">🔧</div>
             <h5 class="font-bold text-green-400 mb-2">REFINAMENTO</h5>
             <p class="text-sm text-gray-400">Iteração baseada em feedback e testes</p>
           </div>
           
           <div class="text-center group">
-            <div class="w-16 h-16 mx-auto mb-4 bg-yellow-400/20 border border-yellow-400 rounded-full flex items-center justify-center text-2xl hover:bg-yellow-400 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 1.5s;">
-              🚀
-            </div>
+            <div class="w-16 h-16 mx-auto mb-4 bg-yellow-400/20 border border-yellow-400 rounded-full flex items-center justify-center text-2xl hover:bg-yellow-400 hover:text-black transition-all duration-300 pulse-grow" style="animation-delay: 1.5s;">🚀</div>
             <h5 class="font-bold text-yellow-400 mb-2">LANÇAMENTO</h5>
             <p class="text-sm text-gray-400">Entrega de experiências memoráveis</p>
           </div>
@@ -969,7 +772,7 @@
           Tem uma ideia incrível? Quer discutir uma parceria? Ou apenas bater um papo sobre jogos indie e anime?
           <br><span class="text-cyan-400">Estamos sempre abertos para conversas interessantes!</span>
         </p>
-        <div class="flex justify-center space-x-4 text-sm text-gray-400">
+        <div class="grid grid-cols-1 md:grid-cols-3 justify-center text-sm text-gray-400">
           <div class="flex items-center space-x-2">
             <div class="w-2 h-2 bg-green-400 rounded-full pulse-grow"></div>
             <span>Resposta rápida</span>
@@ -985,14 +788,15 @@
         </div>
       </div>
 
-      <div class="grid lg:grid-cols-2 gap-16 items-start">
+      <!-- ======= GRID AJUSTADA AQUI ======= -->
+      <div class="contact-grid">
+        <!-- Coluna esquerda -->
         <div class="space-y-8">
-          <!-- Formas de Contato -->
           <div class="text-center md:text-left">
             <h4 class="text-2xl md:text-3xl font-bold mb-8 text-pink-500 tracking-wider neon-text">VAMOS CONVERSAR</h4>
             
             <!-- Email Principal -->
-            <div class="group p-8 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden mb-6 fade-in-scale">
+            <div class="group p-8 border-2 border-yellow-400 bg-gray-900/50 hover:bg-yellow-400 hover:text-black transition-all duration-300 relative overflow-hidden mb-6 fade-in-scale contact-wrap">
               <div class="absolute top-0 right-0 w-4 h-4 bg-white opacity-20 pixel-art rotate-slow"></div>
               <div class="absolute -top-1 -left-1 w-3 h-3 bg-yellow-400 opacity-50 rounded-full pulse-grow"></div>
               
@@ -1000,7 +804,7 @@
                 <div class="text-3xl group-hover:scale-110 transition-transform duration-300">📧</div>
                 <div class="flex-1">
                   <div class="text-sm font-bold tracking-wider text-yellow-400 group-hover:text-black mb-2">EMAIL PRINCIPAL</div>
-                  <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300 block">
+                  <a href="mailto:wesley@bitinverso.com" class="text-lg md:text-xl font-bold tracking-wider text-white group-hover:text-black hover:underline transition-all duration-300 block contact-wrap">
                     wesley@bitinverso.com
                   </a>
                   <div class="text-xs text-gray-400 group-hover:text-black/60 mt-1">Resposta em até 48h úteis</div>
@@ -1055,34 +859,31 @@
           </div>
         </div>
 
-        <!-- Painel Interativo -->
-        <div class="relative">
-          <div class="bg-gray-900 border-4 border-yellow-400 rounded-lg relative overflow-hidden fade-in-scale" style="animation-delay: 0.4s;">
-            <!-- Header do Terminal -->
+        <!-- Coluna direita (painel interativo) -->
+        <div class="relative contact-right">
+          <div class="bg-gray-900 border-4 border-yellow-400 rounded-lg relative overflow-hidden fade-in-scale contact-terminal" style="animation-delay: 0.4s;">
             <div class="bg-gray-800 px-6 py-3 border-b border-yellow-400/30 flex items-center space-x-2">
               <div class="w-3 h-3 bg-red-500 rounded-full"></div>
               <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
               <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-              <div class="flex-1 text-center text-xs text-gray-400 font-mono">bitinverso://contact_terminal</div>
+              <div class="flex-1 text-center text-xs text-gray-400 font-mono contact-wrap">bitinverso://contact_terminal</div>
             </div>
 
-            <!-- Conteúdo do Terminal -->
             <div class="p-8">
               <div class="absolute inset-0 opacity-5">
                 <div class="grid grid-cols-8 gap-1 h-full" id="contact-pixel-pattern"></div>
               </div>
               
-              <div class="relative">
+              <div class="relative contact-panel">
                 <div class="font-mono text-green-400 text-sm mb-4">
                   <div class="typewriter" style="animation-delay: 1s;">$ connecting_to_bit_inverso...</div>
                 </div>
                 
                 <div class="text-center py-8">
                   <div class="text-6xl md:text-8xl font-bold mb-4 text-yellow-400 glitch-text floating-icon">@</div>
-                  <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest mb-2">CONECTE-SE CONOSCO</div>
-                  <div class="text-sm text-gray-500 font-mono mb-6">Pixel art • Anime • Indie Games</div>
+                  <div class="text-lg md:text-xl text-gray-400 font-bold tracking-widest mb-2 contact-wrap">CONECTE-SE CONOSCO</div>
+                  <div class="text-sm text-gray-500 font-mono mb-6 contact-wrap">Pixel art • Anime • Indie Games</div>
                   
-                  <!-- Status de Resposta -->
                   <div class="bg-gray-800/50 rounded-lg p-4 border border-green-400/30">
                     <div class="flex items-center justify-center space-x-3 mb-2">
                       <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -1093,8 +894,8 @@
                   </div>
                 </div>
 
-                <!-- Estatísticas de Contato -->
-                <div class="grid grid-cols-3 gap-4 mt-6 text-center">
+                <!-- Estatísticas com grid responsivo e sem esmagar -->
+                <div class="contact-stats mt-6 text-center">
                   <div class="bg-gray-800/30 rounded p-3 border border-gray-600">
                     <div class="text-xl font-bold text-cyan-400">100%</div>
                     <div class="text-xs text-gray-400">Taxa de resposta</div>
@@ -1112,14 +913,13 @@
             </div>
           </div>
 
-          <!-- Elementos Decorativos -->
-          <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 animate-pulse pixel-art"></div>
-          <div class="absolute -bottom-2 -left-2 w-4 h-4 bg-pink-500 animate-pulse pixel-art rotate-slow" style="animation-delay: 1s;"></div>
-          <div class="absolute top-1/2 -left-1 w-3 h-12 bg-cyan-400 animate-pulse pixel-art" style="animation-delay: 2s;"></div>
+          <!-- Decorativos (já contidos e responsivos) -->
+          <div class="contact-deco br bg-yellow-400 animate-pulse pixel-art"></div>
+          <div class="contact-deco bl bg-pink-500  animate-pulse pixel-art rotate-slow" style="animation-delay: 1s;"></div>
+          <div class="contact-deco ml bg-cyan-400  animate-pulse pixel-art"              style="animation-delay: 2s;"></div>
         </div>
       </div>
 
-      <!-- Call to Action Final -->
       <div class="text-center mt-16 fade-in-scale" style="animation-delay: 1s;">
         <div class="bg-gradient-to-r from-gray-900/80 to-gray-800/80 border border-gray-600 rounded-lg p-8 backdrop-blur-sm">
           <h4 class="text-xl font-bold text-gray-300 mb-4">Pronto para começar uma conversa?</h4>
@@ -1138,9 +938,7 @@
   <!-- FOOTER -->
   <footer class="py-16 px-6 border-t-4 border-gray-800 relative overflow-hidden">
     <div class="max-w-6xl mx-auto">
-      <!-- Footer Principal -->
       <div class="grid lg:grid-cols-4 gap-12 mb-12">
-        <!-- Logo e Descrição -->
         <div class="lg:col-span-2 fade-in-scale">
           <div class="text-2xl md:text-3xl font-bold mb-4 glitch-text">BIT INVERSO</div>
           <p class="text-gray-400 mb-6 leading-relaxed max-w-md">
@@ -1148,12 +946,24 @@
           </p>
           <div class="flex items-center space-x-4">
             <div class="w-3 h-3 bg-green-400 rounded-full pulse-grow"></div>
-            <span class="text-sm text-gray-400">Estúdio ativo desde 2024</span>
+            <span class="text-sm text-gray-400">Estúdio ativo desde Jul/2025</span>
           </div>
         </div>
 
-        <!-- Links Rápidos -->
-        <div class="fade-in-scale" style="animation-delay: 0.2s;">
+        <div class="fade-in-scale space-y-3" style="animation-delay: 0.2s;">
+          <h3 class="text-2xl sm:text-xl md:text-lg font-bold text-cyan-400 drop-shadow-[0_0_8px_#06b6d4]">
+            NAVEGAÇÃO
+          </h3>
+          <ul class="space-y-2 font-medium">
+            <li><a href="#home" class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-xl sm:text-lg md:text-base">Home</a></li>
+            <li><a href="#about" class="text-gray-400 hover:text-pink-500 transition-colors duration-300 text-xl sm:text-lg md:text-base">Quem Somos</a></li>
+            <li><a href="#games" class="text-gray-400 hover:text-green-400 transition-colors duration-300 text-xl sm:text-lg md:text-base">Nossos Jogos</a></li>
+            <li><a href="#values" class="text-gray-400 hover:text-yellow-400 transition-colors duration-300 text-xl sm:text-lg md:text-basem">Valores</a></li>
+            <li><a href="#contact" class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-xl sm:text-lg md:text-base">Contato</a></li>
+          </ul>
+        </div>
+
+        <!-- <div class="fade-in-scale" style="animation-delay: 0.2s;">
           <h4 class="text-lg font-bold text-cyan-400 mb-6 neon-text">NAVEGAÇÃO</h4>
           <ul class="space-y-3">
             <li><a href="#home" class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-sm">Home</a></li>
@@ -1162,54 +972,42 @@
             <li><a href="#values" class="text-gray-400 hover:text-yellow-400 transition-colors duration-300 text-sm">Valores</a></li>
             <li><a href="#contact" class="text-gray-400 hover:text-cyan-400 transition-colors duration-300 text-sm">Contato</a></li>
           </ul>
-        </div>
+        </div> -->
 
-        <!-- Conecte-se -->
         <div class="fade-in-scale" style="animation-delay: 0.4s;">
           <h4 class="text-lg font-bold text-pink-500 mb-6 neon-text">CONECTE-SE</h4>
           <div class="space-y-4">
             <a href="https://www.tiktok.com/@bitinverso" target="_blank" rel="noopener noreferrer" 
                class="flex items-center space-x-3 text-gray-400 hover:text-pink-500 transition-all duration-300 group">
-              <div class="w-8 h-8 border border-pink-500/30 rounded-lg flex items-center justify-center group-hover:border-pink-500 group-hover:bg-pink-500/10">
-                <span class="text-sm">📱</span>
-              </div>
-              <span class="text-sm">TikTok</span>
+              <div class="w-8 h-8 border border-pink-500/30 rounded-lg flex items-center justify-center group-hover:border-pink-500 group-hover:bg-pink-500/10"><span class="text-sm">📱</span></div>
+              <span class="text-xl sm:text-lg md:text-base">TikTok</span>
             </a>
             <a href="https://www.instagram.com/bitinverso" target="_blank" rel="noopener noreferrer" 
                class="flex items-center space-x-3 text-gray-400 hover:text-cyan-400 transition-all duration-300 group">
-              <div class="w-8 h-8 border border-cyan-400/30 rounded-lg flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-400/10">
-                <span class="text-sm">📸</span>
-              </div>
-              <span class="text-sm">Instagram</span>
+              <div class="w-8 h-8 border border-cyan-400/30 rounded-lg flex items-center justify-center group-hover:border-cyan-400 group-hover:bg-cyan-400/10"><span class="text-sm">📸</span></div>
+              <span class="text-xl sm:text-lg md:text-base">Instagram</span>
             </a>
             <a href="mailto:wesley@bitinverso.com" 
                class="flex items-center space-x-3 text-gray-400 hover:text-yellow-400 transition-all duration-300 group">
-              <div class="w-8 h-8 border border-yellow-400/30 rounded-lg flex items-center justify-center group-hover:border-yellow-400 group-hover:bg-yellow-400/10">
-                <span class="text-sm">📧</span>
-              </div>
-              <span class="text-sm">Email</span>
+              <div class="w-8 h-8 border border-yellow-400/30 rounded-lg flex items-center justify-center group-hover:border-yellow-400 group-hover:bg-yellow-400/10"><span class="text-sm">📧</span></div>
+              <span class="text-xl sm:text-lg md:text-base">Email</span>
             </a>
           </div>
         </div>
       </div>
 
-      <!-- Separador -->
       <div class="border-t border-gray-700 py-8">
         <div class="grid md:grid-cols-2 gap-6 items-center">
-          <!-- Newsletter Simples -->
           <div class="fade-in-scale" style="animation-delay: 0.6s;">
             <h5 class="text-sm font-bold text-green-400 mb-2">FIQUE POR DENTRO</h5>
             <p class="text-xs text-gray-500 mb-4">Novidades sobre nossos projetos diretamente no seu email</p>
             <div class="flex space-x-2">
               <input type="email" placeholder="seu@email.com" 
                      class="flex-1 px-3 py-2 bg-gray-800 border border-gray-600 rounded text-sm text-white placeholder-gray-500 focus:border-green-400 focus:outline-none">
-              <button class="px-4 py-2 bg-green-400 text-black text-sm font-bold rounded hover:bg-green-300 transition-colors duration-300">
-                OK
-              </button>
+              <button class="px-4 py-2 bg-green-400 text-black text-sm font-bold rounded hover:bg-green-300 transition-colors duration-300">OK</button>
             </div>
           </div>
 
-          <!-- Status do Estúdio -->
           <div class="text-right fade-in-scale" style="animation-delay: 0.8s;">
             <div class="inline-block p-4 bg-gray-800/50 border border-gray-600 rounded-lg">
               <div class="flex items-center space-x-2 mb-2">
@@ -1225,22 +1023,15 @@
         </div>
       </div>
 
-      <!-- Footer Bottom -->
       <div class="border-t border-gray-700 pt-8">
         <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div class="text-center md:text-left fade-in-scale" style="animation-delay: 1s;">
-            <div class="text-xs text-gray-500 font-bold tracking-widest mb-2">
-              © 2025 BIT INVERSO. TODOS OS DIREITOS RESERVADOS.
-            </div>
-            <div class="text-xs text-gray-600">
-              Feito com <span class="text-pink-500">♥</span> para a comunidade indie brasileira
-            </div>
+            <div class="text-xs text-gray-500 font-bold tracking-widest mb-2">© 2025 BIT INVERSO. TODOS OS DIREITOS RESERVADOS.</div>
+            <div class="text-xs text-gray-600">Feito com <span class="text-pink-500">♥</span> para a comunidade indie brasileira</div>
           </div>
           
           <div class="flex items-center space-x-6 fade-in-scale" style="animation-delay: 1.2s;">
-            <div class="text-xs text-gray-500">
-              <span class="text-cyan-400">v2025.1</span>
-            </div>
+            <div class="text-xs text-gray-500"><span class="text-cyan-400">v2025.1</span></div>
             <div class="flex space-x-2">
               <div class="w-2 h-2bg-cyan-400 animate-pulse"></div>
               <div class="w-2 h-2 bg-pink-500 animate-pulse" style="animation-delay: 0.3s;"></div>
@@ -1251,7 +1042,6 @@
       </div>
     </div>
 
-    <!-- Background Decorativo -->
     <div class="absolute bottom-0 right-0 w-32 h-32 opacity-5">
       <div class="w-full h-full bg-gradient-to-tl from-cyan-400 to-transparent rotate-slow"></div>
     </div>
