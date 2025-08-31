@@ -1,7 +1,7 @@
 name: Optimize & Deploy to Pages
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -18,18 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node & Python
-        uses: actions/setup-python@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          python-version: "3.11"
-      - name: Install deps (Node + Python) (Node + Python)
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pillow
-          npm ci
-      - name: Build Tailwind CSS
-        run: |
-          NODE_ENV=production npm run build --if-present && npm run build --if-present && python tools/build.py
+          node-version: '20'
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install deps (Node)
+        run: npm ci || true
+      - name: Run video encoder
+        run: bash tools/encode_videos.sh
+      - name: Build CSS
+        run: NODE_ENV=production npm run build --if-present
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

@@ -58,3 +58,51 @@
   .carousel-indicators { min-height: 20px; }
 }
 
+
+
+@layer components {
+  /* Flip perf modes */
+  .card-3d { transform-style: preserve-3d; transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+  .card-face { backface-visibility: hidden; will-change: auto; }
+  .game-card { contain: layout paint; }
+  .game-card.wc .card-face, .game-card.wc .card-3d { will-change: transform, opacity; }
+  html.lite-anim .card-3d { transform: none !important; }
+  html.lite-anim .card-front, html.lite-anim .card-back { position: absolute; inset: 0; }
+  html.lite-anim .card-back { opacity: 0; transition: opacity .25s ease; }
+  html.lite-anim .card-front { opacity: 1; transition: opacity .25s ease; }
+  @media (hover: hover) and (pointer: fine) {
+    html.lite-anim .game-card:hover .card-back { opacity: 1; }
+    html.lite-anim .game-card:hover .card-front { opacity: 0; }
+  }
+  html.lite-anim .game-card.is-flipped .card-back { opacity: 1; }
+  html.lite-anim .game-card.is-flipped .card-front { opacity: 0; }
+
+  /* Pause transitions offscreen */
+  .game-card.paused .card-3d,
+  .game-card.paused .card-face { transition: none !important; }
+
+  /* Flip hint (arrow) */
+  .flip-hint {
+    position: absolute; right: .75rem; bottom: .75rem;
+    display: flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem; border-radius: 9999px;
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255,255,255,0.18);
+    pointer-events: none;
+    transform: translateZ(0);
+    opacity: .85;
+  }
+  .flip-hint-icon { fill: #fff; opacity: .9; }
+  @media (hover: hover) and (pointer: fine) {
+    .game-card:hover .flip-hint { opacity: 1; }
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .flip-hint { animation: flipHintPulse 1.8s ease-in-out infinite; }
+  }
+  @keyframes flipHintPulse {
+    0%,100% { transform: translateZ(0) scale(1); opacity: .8; }
+    50%     { transform: translateZ(0) scale(1.08); opacity: 1; }
+  }
+}
+
