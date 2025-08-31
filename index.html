@@ -38,6 +38,8 @@
   <!-- Tailwind (dev) -->
   <noscript></noscript>
   <link rel="preload" href="assets/hero-background.webm" as="video" type="video/webm">
+  <link rel="preload" href="assets/hero-background.webm" as="video" type="video/webm" fetchpriority="high">
+  <link rel="preload" href="assets/hero-poster.webp" as="image" fetchpriority="high">
 </head>
 <body class="min-h-screen bg-black text-white relative overflow-x-hidden">
   <!-- Pixel Grid Background -->
@@ -83,10 +85,10 @@
   <section id="home" data-reveal data-reveal-from="left" data-reveal-dur="slow">
     <div class="hero-viewport">
       <div class="hero-media-wrapper" aria-hidden="true">
-        <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="metadata"
-               preload="metadata" poster="assets/hero-poster.webp"
-               data-src-webm="assets/hero-background.webm"
-               data-src-mp4="assets/hero-background.mp4" fetchpriority="high"></video>
+        <video id="heroVideo" class="hero-video" autoplay muted loop playsinline preload="auto"
+               preload="auto" poster="assets/hero-poster.webp"
+              
+               fetchpriority="high"><source src="assets/hero-background.webm" type="video/webm"><source src="assets/hero-background.mp4" type="video/mp4"></video>
         <div class="hero-overlay"></div>
       </div>
       <div class="carousel container" id="heroCarousel">
