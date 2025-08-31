@@ -58,3 +58,60 @@
   .carousel-indicators { min-height: 20px; }
 }
 
+
+
+@layer components {
+  /* Performance guards for flip cards */
+  .game-card { contain: layout paint; }
+  .card-3d { will-change: transform; transform-style: preserve-3d; }
+  .card-face { 
+    will-change: transform, opacity; 
+    transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .3s ease !important;
+    backface-visibility: hidden;
+  }
+  /* avoid expensive blur/shadow transitions during flip */
+  .card-face { filter: none !important; backdrop-filter: none !important; }
+  .card-front, .card-back { box-shadow: none !important; }
+  /* reduce repaint areas */
+  .card-content { contain: paint; }
+  @media (prefers-reduced-motion: reduce) {
+    .card-3d, .card-face { transition: none !important; }
+  }
+}
+
+
+
+@layer components {
+  /* Offscreen skip work */
+  #games, #about, #contact, footer { content-visibility: auto; contain-intrinsic-size: 900px; }
+  /* Guard hero during scroll */
+  .hero-viewport { contain: layout paint; }
+
+  /* Flip only on devices com hover (desktop/mouse) */
+  @media (hover: hover) and (pointer: fine) {
+    .card-3d { transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .3s ease; }
+    .game-card:hover .card-3d { transform: rotateY(180deg); }
+  }
+
+  /* Touch devices: desativa hover flips; usamos tap via JS (classe .is-flipped) */
+  @media (hover: none) and (pointer: coarse) {
+    .game-card .card-3d { transition: transform .5s ease; }
+    .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
+  }
+
+  /* Evitar overdraw */
+  .card-face { backface-visibility: hidden; }
+  .card-front, .card-back { box-shadow: none; }
+}
+
+
+
+@layer components {
+  .hero-poster { opacity: 1; }
+  .video-disabled ~ #heroPoster, .video-disabled + #heroPoster, .hero-poster.visible { display:block; }
+  .video-disabled { display:none; }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video { animation: none !important; transition: none !important; }
+  }
+}
+
