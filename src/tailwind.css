@@ -58,3 +58,24 @@
   .carousel-indicators { min-height: 20px; }
 }
 
+
+
+@layer components {
+  /* Performance guards for flip cards */
+  .game-card { contain: layout paint; }
+  .card-3d { will-change: transform; transform-style: preserve-3d; }
+  .card-face { 
+    will-change: transform, opacity; 
+    transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .3s ease !important;
+    backface-visibility: hidden;
+  }
+  /* avoid expensive blur/shadow transitions during flip */
+  .card-face { filter: none !important; backdrop-filter: none !important; }
+  .card-front, .card-back { box-shadow: none !important; }
+  /* reduce repaint areas */
+  .card-content { contain: paint; }
+  @media (prefers-reduced-motion: reduce) {
+    .card-3d, .card-face { transition: none !important; }
+  }
+}
+
