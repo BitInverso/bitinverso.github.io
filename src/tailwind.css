@@ -179,16 +179,19 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
   /* 1) Limite transições a propriedades baratas (nada de 'all' e box-shadow) */
   #games .game-card{
     transition: transform .28s cubic-bezier(.2,.8,.2,1), border-color .2s ease;
+    box-shadow: 0 4px 16px rgba(0,0,0,.28);
+    transform: none !important;
+    touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0);
   }
   #games .game-card:hover{
     transform: translateY(-6px) scale(1.01);
     /* sombra mais leve para reduzir blur radius */
-    box-shadow: 0 8px 22px rgba(0,0,0,.32);
+    box-shadow: 0 10px 24px rgba(0,0,0,.34);
   }
 
   /* 2) Card faces: só transform/opacity (já ajuda o flip/crossfade) */
   #games .card-face{
-    transition: transform .45s ease, opacity .22s ease;
+    transition: transform .28s cubic-bezier(.2,.8,.2,1);
   }
 
   /* 3) Desligue blur no mobile (coarse) por padrão — liga só em desktop */
@@ -197,10 +200,19 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
   }
 
   /* 4) Renderização preguiçosa dos cards offscreen (Chromium / Safari 17+) */
-  @supports (content-visibility: auto){
+  /* Desktop mantém CV; Mobile desativa para evitar snap */
+  @media (hover:hover) and (pointer:fine){
+    @supports (content-visibility: auto){
+      #games .game-card{
+        content-visibility: auto;
+        contain-intrinsic-size: 560px 380px; /* aprox. mais real para reduzir jump */
+      }
+    }
+  }
+  @media (hover:none) and (pointer:coarse){
     #games .game-card{
-      content-visibility: auto;
-      contain-intrinsic-size: 500px 300px; /* reserva de layout aproximada */
+      content-visibility: visible !important;
+      contain-intrinsic-size: auto !important;
     }
   }
 
@@ -210,18 +222,6 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
     will-change: transform, opacity;
   }
 
-  #games .game-card{
-    box-shadow: 0 4px 16px rgba(0,0,0,.28);
-  }
-  #games .game-card:hover{
-    box-shadow: 0 10px 24px rgba(0,0,0,.34);
-  }
-
-  /* O contêiner do card não recebe transform (não achata o 3D do filho) */
-  #games .game-card { transform: none !important; }
-
-  /* 3D robusto */
-  #games .game-card { perspective: 1000px; }
   #games .card-3d    { transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
   #games .card-face  { -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0.01px); }
   #games .card-front { transform: rotateY(0deg)   translateZ(0.01px) !important; }
@@ -229,7 +229,6 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
 
   /* Flip via classe (seu JS de click-only mantém isso) */
   #games .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
-  #games .game-card { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0); }
 
   /* Low-perf ainda vira cross-fade */
   .bi-low-perf #games .is-flipped .card-3d { transform: none !important; }

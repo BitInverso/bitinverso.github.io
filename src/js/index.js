@@ -31,11 +31,3 @@ printConsoleArt();
 mountHeroPaddingMobile();
 mountGamesScrollGuard();
 mountAboutAndContactDecor();
-
-// global scroll flag (optional)
-let __scrolling__ = false, __scrollTimer = null;
-window.addEventListener('scroll', ()=>{
-  __scrolling__ = true;
-  clearTimeout(__scrollTimer);
-  __scrollTimer = setTimeout(()=>{ __scrolling__ = false; }, 120);
-}, {passive:true});
