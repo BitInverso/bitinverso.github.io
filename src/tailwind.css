@@ -11,6 +11,9 @@
 
 
 @layer base {
+  /* antes estava 80px; deixe 0 por padrão */
+  :root { --nav-h: 0px; }
+  .hero-viewport { box-sizing: border-box; } /* garante que o padding não estoura o layout */
   html, body {
     @apply overflow-x-hidden max-w-full bg-black text-white scroll-smooth;
   }
@@ -106,3 +109,4 @@
   }
 }
 
+@import 'flip-overrides.css';

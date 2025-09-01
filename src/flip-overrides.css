@@ -1,0 +1,63 @@
+.is-flipped .card-3d {
+  transform: rotateY(180deg);
+  will-change: transform;
+}
+
+/* low-perf: remove 3D e usa opacidade; !important para vencer regras minificadas */
+.bi-low-perf .is-flipped .card-3d {
+  transform: none !important;
+}
+
+.bi-low-perf .card-face.card-back {
+  opacity: 0;
+  pointer-events: none;
+}
+.bi-low-perf .is-flipped .card-face.card-front {
+  opacity: 0;
+  pointer-events: none;
+}
+.bi-low-perf .is-flipped .card-face.card-back {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* transições leves */
+.card-face {
+  transition: transform .5s ease, opacity .22s ease;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+/* respeita reduced motion sempre */
+@media (prefers-reduced-motion: reduce) {
+  .card-3d, .card-face { transition: none !important; }
+  .is-flipped .card-3d { transform: none !important; }
+}
+
+/* segurança extra: quando Battery API sinalizar economia, marca também */
+.bi-battery-saver .is-flipped .card-3d {
+  transform: none !important;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  :root { --nav-h: calc(64px + env(safe-area-inset-top, 0px)); } /* valor inicial; será refinado por JS */
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .hero-viewport {
+    /* mantém o hero com altura total do viewport MENOS a navbar,
+       e empurra o conteúdo interno (inset:0) para baixo da navbar */
+    padding-top: var(--nav-h);
+    height: calc(100svh - var(--nav-h));
+    box-sizing: border-box; /* garante que o padding entra na caixa sem estourar layout */
+  }
+
+  /* âncoras: só no mobile precisamos compensar a navbar fixa */
+  [id] { scroll-margin-top: var(--nav-h); }
+  .hero, .carousel, .hero-slide { scroll-margin-top: calc(var(--nav-h) + 8px); }
+}
