@@ -29,9 +29,26 @@ export function mountGamesFlip(){
   function flipTo(targetCard){
     if (isAnimating) return;
     isAnimating = true;
-    if (activeCard && activeCard !== targetCard) activeCard.classList.remove('is-flipped');
-    if (activeCard === targetCard) { activeCard.classList.remove('is-flipped'); activeCard = null; }
-    else { targetCard.classList.add('is-flipped'); activeCard = targetCard; }
+
+    // se havia outro aberto, fecha
+    if (activeCard && activeCard !== targetCard) {
+      activeCard.classList.remove('is-flipped');
+    }
+
+    // se pediram pra fechar (targetCard nulo) OU clicou no mesmo card -> só fecha
+    if (!targetCard || activeCard === targetCard) {
+      if (activeCard) activeCard.classList.remove('is-flipped');
+      activeCard = null;
+      setTimeout(()=>{ isAnimating = false; }, ANIM_MS + 60);
+      return;
+    }
+
+    // abrir o novo card (com guard)
+    if (targetCard && targetCard.classList) {
+      targetCard.classList.add('is-flipped');
+      activeCard = targetCard;
+    }
+
     setTimeout(()=>{ isAnimating = false; }, ANIM_MS + 60);
   }
 
