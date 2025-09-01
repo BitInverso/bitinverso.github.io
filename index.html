@@ -1,49 +1,116 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
 <head>
-<link as="style" href="assets/tailwind.min.css" onload="this.onload=null;this.rel='stylesheet'" rel="preload"/>
-<noscript><link href="assets/tailwind.min.css" rel="stylesheet"/></noscript>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<meta charset="utf-8"/>
-<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
-<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
-<title>Bit Inverso — Gaming Studio</title>
-<meta content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." name="description"/>
-<meta content="Bit Inverso, jogos indie, pixel art, anime, sátira, humor ácido, games, estúdio de jogos" name="keywords"/>
-<meta content="Bit Inverso" name="author">
-<meta content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" name="robots">
-<link href="https://bitinverso.com/" rel="canonical">
-<!-- OG/Twitter -->
-<meta content="website" property="og:type">
-<meta content="Bit Inverso" property="og:site_name"/>
-<meta content="Bit Inverso — Gaming Studio" property="og:title"/>
-<meta content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." property="og:description"/>
-<meta content="https://bitinverso.com/" property="og:url"/>
-<meta content="https://bitinverso.com/assets/og-image.webp" property="og:image"/>
-<meta content="pt_BR" property="og:locale"/>
-<meta content="summary_large_image" name="twitter:card"/>
-<meta content="Bit Inverso — Gaming Studio" name="twitter:title"/>
-<meta content="Studio Bit Inverso, o estúdio de jogos que vai além de 0s e 1s — anime, sátira e humor ácido em cada pixel." name="twitter:description"/>
-<meta content="https://bitinverso.com/assets/og-image.webp" name="twitter:image"/>
-<!-- PWA / cores -->
-<meta content="#000000" name="theme-color"/>
-<meta content="Bit Inverso" name="application-name"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
-<!-- Preconnect + poster -->
-<link href="https://fonts.googleapis.com" rel="preconnect">
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
-<link as="image" href="assets/hero-poster.webp" rel="preload">
-<!-- Tailwind (dev) -->
-<noscript></noscript>
-<link as="video" href="assets/hero-background.webm" rel="preload" type="video/webm"/>
-<link as="video" fetchpriority="high" href="assets/hero-background.webm" rel="preload" type="video/webm"/>
-<link as="image" fetchpriority="high" href="assets/hero-poster.webp" rel="preload"/>
-<link rel="preload" href="assets/hero-background-480.webm" as="video" type="video/webm" media="(max-width: 480px)" fetchpriority="high">
-<link rel="preload" href="assets/hero-background-720.webm" as="video" type="video/webm" media="(max-width: 768px)" fetchpriority="high">
-<link rel="preload" href="assets/hero-background-1080.webm" as="video" type="video/webm" media="(min-width: 769px)" fetchpriority="high">
+  <!-- Charset & Compatibility -->
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta http-equiv="content-language" content="pt-BR"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+
+  <!-- Title (<= 60 chars) -->
+  <title>Bit Inverso — Estúdio Brasileiro de Jogos Indie (Pixel Art)</title>
+
+  <!-- Primary Meta -->
+  <meta name="description" content="Bit Inverso é um estúdio BR de jogos indie focado em pixel art e estética anime. Humor ácido, sátira e narrativas memoráveis em cada projeto."/>
+  <meta name="keywords" content="Bit Inverso, estúdio brasileiro de jogos, jogos indie, pixel art, jogos de anime, sátira, humor ácido, game studio BR, indie dev Brasil"/>
+  <meta name="author" content="Bit Inverso"/>
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1"/>
+  <link rel="canonical" href="https://bitinverso.com/"/>
+  <link rel="alternate" href="https://bitinverso.com/" hreflang="pt-BR"/>
+
+  <!-- Brand / Country indicators -->
+  <meta name="geo.region" content="BR"/>
+  <meta name="geo.country" content="BR"/>
+  <meta name="theme-color" content="#000000"/>
+  <meta name="application-name" content="Bit Inverso"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Bit Inverso"/>
+  <meta property="og:title" content="Bit Inverso — Estúdio Brasileiro de Jogos Indie"/>
+  <meta property="og:description" content="Estúdio BR de jogos indie com pixel art + estética anime. Sátira, humor ácido e narrativas fortes."/>
+  <meta property="og:url" content="https://bitinverso.com/"/>
+  <meta property="og:image" content="https://bitinverso.com/assets/og-image.webp"/>
+  <meta property="og:locale" content="pt_BR"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Bit Inverso — Estúdio Brasileiro de Jogos Indie"/>
+  <meta name="twitter:description" content="Pixel art + estética anime, humor ácido e narrativas memoráveis — feito no Brasil."/>
+  <meta name="twitter:image" content="https://bitinverso.com/assets/og-image.webp"/>
+  <meta name="twitter:site" content="@bitinverso"/>
+
+  <!-- CSS: inline critical loader; fallback noscript -->
+  <link rel="preload" href="assets/tailwind.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/tailwind.min.css"></noscript>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Exemplo: JetBrains Mono; carregue via CSS do projeto para reduzir CLS -->
+
+  <!-- Media Preloads (poster + vídeo responsivo) -->
+  <link rel="preload" as="image" href="assets/hero-poster.webp" fetchpriority="high">
+  <link rel="preload" as="video" href="assets/hero-background-1080.webm" type="video/webm" fetchpriority="high" media="(min-width: 769px)">
+  <link rel="preload" as="video" href="assets/hero-background-720.webm" type="video/webm" media="(max-width: 768px)">
+  <link rel="preload" as="video" href="assets/hero-background-480.webm" type="video/webm" media="(max-width: 480px)">
+
+  <!-- Icons -->
+  <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="icon" type="image/png" sizes="128x128" href="assets/favicon-128.png">
+  <link rel="icon" type="image/png" sizes="180x180" href="assets/favicon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192.png">
+  <link rel="icon" type="image/png" sizes="256x256" href="assets/favicon-256.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon-512.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon-180.png">
+
+  <!-- Structured Data (Organization + Video) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Bit Inverso",
+    "url": "https://bitinverso.com/",
+    "logo": "https://bitinverso.com/assets/logo_branca.webp",
+    "description": "Estúdio brasileiro de jogos indie focado em pixel art e estética anime. Humor ácido, sátira e narrativas memoráveis.",
+    "sameAs": [
+      "https://www.tiktok.com/@bitinverso",
+      "https://www.instagram.com/bitinverso"
+    ],
+    "foundingDate": "2025-07",
+    "areaServed": "BR",
+    "knowsLanguage": "pt-BR"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "Bit Inverso — Hero Background",
+    "description": "Loop de fundo com estética glitch/pixel art do estúdio brasileiro Bit Inverso.",
+    "thumbnailUrl": "https://bitinverso.com/assets/hero-poster.webp",
+    "uploadDate": "2025-01-01",
+    "inLanguage": "pt-BR",
+    "contentUrl": "https://bitinverso.com/assets/hero-background-1080.mp4",
+    "embedUrl": "https://bitinverso.com/",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Bit Inverso",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://bitinverso.com/assets/logo_branca.webp"
+      }
+    }
+  }
+  </script>
+
+  <!-- Defer scripts não-críticos (mantido fora do <head> quando possível) -->
 </head>
 <body class="min-h-screen bg-black text-white relative overflow-x-hidden">
 <!-- Pixel Grid Background -->
