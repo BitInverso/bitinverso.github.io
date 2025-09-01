@@ -1,8 +1,6 @@
-
-module.exports = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-    ...(process.env.NODE_ENV === 'production' ? { cssnano: { preset: 'default' } } : {})
-  }
-}
+import tailwindcss from 'tailwindcss';
+import autoprefixer from 'autoprefixer';
+import cssnano from 'cssnano';
+export default (ctx) => ({
+  plugins: [tailwindcss, autoprefixer, ...(ctx.env==='production' ? [cssnano({preset:'default'})] : [])]
+});

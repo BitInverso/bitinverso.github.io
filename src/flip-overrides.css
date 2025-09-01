@@ -61,3 +61,64 @@
   [id] { scroll-margin-top: var(--nav-h); }
   .hero, .carousel, .hero-slide { scroll-margin-top: calc(var(--nav-h) + 8px); }
 }
+
+/* 1) Limite transições a propriedades baratas (nada de 'all' e box-shadow) */
+#games .game-card{
+  transition: transform .28s cubic-bezier(.2,.8,.2,1), border-color .2s ease;
+}
+#games .game-card:hover{
+  transform: translateY(-6px) scale(1.01);
+  /* sombra mais leve para reduzir blur radius */
+  box-shadow: 0 8px 22px rgba(0,0,0,.32);
+}
+
+/* 2) Card faces: só transform/opacity (já ajuda o flip/crossfade) */
+#games .card-face{
+  transition: transform .45s ease, opacity .22s ease;
+}
+
+/* 3) Desligue blur no mobile (coarse) por padrão — liga só em desktop */
+@media (hover:none) and (pointer:coarse){
+  #games .card-face{ backdrop-filter: none !important; }
+}
+
+/* 4) Renderização preguiçosa dos cards offscreen (Chromium / Safari 17+) */
+@supports (content-visibility: auto){
+  #games .game-card{
+    content-visibility: auto;
+    contain-intrinsic-size: 500px 300px; /* reserva de layout aproximada */
+  }
+}
+
+/* 6) 'will-change' só quando necessário (classe .wc será ligada por JS) */
+#games .game-card.wc .card-3d,
+#games .game-card.wc .card-face{
+  will-change: transform, opacity;
+}
+
+#games .game-card{
+  box-shadow: 0 4px 16px rgba(0,0,0,.28);
+}
+#games .game-card:hover{
+  box-shadow: 0 10px 24px rgba(0,0,0,.34);
+}
+
+/* O contêiner do card não recebe transform (não achata o 3D do filho) */
+#games .game-card { transform: none !important; }
+
+/* 3D robusto */
+#games .game-card { perspective: 1000px; }
+#games .card-3d    { transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+#games .card-face  { -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0.01px); }
+#games .card-front { transform: rotateY(0deg)   translateZ(0.01px) !important; }
+#games .card-back  { transform: rotateY(180deg) translateZ(0.01px) !important; }
+
+/* Flip via classe (seu JS de click-only mantém isso) */
+#games .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
+#games .game-card { touch-action: manipulation; }
+
+/* Low-perf ainda vira cross-fade */
+.bi-low-perf #games .is-flipped .card-3d { transform: none !important; }
+.bi-low-perf #games .card-face.card-back { opacity: 0; pointer-events: none; }
+.bi-low-perf #games .is-flipped .card-face.card-front { opacity: 0; pointer-events: none; }
+.bi-low-perf #games .is-flipped .card-face.card-back  { opacity: 1; pointer-events: auto; }

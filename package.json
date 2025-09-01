@@ -1,16 +1,23 @@
 {
-  "name": "video-loop-page",
+  "name": "bit-inverso-site",
   "private": true,
-  "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build:css": "tailwindcss -c tailwind.config.js -i ./src/tailwind.css -o ./assets/tailwind.min.css --minify",
-    "dev:css": "tailwindcss -c tailwind.config.js -i ./src/tailwind.css -o ./assets/tailwind.css --watch",
-    "build": "npm run build:css"
+    "dev": "npm run dev:css & npm run dev:js",
+    "dev:css": "postcss src/tailwind.css --watch --dir assets --verbose --map",
+    "dev:js": "esbuild src/js/index.js --bundle --sourcemap --target=es2018 --outfile=assets/scripts.min.js",
+    "build": "npm run build:css && npm run build:js",
+    "build:css": "cross-env NODE_ENV=production postcss src/tailwind.css -o assets/tailwind.min.css",
+    "build:js": "esbuild src/js/index.js --bundle --minify --target=es2018 --outfile=assets/scripts.min.js --sourcemap=external",
+    "clean": "rm -f assets/tailwind.min.css assets/scripts.min.js assets/scripts.min.js.map"
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.10",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.45",
-    "cssnano": "^7.0.6"
+    "cross-env": "^10.0.0",
+    "cssnano": "^6.1.2",
+    "esbuild": "^0.23.0",
+    "postcss": "^8.4.47",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^3.4.10"
   }
 }

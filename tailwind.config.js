@@ -1,10 +1,11 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
+export default {content: [
     "./*.html",
     "./**/*.html",
-    "./assets/**/*.js",     // só seus JS
-    "!./node_modules/**",   // belt & suspenders
+    "!./node_modules/**",   // belt & suspenders,
+    "./src/**/*.js",           // <— importante: aponta pro seu JS fonte
+    "./src/**/*.ts",
+    "./src/**/*.jsx",
+    "./src/**/*.tsx"
   ],
   theme: {
     extend: {},
@@ -21,5 +22,5 @@ module.exports = {
   ],
   corePlugins: {
     preflight: true,
-  },
+  }
 };
