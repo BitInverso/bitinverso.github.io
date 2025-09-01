@@ -12,6 +12,7 @@ import { printConsoleArt } from "./modules/consoleArt.js";
 import { mountHeroPaddingMobile } from "./modules/heroPaddingMobile.js";
 import { mountGamesScrollGuard } from "./modules/gamesScrollGuard.js";
 import { mountAboutAndContactDecor } from "./modules/aboutAndContact.js";
+import { mountFlipIndicatorLabel } from './modules/flipIndicatorLabel.js';
 
 applyLowPerfHeuristicsSync();
 mountNavHeightVar();
@@ -19,6 +20,7 @@ mountMobileMenu();
 setupHeroVideo();
 mountHeroVisibility();
 mountSmartVideoDegrade();
+mountFlipIndicatorLabel();
 mountGamesFlip();
 mountEnhancedAnimations();
 mountNewsletter();

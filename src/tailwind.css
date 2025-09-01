@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -67,8 +66,6 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
   .carousel-indicators { min-height: 20px; }
 }
 
-
-
 @layer components {
   /* Flip perf modes */
   .card-3d { transform-style: preserve-3d; transition: transform .45s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
@@ -115,4 +112,180 @@ body,button,a{font-family:'JetBrains Mono',monospace;}
   }
 }
 
-@import 'flip-overrides.css';
+@layer components {
+  .is-flipped .card-3d {
+    transform: rotateY(180deg);
+    will-change: transform;
+  }
+
+  /* low-perf: remove 3D e usa opacidade; !important para vencer regras minificadas */
+  .bi-low-perf .is-flipped .card-3d {
+    transform: none !important;
+  }
+
+  .bi-low-perf .card-face.card-back {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bi-low-perf .is-flipped .card-face.card-front {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .bi-low-perf .is-flipped .card-face.card-back {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* transições leves */
+  .card-face {
+    transition: transform .5s ease, opacity .22s ease;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: transform, opacity;
+  }
+
+  /* respeita reduced motion sempre */
+  @media (prefers-reduced-motion: reduce) {
+    .card-3d, .card-face { transition: none !important; }
+    .is-flipped .card-3d { transform: none !important; }
+  }
+
+  /* segurança extra: quando Battery API sinalizar economia, marca também */
+  .bi-battery-saver .is-flipped .card-3d {
+    transform: none !important;
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    :root { --nav-h: calc(64px + env(safe-area-inset-top, 0px)); } /* valor inicial; será refinado por JS */
+    [data-reveal] {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .hero-viewport {
+      /* mantém o hero com altura total do viewport MENOS a navbar,
+        e empurra o conteúdo interno (inset:0) para baixo da navbar */
+      padding-top: var(--nav-h);
+      height: calc(100svh - var(--nav-h));
+      box-sizing: border-box; /* garante que o padding entra na caixa sem estourar layout */
+    }
+
+    /* âncoras: só no mobile precisamos compensar a navbar fixa */
+    [id] { scroll-margin-top: var(--nav-h); }
+    .hero, .carousel, .hero-slide { scroll-margin-top: calc(var(--nav-h) + 8px); }
+  }
+
+  /* 1) Limite transições a propriedades baratas (nada de 'all' e box-shadow) */
+  #games .game-card{
+    transition: transform .28s cubic-bezier(.2,.8,.2,1), border-color .2s ease;
+  }
+  #games .game-card:hover{
+    transform: translateY(-6px) scale(1.01);
+    /* sombra mais leve para reduzir blur radius */
+    box-shadow: 0 8px 22px rgba(0,0,0,.32);
+  }
+
+  /* 2) Card faces: só transform/opacity (já ajuda o flip/crossfade) */
+  #games .card-face{
+    transition: transform .45s ease, opacity .22s ease;
+  }
+
+  /* 3) Desligue blur no mobile (coarse) por padrão — liga só em desktop */
+  @media (hover:none) and (pointer:coarse){
+    #games .card-face{ backdrop-filter: none !important; }
+  }
+
+  /* 4) Renderização preguiçosa dos cards offscreen (Chromium / Safari 17+) */
+  @supports (content-visibility: auto){
+    #games .game-card{
+      content-visibility: auto;
+      contain-intrinsic-size: 500px 300px; /* reserva de layout aproximada */
+    }
+  }
+
+  /* 6) 'will-change' só quando necessário (classe .wc será ligada por JS) */
+  #games .game-card.wc .card-3d,
+  #games .game-card.wc .card-face{
+    will-change: transform, opacity;
+  }
+
+  #games .game-card{
+    box-shadow: 0 4px 16px rgba(0,0,0,.28);
+  }
+  #games .game-card:hover{
+    box-shadow: 0 10px 24px rgba(0,0,0,.34);
+  }
+
+  /* O contêiner do card não recebe transform (não achata o 3D do filho) */
+  #games .game-card { transform: none !important; }
+
+  /* 3D robusto */
+  #games .game-card { perspective: 1000px; }
+  #games .card-3d    { transform-style: preserve-3d; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  #games .card-face  { -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translateZ(0.01px); }
+  #games .card-front { transform: rotateY(0deg)   translateZ(0.01px) !important; }
+  #games .card-back  { transform: rotateY(180deg) translateZ(0.01px) !important; }
+
+  /* Flip via classe (seu JS de click-only mantém isso) */
+  #games .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
+  #games .game-card { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0); }
+
+  /* Low-perf ainda vira cross-fade */
+  .bi-low-perf #games .is-flipped .card-3d { transform: none !important; }
+  .bi-low-perf #games .card-face.card-back { opacity: 0; pointer-events: none; }
+  .bi-low-perf #games .is-flipped .card-face.card-front { opacity: 0; pointer-events: none; }
+  .bi-low-perf #games .is-flipped .card-face.card-back  { opacity: 1; pointer-events: auto; }
+
+  .flip-indicator {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+  }
+
+  .flip-icon {
+    font-size: 16px;
+    animation: rotateHint 2s infinite ease-in-out;
+  }
+
+  .card-3d:hover .flip-indicator {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @keyframes rotateHint {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .flip-indicator {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .flip-indicator span {
+      font-size: 11px;
+    }
+  }
+
+  /* Touch feedback for mobile */
+  @media (hover: none) {        
+    .flip-indicator {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
