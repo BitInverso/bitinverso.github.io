@@ -115,7 +115,7 @@
 
 /* Flip via classe (seu JS de click-only mantém isso) */
 #games .game-card.is-flipped .card-3d { transform: rotateY(180deg); }
-#games .game-card { touch-action: manipulation; }
+#games .game-card { touch-action: manipulation; -webkit-tap-highlight-color: rgba(0,0,0,0); }
 
 /* Low-perf ainda vira cross-fade */
 .bi-low-perf #games .is-flipped .card-3d { transform: none !important; }
