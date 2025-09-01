@@ -1,7 +1,8 @@
 name: Optimize & Deploy to Pages
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,26 +15,77 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  encode-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Instalar ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Permissões no script
+        run: chmod +x tools/encode_videos.sh
+
+      - name: Re-encoder vídeos (MP4 + WEBM em 480/720/1080)
+        run: |
+          tools/encode_videos.sh assets/hero-background.mp4
+          # ou: tools/encode_videos.sh assets/hero-background.mp4 --force
+
+      - name: Validar saídas
+        run: |
+          test -f assets/hero-background-480.webm
+          test -f assets/hero-background-480.mp4
+          test -f assets/hero-background-720.webm
+          test -f assets/hero-background-720.mp4
+          test -f assets/hero-background-1080.webm
+          test -f assets/hero-background-1080.mp4
+
+      # >>> NOVO: publica os assets gerados para o próximo job
+      - name: Upload encoded assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: encoded-assets
+          path: |
+            assets/hero-background-*.webm
+            assets/hero-background-*.mp4
+          if-no-files-found: error
+
   build:
+    needs: encode-assets
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # >>> NOVO: baixa os assets gerados e sobrescreve os atuais
+      - name: Download encoded assets
+        uses: actions/download-artifact@v4
+        with:
+          name: encoded-assets
+          path: assets
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Install FFmpeg
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+          node-version: "20"
+
       - name: Install deps (Node)
         run: npm ci || true
-      - name: Run video encoder
-        run: bash tools/encode_videos.sh
+
       - name: Build CSS
         run: NODE_ENV=production npm run build --if-present
-      - name: Upload artifact
+
+      # Se o site é servido a partir da raiz do repo (index.html na raiz), manter "."
+      # Caso seu build gere uma pasta (ex.: "dist"), troque path: dist
+      - name: Upload artifact (site)
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
