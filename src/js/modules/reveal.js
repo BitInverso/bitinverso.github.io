@@ -1,42 +1,48 @@
-import { $, $$ } from "../utils/dom.js";
+// src/js/modules/reveal.js
+import { $$ } from "../utils/dom.js";
+
 export function mountRevealOnScroll(){
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-                || matchMedia('(max-width: 820px)').matches
-                || matchMedia('(hover: none) and (pointer: coarse)').matches;
-  const nodes = document.querySelectorAll('[data-reveal]');
+  // evita inicializar 2x
+  if (window.__revealInit) return;
+  window.__revealInit = true;
+
+  const nodes = Array.from(document.querySelectorAll('[data-reveal]'));
   if (!nodes.length) return;
-  if (!('IntersectionObserver' in window)){
-    nodes.forEach(n=>{ n.classList.add('is-visible'); n.style.animationPlayState='running'; });
+
+  // prepara: só aqui marcamos como "escondido"
+  nodes.forEach(n => n.classList.add('reveal-init'));
+
+  const isTouch = matchMedia('(hover: none), (pointer: coarse)').matches
+               || /Android|iP(hone|ad|od)/i.test(navigator.userAgent);
+  const prefersReduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // em mobile/coarse ou reduced-motion: mostra direto
+  if (!('IntersectionObserver' in window) || isTouch || prefersReduce){
+    nodes.forEach(n => { n.classList.add('is-visible'); n.classList.remove('reveal-init'); });
     return;
   }
-  if (isMobile){
-    document.querySelectorAll('#about [data-reveal], #games [data-reveal]').forEach(n=>{
-      n.classList.add('is-visible'); n.style.animationPlayState='running';
-    });
-  }
-  const nav = document.querySelector('.navbar');
-  const navH = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
+
+  // IO enxuto e estável (sem cálculos de navbar)
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries){
       if (e.isIntersecting){
-        e.target.classList.add('is-visible');
-        e.target.style.animationPlayState='running';
-        io.unobserve(e.target);
+        const el = e.target;
+        el.classList.add('is-visible');
+        el.classList.remove('reveal-init');
+        io.unobserve(el);
       }
-    });
-  }, { rootMargin: `-${navH + 8}px 0px -15% 0px`, threshold: 0.08 });
-  nodes.forEach(n=>{
-    if (!n.classList.contains('is-visible')){
-      n.style.animationPlayState = 'paused';
-      io.observe(n);
     }
-  });
-  window.addEventListener('resize', ()=>{
-    $$('#about [data-reveal], #games [data-reveal], [data-reveal]').forEach(n=>{
-      const r = n.getBoundingClientRect();
-      if (r.top < innerHeight && r.bottom > 0){
-        n.classList.add('is-visible'); n.style.animationPlayState='running';
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
+
+  nodes.forEach(n => io.observe(n));
+
+  // fail-safe: se algo bugar, revela tudo depois de 2.5s
+  setTimeout(() => {
+    nodes.forEach(n => {
+      if (!n.classList.contains('is-visible')){
+        n.classList.add('is-visible');
+        n.classList.remove('reveal-init');
       }
     });
-  }, {passive:true});
+  }, 2500);
 }
