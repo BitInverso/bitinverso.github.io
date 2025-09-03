@@ -420,6 +420,19 @@
         __allowPersist: true
     };
 
+    const SAVE_KEY = 'NJ:SAVE:v2';     // mude a versão se quiser invalidar saves antigos
+    let HAS_LOADED_FROM_STORAGE = false;
+    let AUTOSAVE_ENABLED = false;      // só liga depois do Start
+
+    const persisted = loadGameFromStorage();
+    if (persisted){
+      // merge superficial - mantenha objetos esperados
+      gameState = Object.assign({}, gameState, persisted);
+    } else {
+      // Primeiro boot: NÃO salve ainda. Espere o usuário apertar Start.
+      HAS_LOADED_FROM_STORAGE = false;
+    }
+
     /* =======================
       Work system (jobs & events)
     ========================*/
@@ -512,6 +525,122 @@
       { words:["すみません","駅","は","どこ","です","か"], answer:"すみません駅はどこですか" },
     ];
 
+    // garante a estrutura, se ainda não tiver
+    function ensureJobs(){
+      if (!gameState.jobs) gameState.jobs = {};
+      if (!gameState.jobs.unlocked) gameState.jobs.unlocked = {};
+      if (!Array.isArray(gameState.jobs.pendingEventQueue)) gameState.jobs.pendingEventQueue = [];
+    }
+
+    // use isto para enfileirar eventos (quando processar horas offline etc.)
+    function pushWorkEvent(ev){
+      ensureJobs();
+      gameState.jobs.pendingEventQueue.push(ev);
+      if (AUTOSAVE_ENABLED) saveGameToStorage(); // só salva depois do Start
+    }
+
+    // chame esta função para abrir o PRÓXIMO evento da fila (se puder)
+    function maybeOpenNextWorkEvent(){
+      ensureJobs();
+
+      // não abrir durante boot (antes do Start) nem enquanto overlays críticos estiverem ativos
+      if (!AUTOSAVE_ENABLED) return;                        // evita “popar” no boot
+      if (gameState.inDialogue || gameState.inMinigame || gameState.inBattle) return;
+
+      // trava reentrância (garante um evento por vez)
+      gameState.uiLocks = gameState.uiLocks || {};
+      if (gameState.uiLocks.workEventOpen) return;
+
+      const q = gameState.jobs.pendingEventQueue;
+      if (!q.length) return;
+
+      const ev = q.shift();
+      saveGameToStorage();                                   // gated
+
+      gameState.uiLocks.workEventOpen = true;
+      try {
+        openWorkEvent(ev);                                   // sua função que mostra o overlay
+      } catch (e) {
+        console.warn('openWorkEvent failed:', e);
+        gameState.uiLocks.workEventOpen = false;            // libera se falhar
+      }
+    }
+
+    // chame isto ao FECHAR o overlay de evento (no botão "Entendi"/"Fechar")
+    function closeWorkEvent(){
+      gameState.uiLocks = gameState.uiLocks || {};
+      gameState.uiLocks.workEventOpen = false;
+      if (AUTOSAVE_ENABLED) saveGameToStorage();
+    }
+
+    function tryPromote() {
+      gameState.jobs = gameState.jobs || {};
+      const jobId = gameState.jobs.currentJobId || 'cafe';
+      const job = JOBS ? JOBS[jobId] : null;
+      if (!job) return;
+
+      const idx = gameState.jobs.currentRankIndex || 0;
+      if (idx < job.ranks.length - 1) {
+        gameState.jobs.currentRankIndex = idx + 1;
+        const newRank = job.ranks[gameState.jobs.currentRankIndex];
+        const rateTxt = (newRank && typeof newRank.rate !== 'undefined') ? ` (+${newRank.rate}/h)` : '';
+        showNotification(`Promotion! New rank: ${newRank?.name || '—'}${rateTxt}.`, 4000);
+      } else {
+        showNotification('You are already at the top of this career!');
+      }
+
+      // persiste (gated)
+      if (typeof saveGameToStorage === 'function') saveGameToStorage();
+    }
+
+    function resolveWorkChoice(ev, effects) {
+      // sanity
+      effects = effects || {};
+      gameState.relationships = gameState.relationships || {};
+      gameState.jobs = gameState.jobs || {};
+
+      // coins
+      if (typeof effects.coins === 'number' && effects.coins !== 0) {
+        gameState.coins = (gameState.coins || 0) + effects.coins;
+        if (typeof updateCoins === 'function') updateCoins();
+        showNotification(effects.coins > 0
+          ? `Bonus +${effects.coins} coins!`
+          : `Cost ${Math.abs(effects.coins)} coins.`
+        );
+      }
+
+      // relação com Takeshi
+      if (typeof effects.relTakeshi === 'number' && effects.relTakeshi !== 0) {
+        gameState.relationships['takeshi'] = (gameState.relationships['takeshi'] || 0) + effects.relTakeshi;
+      }
+
+      // chance de promoção (clamp 0..0.5 por segurança)
+      let p = 0;
+      if (typeof effects.promoChance === 'number') p += Math.max(0, effects.promoChance);
+      // bônus por relacionamento (máx +0.10)
+      p += Math.max(0, Math.min(0.10, (gameState.relationships['takeshi'] || 0) * 0.02));
+      // bônus por horas trabalhadas (máx +0.10)
+      p += Math.min(0.10, (gameState.jobs.totalOfflineHoursWorked || 0) * 0.002);
+      p = Math.max(0, Math.min(0.5, p)); // clamp final
+
+      if (Math.random() < p) {
+        tryPromote();
+      } else {
+        showNotification('Event resolved. Keep it up!');
+      }
+
+      // persiste (respeita AUTOSAVE_ENABLED)
+      if (typeof saveGameToStorage === 'function') saveGameToStorage();
+
+      // fecha overlay e libera fila
+      if (typeof closeWorkEvent === 'function') closeWorkEvent();
+
+      // se você usa fila, pode tentar abrir o próximo:
+      if (typeof maybeOpenNextWorkEvent === 'function') maybeOpenNextWorkEvent();
+    }
+
+    // (se já definiu em outro lugar, reaproveite)
+    const REAL_MS_PER_JOB_HOUR = window.REAL_MS_PER_JOB_HOUR || (3*60*1000); // 3 min reais = 1h de trabalho
     function currentMinutesOfDay() {
         const h = Math.floor(gameState.time);
         const m = Math.floor((gameState.time - h) * 60);
@@ -1329,7 +1458,7 @@
                 gameState.jobs.unlocked.cafe = true;
 
                 try {
-                    saveNow && saveNow();
+                    saveGameToStorage();
                 } catch {}
                 showNotification('Job unlocked: Cafe! Open the Work panel.');
             }
@@ -1389,55 +1518,76 @@
       showNotification('There is no one nearby to interact with.');
     }
 
-    /* =============
-      SAVE SYSTEM
-    ==============*/
-    const STORAGE_KEY = 'nihongo-journey-save-v1';
-
-    function loadSave() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) {
-                gameState.__allowPersist = false;
-                return;
-            }
-            const data = JSON.parse(raw);
-            gameState = Object.assign({}, gameState, data);
-            gameState.__allowPersist = true;
-        } catch (e) {
-            console.warn('loadSave error', e);
-            gameState.__allowPersist = false;
-        }
+    function loadGameFromStorage(){
+      try{
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        HAS_LOADED_FROM_STORAGE = true;
+        return data;
+      }catch(e){
+        console.warn('loadGameFromStorage failed:', e);
+        return null;
+      }
     }
 
-    function saveNow() {
-        if (!gameState.__allowPersist) return;
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-        } catch (e) {
-            console.warn('saveNow error', e);
-        }
+    function saveGameToStorage(){
+      if (!AUTOSAVE_ENABLED) return;          // <-- trava salvamento antes do Start
+      try{
+        const payload = JSON.stringify(gameState);
+        localStorage.setItem(SAVE_KEY, payload);
+      }catch(e){
+        console.warn('saveGameToStorage failed:', e);
+      }
+    }
+
+    function clearGameStorage(){
+      try{
+        localStorage.removeItem(SAVE_KEY);
+      }catch(e){
+        console.warn('clearGameStorage failed:', e);
+      }
+    }
+
+    function factoryReset(){
+      AUTOSAVE_ENABLED = false;    // evita repovoar instantaneamente
+      clearGameStorage();
+      // opcional: limpar timers, overlays, etc.
+      location.reload();           // recarrega a página sem save
     }
 
     function stampLastSeen() {
-        if (!gameState.__allowPersist) return;
+        if (!AUTOSAVE_ENABLED) return;              // gate global
         if (!gameState.jobs || !gameState.jobs.isOnShift) return;
+
         gameState.jobs.lastSeenAt = Date.now();
-        saveNow();
-    }
-    window.addEventListener('beforeunload', stampLastSeen);
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'hidden') stampLastSeen();
+        saveGameToStorage();                        // usa o helper com gate
+      }
+      window.addEventListener('beforeunload', ()=>{
+      if (!AUTOSAVE_ENABLED) return; // não salva enquanto está em boot/reset
+      try{
+        // se quiser, só grave um timestamp simples no state
+        gameState._lastSeenAt = Date.now();
+        saveGameToStorage();
+      }catch{}
     });
 
-    function init() {
-        loadSave();
+    (function hydrateFromStorage(){
+      const persisted = loadGameFromStorage();
+      if (persisted){
+        gameState = Object.assign({}, gameState, persisted);
+      }
+    })();
 
-        if (gameState.storyProgress && gameState.storyProgress.metTakeshi) {
-            if (!gameState.jobs.unlocked.cafe) {
-                gameState.jobs.unlocked.cafe = true;
-                saveNow();
-            }
+    function init() {
+        if (gameState.storyProgress?.metTakeshi) {
+          gameState.jobs = gameState.jobs || { unlocked:{} };
+          gameState.jobs.unlocked = gameState.jobs.unlocked || {};
+          if (!gameState.jobs.unlocked.cafe) {
+            gameState.jobs.unlocked.cafe = true;
+            // NÃO salvar aqui; marca para persistir depois do Start
+            gameState._needsPersist = true;
+          }
         }
 
         const MINUTES_PER_GAME_HOUR = 3; // 3 real minutes = 1 "work hour"
@@ -1446,14 +1596,14 @@
         const diffMs = now - lastLogin;
         const offlineHours = diffMs / (1000 * 60 * MINUTES_PER_GAME_HOUR);
 
-        if (gameState.jobs.isOnShift && gameState.jobs.currentJobId) {
-            processOfflineWork(offlineHours);
-            maybeOpenNextWorkEvent();
+        if (gameState.jobs?.isOnShift && gameState.jobs.currentJobId) {
+          processOfflineWork(offlineHours);
+          maybeOpenNextWorkEvent();
         }
 
+        gameState.jobs = gameState.jobs || {};
         gameState.jobs.lastSeenAt = now;
-        saveNow();
-
+        saveGameToStorage(); // <- NÃO salva nada antes do Start (usa o gate AUTOSAVE_ENABLED)
         startButton.addEventListener('click', () => {
             gameState.inDialogue = false;
             gameState.inMinigame = false;
@@ -1473,7 +1623,7 @@
             startScreen.style.display = 'none';
             gameState.gameStarted = true;
             gameState.__allowPersist = true;
-            saveNow();
+            saveGameToStorage();
             startGameTime();
             gameLoop();
         });
@@ -1565,27 +1715,45 @@
         document.getElementById('job-close').addEventListener('click', () => {
             jobOv.style.display = 'none';
         });
+        // START SHIFT
         document.getElementById('job-start').addEventListener('click', () => {
-            if (!gameState.jobs.unlocked.cafe) {
-                showNotification('No job unlocked.');
-                return;
-            }
-            gameState.jobs.isOnShift = true;
-            saveNow();
-            renderJobStatus();
-            showNotification('Shift started. Coins will accrue while you are offline.');
+          ensureJobs();
+          if (!gameState.jobs.unlocked.cafe){
+            showNotification('No job unlocked.');
+            return;
+          }
+          gameState.jobs.isOnShift = true;
+          gameState.jobs.currentJobId = gameState.jobs.currentJobId || 'cafe';
+          gameState.jobs.lastSeenAt = Date.now();             // âncora para contar offline depois
+          saveGameToStorage();                                 // << gated por AUTOSAVE_ENABLED
+          renderJobStatus();
+          showNotification('Shift started. Coins will accrue while you are offline.');
         });
+        // STOP SHIFT (opção: “liquidar” o que ficou pendente até agora)
         document.getElementById('job-stop').addEventListener('click', () => {
-            if (!gameState.jobs.unlocked.cafe) {
-                showNotification('No job unlocked.');
-                return;
-            }
-            gameState.jobs.isOnShift = false;
-            saveNow();
-            renderJobStatus();
-            showNotification('Shift ended.');
-        });
+          ensureJobs();
+          if (!gameState.jobs.unlocked.cafe){
+            showNotification('No job unlocked.');
+            return;
+          }
 
+          // Se quiser, processa imediatamente o período desde o último carimbo:
+          if (gameState.jobs.isOnShift && gameState.jobs.lastSeenAt){
+            const now = Date.now();
+            const ms = Math.max(0, now - gameState.jobs.lastSeenAt);
+            const offlineHours = ms / REAL_MS_PER_JOB_HOUR;
+            if (offlineHours > 0){
+              try { processOfflineWork(offlineHours); } catch {}
+              try { maybeOpenNextWorkEvent(); } catch {}
+            }
+          }
+
+          gameState.jobs.isOnShift = false;
+          gameState.jobs.lastSeenAt = Date.now();             // carimba fim do turno
+          saveGameToStorage();                                 // << gated
+          renderJobStatus();
+          showNotification('Shift ended.');
+        });
         document.getElementById('workevent-close').addEventListener('click', closeWorkEvent);
         bindBattleButtonsJP();
     }
@@ -2060,72 +2228,6 @@
         if (DBG.mg) console.debug('[UI] open map');
     });
 
-    function maybeOpenNextWorkEvent() {
-        if (gameState.inDialogue || gameState.inMinigame) return;
-        if (gameState.jobs.pendingEventQueue.length === 0) return;
-        const ev = gameState.jobs.pendingEventQueue.shift();
-        saveNow();
-        openWorkEvent(ev);
-    }
-
-    function openWorkEvent(ev) {
-        const ov = document.getElementById('workevent-overlay');
-        const t = document.getElementById('workevent-title');
-        const body = document.getElementById('workevent-text');
-        const box = document.getElementById('workevent-choices');
-        t.textContent = ev.title;
-        body.textContent = ev.text;
-        box.innerHTML = '';
-        ev.choices.forEach((c) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn';
-            btn.textContent = c.label;
-            btn.onclick = () => resolveWorkChoice(ev, c.effects);
-            box.appendChild(btn);
-        });
-        ov.style.display = 'flex';
-    }
-
-    function closeWorkEvent() {
-        document.getElementById('workevent-overlay').style.display = 'none';
-        setTimeout(maybeOpenNextWorkEvent, 150);
-    }
-
-    function resolveWorkChoice(ev, effects) {
-        if (effects.coins) {
-            gameState.coins = (gameState.coins || 0) + effects.coins;
-            updateCoins();
-            if (effects.coins > 0) showNotification(`Bonus +${effects.coins} coins!`);
-            if (effects.coins < 0) showNotification(`Cost ${Math.abs(effects.coins)} coins.`);
-        }
-        if (effects.relTakeshi) {
-            gameState.relationships['takeshi'] = (gameState.relationships['takeshi'] || 0) + effects.relTakeshi;
-        }
-        let p = Math.max(0, (effects.promoChance || 0));
-        p += Math.max(0, Math.min(0.10, (gameState.relationships['takeshi'] || 0) * 0.02));
-        p += Math.min(0.10, (gameState.jobs.totalOfflineHoursWorked || 0) * 0.002);
-        if (Math.random() < p) {
-            tryPromote();
-        } else {
-            showNotification('Event resolved. Keep it up!');
-        }
-        saveNow();
-        closeWorkEvent();
-    }
-
-    function tryPromote() {
-        const job = JOBS[gameState.jobs.currentJobId || 'cafe'];
-        if (!job) return;
-        if (gameState.jobs.currentRankIndex < job.ranks.length - 1) {
-            gameState.jobs.currentRankIndex++;
-            const newRank = job.ranks[gameState.jobs.currentRankIndex];
-            showNotification(`Promotion! New rank: ${newRank.name} (+${newRank.rate}/h).`, 4000);
-        } else {
-            showNotification('You are already at the top of this career!');
-        }
-        saveNow();
-    }
-
     function makeRandomWorkEvent(job) {
         const templates = [{
                 title: `${job.name}: delicate situation with a customer`,
@@ -2209,39 +2311,88 @@
         return templates[Math.floor(Math.random() * templates.length)];
     }
 
-    function processOfflineWork(offlineHours) {
-        const jobId = gameState.jobs.currentJobId;
-        if (!jobId) return;
-        const job = JOBS[jobId];
-        const rank = job.ranks[gameState.jobs.currentRankIndex] || job.ranks[0];
+    function processOfflineWork(offlineHours){
+      // sanidade de entrada
+      if (!Number.isFinite(offlineHours) || offlineHours <= 0) return;
 
-        const coinsEarned = Math.floor(offlineHours * rank.rate);
-        if (coinsEarned > 0) {
-            gameState.coins = (gameState.coins || 0) + coinsEarned;
-            updateCoins();
-            showNotification(`You worked offline for ${offlineHours.toFixed(1)}h and earned ${coinsEarned} coins.`);
-        }
+      // garante estrutura básica
+      gameState.jobs = gameState.jobs || {};
+      gameState.jobs.unlocked = gameState.jobs.unlocked || {};
+      gameState.jobs.pendingEventQueue = Array.isArray(gameState.jobs.pendingEventQueue) ? gameState.jobs.pendingEventQueue : [];
+      gameState.jobs.currentRankIndex = gameState.jobs.currentRankIndex || 0;
+      gameState.jobs.totalOfflineHoursWorked = gameState.jobs.totalOfflineHoursWorked || 0;
+      gameState.jobs.totalHoursWorked = gameState.jobs.totalHoursWorked || 0;
+      gameState.jobs.eventsTriggered = gameState.jobs.eventsTriggered || 0;
+      gameState.jobs.extraEventAnchor = gameState.jobs.extraEventAnchor || 0;
 
-        gameState.jobs.totalOfflineHoursWorked += offlineHours;
-        gameState.jobs.totalHoursWorked = (gameState.jobs.totalHoursWorked || 0) + offlineHours;
+      const jobId = gameState.jobs.currentJobId;
+      if (!jobId || !window.JOBS || !JOBS[jobId]) return; // sem job ativo
 
-        while (gameState.jobs.eventsTriggered < job.eventMilestones.length &&
-            gameState.jobs.totalHoursWorked >= job.eventMilestones[gameState.jobs.eventsTriggered]) {
-            gameState.jobs.pendingEventQueue.push(makeRandomWorkEvent(job));
-            gameState.jobs.eventsTriggered++;
-        }
+      const job = JOBS[jobId];
+      const ranks = Array.isArray(job.ranks) ? job.ranks : [];
+      const rank = ranks[gameState.jobs.currentRankIndex] || ranks[0] || { rate: 0 };
 
-        const lastAnchor = job.eventMilestones.at(-1) || 0;
-        if (gameState.jobs.eventsTriggered >= job.eventMilestones.length && gameState.jobs.extraEventAnchor === 0) {
-            gameState.jobs.extraEventAnchor = lastAnchor;
+      const rate = Number(rank.rate) || 0;
+      const coinsEarned = Math.floor(offlineHours * rate);
+
+      if (coinsEarned !== 0){
+        gameState.coins = (gameState.coins || 0) + coinsEarned;
+        if (typeof updateCoins === 'function') updateCoins();
+        const hrs = offlineHours.toFixed(1);
+        showNotification(
+          coinsEarned > 0
+            ? `You worked offline for ${hrs}h and earned ${coinsEarned} coins.`
+            : `You worked offline for ${hrs}h and lost ${Math.abs(coinsEarned)} coins.`
+        );
+      }
+
+      // acumula horas
+      gameState.jobs.totalOfflineHoursWorked += offlineHours;
+      gameState.jobs.totalHoursWorked += offlineHours;
+
+      // milestones de eventos
+      const milestones = Array.isArray(job.eventMilestones) ? job.eventMilestones : [];
+
+      // helper de fila (usa pushWorkEvent se existir; senão, faz fallback)
+      const enqueueEvent = (ev)=>{
+        if (typeof pushWorkEvent === 'function') {
+          pushWorkEvent(ev);
+        } else {
+          gameState.jobs.pendingEventQueue.push(ev);
+          if (typeof saveGameToStorage === 'function') saveGameToStorage(); // gated
         }
-        while (gameState.jobs.eventsTriggered >= job.eventMilestones.length &&
-            gameState.jobs.totalHoursWorked >= gameState.jobs.extraEventAnchor + 30) {
-            gameState.jobs.pendingEventQueue.push(makeRandomWorkEvent(job));
-            gameState.jobs.extraEventAnchor += 30;
+      };
+
+      // eventos nas milestones fixas
+      while (
+        gameState.jobs.eventsTriggered < milestones.length &&
+        gameState.jobs.totalHoursWorked >= milestones[gameState.jobs.eventsTriggered]
+      ){
+        if (typeof makeRandomWorkEvent === 'function') {
+          enqueueEvent(makeRandomWorkEvent(job));
         }
-        saveNow();
+        gameState.jobs.eventsTriggered++;
+      }
+
+      // eventos extras a cada +30h após a última milestone
+      const lastAnchor = milestones.length ? milestones[milestones.length - 1] : 0;
+      if (gameState.jobs.eventsTriggered >= milestones.length && gameState.jobs.extraEventAnchor === 0){
+        gameState.jobs.extraEventAnchor = lastAnchor;
+      }
+      while (
+        gameState.jobs.eventsTriggered >= milestones.length &&
+        gameState.jobs.totalHoursWorked >= (gameState.jobs.extraEventAnchor + 30)
+      ){
+        if (typeof makeRandomWorkEvent === 'function') {
+          enqueueEvent(makeRandomWorkEvent(job));
+        }
+        gameState.jobs.extraEventAnchor += 30;
+      }
+
+      // persiste (respeita AUTOSAVE_ENABLED)
+      if (typeof saveGameToStorage === 'function') saveGameToStorage();
     }
+
 
     function shuffle(arr){
       const a = arr.slice();
@@ -2482,6 +2633,8 @@
         gameState.encounterTimerId = null;
       }
     }
+
+    window.factoryReset = factoryReset;
   </script>
 </body>
 </html>
