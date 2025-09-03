@@ -211,7 +211,55 @@
 
     /* fade out suave do overlay todo */
     .victory-out { animation: vicOut .35s ease-out forwards; }
-    @keyframes vicOut { to { opacity:0 } }
+    /* === Earthquake (full viewport) === */
+    #eq-overlay{
+      position: fixed; inset: 0; z-index: 180; display: none;
+      pointer-events: auto;        /* recebe cliques nas peças */
+    }
+
+    #eq-matrix{
+      position: absolute; inset: 0;
+      width: 100vw; height: 100vh; /* cobre o viewport */
+      opacity: 0.35;
+    }
+
+    #eq-layer{                     /* camada das peças clicáveis */
+      position: absolute; inset: 0;
+      width: 100vw; height: 100vh;
+    }
+
+    .eq-piece{
+      position: absolute;
+      padding: 6px 10px; border-radius: 8px;
+      background: rgba(20,255,120,0.14);
+      border: 1px solid rgba(80,255,160,0.35);
+      color: #aaffcc; font-weight: 700; user-select: none; cursor: pointer;
+      text-shadow: 0 0 6px rgba(0,255,140,.6);
+      will-change: transform;
+      transform: translate3d(0,0,0);
+    }
+    .eq-piece.sel{ outline:2px solid #e9c46a; background:rgba(233,196,106,.2); color:#fff; }
+
+    /* tremor no card (opcional manter) */
+    #battle-card.quake { animation: quakeShake .08s linear infinite; }
+    @keyframes quakeShake {
+      0%{ transform:translate(0,0) rotate(0deg) }
+      25%{ transform:translate(-2px,1px) rotate(-0.2deg) }
+      50%{ transform:translate(2px,-1px) rotate(0.2deg) }
+      75%{ transform:translate(-1px,-2px) rotate(0deg) }
+      100%{ transform:translate(0,0) rotate(0deg) }
+    }
+    /* Skills modal bem simples */
+    #skills-modal{
+      position:absolute; inset:0; display:none; z-index:170;
+      align-items:center; justify-content:center; background:rgba(0,0,0,.55);
+    }
+    #skills-card{
+      background:#0e1826; border:1px solid #778da9; border-radius:12px;
+      padding:14px; min-width:260px; color:#e0e1dd; box-shadow:0 10px 30px rgba(0,0,0,.4);
+    }
+    #skills-list .skill-btn{ width:100%; margin-top:8px; }
+
   </style>
 </head>
 <body>
@@ -351,6 +399,23 @@
         <div class="victory-confetti"></div>
         <div class="victory-coins"></div>
         <div class="victory-banner">Victory!</div>
+      </div>
+      <div id="skills-modal">
+        <div id="skills-card">
+          <div style="font-weight:700; margin-bottom:6px;">Select a Skill</div>
+          <div id="skills-list">
+            <button id="skill-earthquake" class="btn skill-btn">Earthquake</button>
+          </div>
+          <div style="text-align:right; margin-top:10px;">
+            <button id="skills-close" class="btn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earthquake overlay -->
+      <div id="eq-overlay">
+        <canvas id="eq-matrix"></canvas>
+        <div id="eq-layer"></div>
       </div>
       <div id="battle-title">A wild challenge appeared!</div>
 
@@ -597,6 +662,8 @@
     const SAVE_KEY = 'NJ:SAVE:v2';     // mude a versão se quiser invalidar saves antigos
     let HAS_LOADED_FROM_STORAGE = false;
     let AUTOSAVE_ENABLED = false;      // só liga depois do Start
+    let matrixRAF = 0, mxCtx = null, mxCols = [], mxW=0, mxH=0, mxFont=16;
+
 
     const persisted = loadGameFromStorage();
     if (persisted){
@@ -700,6 +767,25 @@
       { words:["ここ","は","公園","です"],          answer:"ここは公園です" },
       { words:["コーヒー","を","お願いします"],       answer:"コーヒーをお願いします" },
       { words:["すみません","駅","は","どこ","です","か"], answer:"すみません駅はどこですか" },
+    ];
+
+
+    gameState.battle.skillActive = false;
+    // HP do inimigo (se usar outra fonte, ajuste aqui também)
+    const ENEMY_MAX_HP = 10;
+
+    // pool simples de pares Kanji → EN
+    const EQ_PAIRS = [
+      { kanji:'水', en:'water' },
+      { kanji:'火', en:'fire' },
+      { kanji:'木', en:'tree' },
+      { kanji:'山', en:'mountain' },
+      { kanji:'川', en:'river' },
+      { kanji:'茶', en:'tea' },
+      { kanji:'駅', en:'station' },
+      { kanji:'本', en:'book' },
+      { kanji:'空', en:'sky' },
+      { kanji:'雨', en:'rain' },
     ];
 
     // --- Helpers de limpeza ---
@@ -2683,6 +2769,7 @@
       if (gameState.battle.battleEnded || gameState.battle.victoryFxRunning) return;
       if (gameState.battle.turn !== 'player') return;
       if (gameState.battle.defensePending) return;
+      if (gameState.battle.skillActive) return;
 
       const ordered = document.getElementById('battle-ordered');
 
@@ -3020,6 +3107,7 @@
       // };
 
       document.getElementById('battle-ordered').addEventListener('click', (e)=>{
+        if (gameState.battle.skillActive) return;
         if (!e.target.classList.contains('word-chip')) return;
         if (gameState.battle.turn !== 'player') return;
         if (gameState.battle.defensePending) return;
@@ -3044,6 +3132,7 @@
 
       const btnDef = document.getElementById('battle-defend');
       if (btnDef) btnDef.onclick = ()=>{
+        if (gameState.battle.skillActive) return;
         if (gameState.battle.turn !== 'player') return;
         chooseDefend();
       };
@@ -3057,35 +3146,29 @@
           if (e.key === 'Enter'){ e.preventDefault(); guardAttempt(); }
         });
       }
-      document.getElementById('battle-flee').onclick = ()=> {if (gameState.battle.battleEnded || gameState.battle.victoryFxRunning) return; closeBattleJP('You fled the encounter.');};
+      document.getElementById('battle-flee').onclick = ()=> {if (gameState.battle.battleEnded || gameState.battle.victoryFxRunning) return; if (gameState.battle.skillActive) return; closeBattleJP('You fled the encounter.');};
       // defense overlay submit
       document.getElementById('defense-submit').onclick = guardAttempt;
       document.getElementById('defense-input').addEventListener('keydown', (e)=>{
         if (e.key==='Enter'){ e.preventDefault(); guardAttempt(); }
       });
 
-      // Skills permanece igual
-      document.getElementById('battle-skills').onclick = ()=>{
-        if (gameState.battle.turn !== 'player') return;
-        openSkills();
-      };
-      document.getElementById('skills-close').onclick = closeSkills;
-      document.getElementById('skill-earthquake').onclick = ()=>{
-        if (gameState.battle.turn !== 'player') return;
-        closeSkills();
-        const dmg = 4 + Math.floor(Math.random()*3);
-        applyEnemyDamage(dmg);
-        showNotification(`Earthquake! Enemy took ${dmg} damage.`);
-        if (gameState.battle.enemyHp <= 0){
-          const reward = 8 + Math.floor(Math.random()*7);
-          gameState.coins = (gameState.coins||0) + reward;
-          updateCoins && updateCoins();
-          closeBattleJP(`Enemy defeated! +${reward} coins`);
-          return;
-        }
-        gameState.battle.turn = 'enemy';
-        enemyTurn();
-      };
+      const btnSkills = document.getElementById('battle-skills');
+      if (btnSkills){
+        btnSkills.onclick = ()=>{
+          if (gameState.battle.victoryFxRunning || gameState.battle.battleEnded) return;
+          if (gameState.battle.turn !== 'player') return;
+          if (gameState.battle.defensePending || gameState.battle.skillActive) return;
+          openSkillsModal();
+        };
+      }
+
+      const sm = document.getElementById('skills-modal');
+      document.getElementById('skills-close')?.addEventListener('click', ()=> sm.style.display='none');
+      document.getElementById('skill-earthquake')?.addEventListener('click', ()=>{
+        sm.style.display='none';
+        triggerEarthquake();
+      });
     }
 
     /* ========= Random encounter loop (New District) ========= */
@@ -3238,6 +3321,245 @@
         end(); // fallback sem FX
       }
     }
+
+  function openSkillsModal(){
+    const sm = document.getElementById('skills-modal');
+    if (sm) sm.style.display='flex';
+  }
+
+  /** Skill: Earthquake
+   * Dura até 5s. Tremor + "matrix rain" + peças clicáveis (kanji/en).
+   * Se acertar um par (kanji→en) dentro do tempo → hit kill.
+   * Senão, aplica 20–40% do HP do inimigo como dano.
+   * Consome o turno do jogador.
+   */
+  function triggerEarthquake(){
+    if (gameState.battle.turn !== 'player') return;
+    if (gameState.battle.victoryFxRunning || gameState.battle.battleEnded) return;
+    if (gameState.battle.skillActive) return;
+
+    const overlay = document.getElementById('eq-overlay');
+    const layer   = document.getElementById('eq-layer');
+    const canvas  = document.getElementById('eq-matrix');
+    const card    = document.getElementById('battle-card');
+    if (!overlay || !layer || !canvas || !card) return;
+
+    gameState.battle.skillActive = true;
+    card.classList.add('quake');
+
+    /* 1) Mostrar overlay ANTES de medir */
+    overlay.style.display = 'block';
+    // força layout (reflow) para garantir dimensões corretas
+    overlay.getBoundingClientRect();
+
+    /* 2) Iniciar a “matrix rain” agora que o canvas já está visível */
+    startMatrixRain(canvas);
+
+    /* 3) Gerar peças com viewport cheio */
+    const pairs = shuffle(EQ_PAIRS).slice(0, 5);
+    const pieces = spawnFallingPieces(layer, pairs);
+    // estado de seleção
+    let selected = null; // {type:'kanji'|'en', id:number, el:HTMLElement}
+    let successHitKill = false;
+
+    // handler de clique nas peças
+    overlay.addEventListener('click', pieceClickHandler);
+    function pieceClickHandler(e){
+      const t = e.target;
+      if (!t.classList.contains('eq-piece')) return;
+      const pid = Number(t.getAttribute('data-pair')||'-1');
+      const typ = t.getAttribute('data-type'); // 'kanji'|'en'
+      if (pid<0) return;
+
+      if (!selected){
+        selected = { type: typ, id: pid, el: t };
+        t.classList.add('sel');
+      } else {
+        if (selected.id === pid && selected.type !== typ){
+          // MATCH → hit kill
+          successHitKill = true;
+          // feedback visual
+          selected.el.classList.add('sel');
+          t.classList.add('sel');
+          endEarthquake(true);
+        } else {
+          // reset seleção (permite tentar de novo)
+          selected.el.classList.remove('sel');
+          selected = { type: typ, id: pid, el: t };
+          t.classList.add('sel');
+        }
+      }
+    }
+
+    // animação de queda (5s ou até acertar)
+    const start = performance.now();
+    let animId = 0;
+    function step(ts){
+      const dt = Math.min(32, ts - (step._last||ts)); step._last = ts;
+
+      pieces.forEach(p=>{
+        if (p.dead) return;
+        p.y += p.speed * (dt / 1000);
+        p.el.style.transform = `translate3d(${Math.round(p.x)}px, ${Math.round(p.y)}px, 0)`;
+        if (p.y > p.rootH + 30){
+          p.dead = true;
+          p.el.remove();
+        }
+      });
+
+      const elapsed = ts - start;
+      if (!successHitKill && elapsed < 5000){
+        animId = requestAnimationFrame(step);
+      } else {
+        endEarthquake(successHitKill);
+      }
+    }
+    animId = requestAnimationFrame(step);
+
+    // encerra skill
+    function endEarthquake(kill){
+      if (!gameState.battle.skillActive) return;
+
+      cancelAnimationFrame(animId);
+      overlay.removeEventListener('click', pieceClickHandler);
+
+      stopMatrixRain();                 // para o canvas
+      layer.innerHTML = '';             // limpa SOMENTE as peças
+      overlay.style.display = 'none';
+      card.classList.remove('quake');
+
+      gameState.battle.skillActive = false;
+
+      // aplica dano/kill
+      if (kill){
+        const hpLeft = applyEnemyDamage(gameState.battle.enemyHp); // zera
+        showNotification('Earthquake Match! Instant kill!');
+        if (hpLeft <= 0){
+          const reward = 8 + Math.floor(Math.random()*7);
+          gameState.coins = (gameState.coins||0) + reward;
+          updateCoins && updateCoins();
+          handleVictoryAndClose ? handleVictoryAndClose(reward)
+                                : closeBattleJP(`Enemy defeated! +${reward} coins`);
+          return;
+        }
+      } else {
+        // 20–40% do HP máx (arredonda pelo menos 1)
+        const frac = 0.20 + Math.random()*0.20;
+        const dmg  = Math.max(1, Math.round(ENEMY_MAX_HP * frac));
+        applyEnemyDamage(dmg);
+        showNotification(`Earthquake shakes the foe! -${dmg} HP`);
+        if (gameState.battle.enemyHp <= 0){
+          const reward = 8 + Math.floor(Math.random()*7);
+          gameState.coins = (gameState.coins||0) + reward;
+          updateCoins && updateCoins();
+          handleVictoryAndClose ? handleVictoryAndClose(reward)
+                                : closeBattleJP(`Enemy defeated! +${reward} coins`);
+          return;
+        }
+      }
+
+      // consome o turno do jogador: inimigo ataca após a skill
+      gameState.battle.turn = 'enemy';
+      setTimeout(()=> enemyTurn && enemyTurn(), 350);
+    }
+
+    // torna overlay visível no fim da preparação
+    overlay.style.display='block';
+
+    // helpers internos ------------- //
+    function spawnFallingPieces(root, pairs){
+      const W = Math.max(window.innerWidth, document.documentElement.clientWidth);
+      const H = Math.max(window.innerHeight, document.documentElement.clientHeight);
+
+      // Criar lista: kanji + en e embaralhar
+      const items = [];
+      pairs.forEach((p, idx)=>{
+        items.push({ text:p.kanji, type:'kanji', pair:idx });
+        items.push({ text:p.en,    type:'en',    pair:idx });
+      });
+      const arr = shuffle(items);
+
+      // Distribuir em colunas por toda a largura
+      const targetCols = Math.min(10, Math.max(6, Math.floor(W / 120))); // ~120px de espaçamento
+      const colWidth = W / targetCols;
+
+      // Para variar e evitar sobreposição, vamos cortar em “ondas”
+      return arr.map((it, i)=>{
+        const el = document.createElement('div');
+        el.className = 'eq-piece';
+        el.textContent = it.text;
+        el.setAttribute('data-type', it.type);
+        el.setAttribute('data-pair', String(it.pair));
+        root.appendChild(el);
+
+        // coluna e jitter
+        const colIdx = i % targetCols;
+        const jitter = (Math.random() * (colWidth * 0.5)) - (colWidth * 0.25);
+        const baseX  = (colIdx + 0.5) * colWidth + jitter;
+
+        // posição inicial (acima da viewport) com offset de onda para não caírem todos juntos
+        const wave = Math.floor(i / targetCols);
+        const startY = - (40 + wave * 50 + Math.random()*40);
+
+        // velocidade “Matrix” (suave)
+        const speed = 70 + Math.random() * 80; // px/s
+
+        // aplicar transform inicial
+        el.style.transform = `translate3d(${Math.round(baseX)}px, ${Math.round(startY)}px, 0)`;
+
+        return { el, x: baseX, y: startY, speed, dead:false, rootH: H };
+      });
+    }
+
+    // Matrix rain simples no canvas
+    function startMatrixRain(cnv){
+      const ctx = cnv.getContext('2d');
+      let mxW=0, mxH=0, mxFont=16, matrixRAF=0, mxCols=[];
+
+      const resize = ()=>{
+        cnv.width  = Math.max(window.innerWidth,  document.documentElement.clientWidth);
+        cnv.height = Math.max(window.innerHeight, document.documentElement.clientHeight);
+        mxW = cnv.width; mxH = cnv.height;
+        mxFont = 16;
+        const cols = Math.floor(mxW / mxFont);
+        mxCols = new Array(cols).fill(0);
+      };
+      resize();
+      window.addEventListener('resize', resize);
+
+      const glyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
+
+      function draw(){
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.fillRect(0,0,mxW,mxH);
+
+        ctx.fillStyle = '#00ff9c';
+        ctx.font = mxFont + 'px monospace';
+
+        for (let i=0;i<mxCols.length;i++){
+          const text = glyphs[Math.floor(Math.random()*glyphs.length)];
+          const x = i * mxFont;
+          const y = mxCols[i] * mxFont;
+          ctx.fillText(text, x, y);
+          if (y > mxH && Math.random() > 0.975) mxCols[i] = 0;
+          mxCols[i]++;
+        }
+        matrixRAF = requestAnimationFrame(draw);
+      }
+      draw();
+
+      cnv._stopMatrix = ()=>{
+        cancelAnimationFrame(matrixRAF);
+        window.removeEventListener('resize', resize);
+        ctx.clearRect(0,0,mxW,mxH);
+      };
+    }
+    function stopMatrixRain(){
+      const cnv = document.getElementById('eq-matrix');
+      cnv && cnv._stopMatrix && cnv._stopMatrix();
+    }
+  }
+
 
     window.factoryReset = factoryReset;
   </script>
