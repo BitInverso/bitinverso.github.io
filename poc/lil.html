@@ -415,6 +415,8 @@
           pickedThisTurn: false, // garante 1 palavra por turno
           history: []            // para Undo (uma palavra)
         },
+        gameMinutesTotal: 0,
+        socialPenaltyUntilAbs: 0,
         __allowPersist: true
     };
 
@@ -456,6 +458,9 @@
         gameState.player.x = canvas.width / 2;
         gameState.player.y = canvas.height / 2;
     }
+
+    gameState.gameMinutesTotal = 0;
+    gameState.socialPenaltyUntilAbs = 0;
     initPlayerPosition();
 
     const wordDictionary = {
@@ -513,17 +518,19 @@
         return h * 60 + m;
     }
 
-    function isSocialPenaltyActive() {
-        const now = currentMinutesOfDay();
-        return gameState.socialPenaltyUntil > 0 && now < gameState.socialPenaltyUntil;
+    function isSocialPenaltyActive(){
+      return (gameState.socialPenaltyUntilAbs || 0) > (gameState.gameMinutesTotal || 0);
     }
 
-    function applyDictionaryPenalty() {
-        const now = currentMinutesOfDay();
-        gameState.socialPenaltyUntil = now + 30;
-        const badge = document.getElementById('dict-penalty-badge');
-        if (badge) badge.style.display = 'inline-block';
-        showNotification('You consulted the dictionary. Affinity reduced for 30 in‑game minutes.');
+    function applyDictionaryPenalty(){
+      // 30 minutos de jogo a partir de agora
+      const nowAbs = gameState.gameMinutesTotal || 0;
+      gameState.socialPenaltyUntilAbs = nowAbs + 30;
+
+      const badge = document.getElementById('dict-penalty-badge');
+      if (badge) badge.style.display='inline-block';
+
+      showNotification('You checked the dictionary. Affinity gains reduced for 30 in-game minutes.');
     }
 
     function getDictEls() {
@@ -906,12 +913,18 @@
         timeDisplay.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
     }
 
-    function startGameTime() {
-        setInterval(() => {
-            gameState.time += gameState.timeSpeed / 60; // avança "hora do jogo"
-            if (gameState.time >= 24) gameState.time = 0; // reseta após 24h
-            updateTimeDisplay(); // já existe no código
-        }, 1000); // a cada 1 segundo real
+    function startGameTime(){
+      setInterval(()=>{
+        // avança horas do jogo
+        gameState.time += gameState.timeSpeed / 60;
+        if (gameState.time >= 24) gameState.time = 0;
+
+        // avança minutos absolutos do jogo
+        // (timeSpeed = minutos de jogo por segundo real)
+        gameState.gameMinutesTotal += (gameState.timeSpeed || 0);
+
+        updateTimeDisplay();
+      }, 1000);
     }
 
     function showMap() {
@@ -1090,7 +1103,7 @@
         const tod = getTimeOfDay();
         const place = npc.schedule[tod];
         if (place !== gameState.playerLocation) return;
-        
+
         ctx.fillStyle = npc.color;
         ctx.beginPath();
         ctx.arc(npc.x, npc.y, 15, 0, Math.PI * 2);
@@ -1581,6 +1594,12 @@
     function gameLoop() {
         if (!gameState.gameStarted) return;
         npcHint.style.display = 'none';
+
+        const badge = document.getElementById('dict-penalty-badge');
+        if (badge){
+          badge.style.display = isSocialPenaltyActive() ? 'inline-block' : 'none';
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         activeMap().draw();
         npcs.forEach(drawNPC);
