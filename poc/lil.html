@@ -1,0 +1,2118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Nihongo Journey — Full (Desktop+Mobile, Jobs, Minigame, Events)</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+    body{font-family:Inter,Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#14213d 0%,#0b132b 100%);color:#e0e1dd;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+    a{color:#90e0ef}
+    #game-header{padding:12px 15px;background:rgba(13,27,42,.95);border-bottom:2px solid #778da9;z-index:10;display:flex;justify-content:space-between;align-items:center}
+    #game-container{flex:1;position:relative;overflow:hidden}
+    #game-canvas{position:absolute;top:0;left:0;width:100%;height:100%;background:#1b263b}
+    #hud{position:absolute;top:15px;left:15px;background:rgba(13,27,42,.8);padding:10px;border-radius:10px;z-index:5;display:flex;flex-direction:column;gap:5px;max-width:60%}
+    #vocabulary-count,#time-display,#location-display{font-size:.8rem}
+    #map-button{position:absolute;top:15px;right:15px;background:rgba(13,27,42,.85);border:1px solid #778da9;border-radius:8px;padding:8px 12px;color:#e0e1dd;font-size:.8rem;z-index:6}
+    #job-button{position:absolute;top:15px;right:95px;background:rgba(13,27,42,.85);border:1px solid #778da9;border-radius:8px;padding:8px 12px;color:#e0e1dd;font-size:.8rem;z-index:6}
+    #controls{position:absolute;bottom:20px;left:20px;width:140px;height:140px;z-index:6}
+    #joystick{position:absolute;width:70px;height:70px;background:rgba(65,90,119,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e0e1dd;font-size:11px;text-align:center;user-select:none;touch-action:none;border:2px solid #778da9}
+    #interact-btn{position:absolute;bottom:20px;right:20px;width:86px;height:86px;background:rgba(65,90,119,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e0e1dd;font-size:12px;text-align:center;z-index:6;border:2px solid #778da9}
+    #npc-hint{position:absolute;bottom:120px;right:20px;background:rgba(13,27,42,.8);border:1px solid #778da9;border-radius:10px;padding:8px 10px;font-size:.8rem;display:none;z-index:6}
+    #dialogue-box{position:absolute;bottom:100px;left:15px;right:15px;background:rgba(13,27,42,.96);border:2px solid #778da9;border-radius:12px;padding:15px;z-index:7;display:none;box-shadow:0 0 15px rgba(0,0,0,.6)}
+    #dialogue-text{margin-bottom:15px;line-height:1.45;font-size:.95rem;max-height:200px;overflow-y:auto;padding:5px}
+    #response-options{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;padding:5px}
+    .word-option{background:#415a77;border:none;border-radius:8px;padding:10px;color:#e0e1dd;font-size:.9rem;cursor:pointer;transition:all .2s;text-align:left}
+    .word-option:active{background:#778da9;transform:scale(.98)}
+    .word-option.unknown{background:#2d3748;color:#718096;cursor:not-allowed}
+    #close-dialogue{position:absolute;top:-10px;right:-10px;width:28px;height:28px;background:#e63946;border:2px solid #778da9;border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer}
+    #notification{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(13,27,42,.9);padding:10px 15px;border-radius:20px;z-index:100;font-size:.85rem;display:none;text-align:center;max-width:80%}
+    /* overlays: generic */
+    .overlay{position:absolute;inset:0;display:none}
+    .overlay[style*="display: none"]{pointer-events:none}
+    .panel{background:#1b263b;border:2px solid #778da9;border-radius:14px;padding:18px;color:#e0e1dd}
+    /* Dictionary */
+    #dict-overlay{ position:fixed; inset:0; background:rgba(13,27,42,.96); display:none; z-index:9999; align-items:center; justify-content:center; padding:24px; }
+    #dict-card{ width:min(560px,92vw); background:#1b263b; border:2px solid #778da9; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); padding:18px; color:#e0e1dd; }
+    #dict-title{ font-size:1.2rem; color:#e9c46a; margin-bottom:8px; }
+    #dict-actions{ margin-top:14px; display:flex; gap:10px; justify-content:flex-end; }
+    .btn{ background:#415a77; border:none; border-radius:10px; color:#e0e1dd; padding:10px 16px; font-size:.95rem; cursor:pointer;}
+    .badge{ display:inline-block; background:#e63946; color:#fff; padding:2px 8px; border-radius:999px; font-size:.75rem; margin-left:8px; }
+    .learned-word{color:#90e0ef;font-weight:700;border-bottom:1px dotted #94d2bd}
+    .unknown-word{ text-decoration: underline dashed; cursor:pointer; color:#e0e1dd; }
+    /* Minigame */
+    #minigame-overlay{position:absolute; inset:0; background:rgba(0,0,0,.85); display:none; z-index:80; align-items:center; justify-content:center; flex-direction:column; touch-action:none; -webkit-user-select:none; user-select:none;}
+    #minigame-canvas{background:#0e1826; border:0; margin:0; box-shadow:0 0 0 2px #778da9 inset; border-radius:10px; max-width:95vw; max-height:70vh; touch-action:none; display:block;}
+  </style>
+</head>
+<body>
+  <div id="game-header">
+    <h1>日本への旅</h1>
+    <div id="time-display">10:00</div>
+  </div>
+
+  <div id="game-container">
+    <!-- Dictionary -->
+    <div id="dict-overlay">
+      <div id="dict-card">
+        <div id="dict-title">Pocket Dictionary <span id="dict-penalty-badge" class="badge" style="display:none;">Social impact active</span></div>
+        <div id="dict-body">
+          <div><strong>Word:</strong> <span id="dict-word">—</span></div>
+          <div><strong>Part of speech:</strong> <span id="dict-pos">—</span></div>
+          <div><strong>Meaning:</strong> <span id="dict-meaning">—</span></div>
+          <div style="margin-top:10px; font-size:.9rem; opacity:.9;">
+            Using the dictionary during conversations may be noticed by locals.
+            <strong>Consequence:</strong> affinity gained with NPCs is reduced for <u>30 in‑game minutes</u> after each lookup.
+          </div>
+        </div>
+        <div id="dict-actions">
+          <button id="dict-close" class="btn">Got it</button>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="game-canvas" tabindex="0"></canvas>
+
+    <div id="hud">
+      <div id="vocabulary-count">Words: 3</div>
+      <div id="location-display">Location: Street</div>
+      <div id="coin-display">Coins: 0</div>
+    </div>
+    <button id="job-button">Work</button>
+    <button id="map-button">Map</button>
+    <div id="npc-hint">Press E / Space / Enter to interact</div>
+
+    <div id="controls"><div id="joystick">Move</div></div>
+    <div id="interact-btn">Interact</div>
+
+    <div id="dialogue-box">
+      <div id="close-dialogue">X</div>
+      <div id="dialogue-text"></div>
+      <div id="response-options"></div>
+    </div>
+
+    <div id="notification"></div>
+
+    <div id="keydebug" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:8px;font-size:.75rem;display:none;z-index:99">
+      L:<span id="kd-l">0</span> R:<span id="kd-r">0</span> U:<span id="kd-u">0</span> D:<span id="kd-d">0</span> I:<span id="kd-i">0</span>
+    </div>
+
+    <!-- Minigame -->
+    <div id="minigame-overlay">
+      <div style="color:#e9c46a; font-size:1.2rem; margin-bottom:10px;">Mini Game — Slice only the <b>verbs</b>!</div>
+      <canvas id="minigame-canvas"></canvas>
+      <div id="minigame-ui" style="margin-top:10px; color:#e0e1dd;">Score: <span id="mg-score">0</span> • Mistakes: <span id="mg-mistakes">0</span> • Time: <span id="mg-time">60</span>s • Lives: <span id="mg-lives">❤️❤️❤️</span></div>
+      <button id="minigame-exit" class="btn" style="margin-top:10px;">Exit</button>
+    </div>
+
+    <!-- Map -->
+    <div id="map-overlay" class="overlay" style="background:rgba(13,27,42,.95);z-index:40;display:none;align-items:center;flex-direction:column;padding:20px;">
+      <div class="panel" style="width:min(720px,92vw);">
+        <div id="map-title" style="color:#e9c46a;font-size:1.2rem;margin-bottom:12px;">City Map</div>
+        <div id="map-content" style="width:100%;height:60vh;background:#0f1a28;border-radius:10px;position:relative;overflow:hidden;border:2px solid #778da9;margin-bottom:12px;">
+          <div class="map-area" id="map-cafe" style="position:absolute;top: 15%; left: 20%; width: 25%; height: 20%; background: #e63946;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Cafe</div>
+          <div class="map-area" id="map-store" style="position:absolute;top: 15%; left: 55%; width: 25%; height: 20%; background: #a8dadc;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Store</div>
+          <div class="map-area" id="map-park" style="position:absolute;top: 45%; left: 38%; width: 25%; height: 20%; background: #457b9d;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Park</div>
+          <div class="map-area" id="map-shrine" style="position:absolute;top: 45%; left: 10%; width: 25%; height: 20%; background: #9d4edd;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Shrine</div>
+          <div class="map-area" id="map-school" style="position:absolute;top: 45%; left: 65%; width: 25%; height: 20%; background: #f4a261;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">School</div>
+          <div class="map-area" id="map-hostel" style="position:absolute;top: 75%; left: 38%; width: 25%; height: 20%; background: #2a9d8f;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Hostel</div>
+          <div class="map-area locked" id="map-novo" style="position:absolute;top: 75%; left: 70%; width: 25%; height: 20%; background: #264653;display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:.45;filter:grayscale(.6);cursor:not-allowed;">New District</div>
+        </div>
+        <div style="text-align:right"><button id="close-map" class="btn">Close Map</button></div>
+      </div>
+    </div>
+
+    <!-- School -->
+    <div id="school-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:50;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:560px; width:92vw; text-align:center;">
+        <h2 style="color:#e9c46a; margin-bottom:30px;">Japanese School</h2>
+        <button class="btn" id="vocab-lesson">Study Vocabulary</button>
+        <button class="btn" id="grammar-lesson">Learn Grammar</button>
+        <button class="btn" id="close-school">Back to City</button>
+      </div>
+    </div>
+
+    <!-- Work Panel -->
+    <div id="job-overlay" class="overlay" style="background:rgba(13,27,42,.96);z-index:70;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:620px; width:92vw;">
+        <h3 style="color:#e9c46a; font-size:1.2rem; margin-bottom:8px;">Work</h3>
+        <div id="job-status" style="font-size:.95rem; line-height:1.5; margin-bottom:12px;"></div>
+        <div id="job-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" id="job-start">Start shift</button>
+          <button class="btn" id="job-stop">End shift</button>
+          <button class="btn" id="job-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Event -->
+    <div id="workevent-overlay" class="overlay" style="background:rgba(0,0,0,.85);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="width:min(640px,92vw);">
+        <div id="workevent-title" style="color:#e9c46a; font-size:1.1rem; margin-bottom:10px;">Work event</div>
+        <div id="workevent-text" style="line-height:1.5; margin-bottom:14px;"></div>
+        <div id="workevent-choices" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div style="margin-top:12px; text-align:right;">
+          <button class="btn" id="workevent-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start -->
+    <div id="start-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:560px;text-align:center">
+        <div id="logo" style="font-size:2rem;color:#e9c46a;margin-bottom:15px;text-shadow:0 0 10px rgba(233,196,106,.5)">Nihongo Journey</div>
+        <div id="instructions" style="margin-bottom:22px;line-height:1.6;font-size:.95rem;">
+          <p>You’ve arrived in <b>Japan</b> as a backpacker, without knowing the language.</p>
+          <p>Explore the city, <b>learn Japanese words</b>, and make friends to experience authentic culture.</p>
+          <p><b>Move:</b> WASD / Arrows • <b>Interact:</b> E / Space / Enter • Or use on‑screen controls.</p>
+        </div>
+        <button id="start-button" class="btn" style="border-radius:25px;padding:14px 35px;">Start Journey</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =======================
+      Config & Utilities
+    ========================*/
+    const DBG = {
+        mg: false
+    };
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - document.getElementById('game-header').offsetHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const dialogueBox = document.getElementById('dialogue-box');
+    const dialogueText = document.getElementById('dialogue-text');
+    const responseOptions = document.getElementById('response-options');
+    const vocabularyCount = document.getElementById('vocabulary-count');
+    const timeDisplay = document.getElementById('time-display');
+    const locationDisplay = document.getElementById('location-display');
+    const startScreen = document.getElementById('start-screen');
+    const startButton = document.getElementById('start-button');
+    const joystick = document.getElementById('joystick');
+    const interactBtn = document.getElementById('interact-btn');
+    const closeDialogue = document.getElementById('close-dialogue');
+    const notification = document.getElementById('notification');
+    const npcHint = document.getElementById('npc-hint');
+    const mapButton = document.getElementById('map-button');
+    const mapOverlay = document.getElementById('map-overlay');
+    const closeMap = document.getElementById('close-map');
+    const schoolScreen = document.getElementById('school-screen');
+    const closeSchool = document.getElementById('close-school');
+    const vocabLesson = document.getElementById('vocab-lesson');
+    const grammarLesson = document.getElementById('grammar-lesson');
+    const jobBtn = document.getElementById('job-button');
+    const jobOv = document.getElementById('job-overlay');
+    const jobStatus = document.getElementById('job-status');
+
+    const KeyState = {
+        left: false,
+        right: false,
+        up: false,
+        down: false,
+        interact: false
+    };
+    window.addEventListener('keydown', (e) => {
+        if (!document.hasFocus()) {
+            try {
+                window.focus();
+            } catch {}
+        }
+        const k = (e.key || '').toLowerCase();
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) {
+            e.preventDefault();
+        }
+        if (k === 'k') {
+            const box = document.getElementById('keydebug');
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+        if (k === 'arrowleft' || k === 'a') KeyState.left = true;
+        if (k === 'arrowright' || k === 'd') KeyState.right = true;
+        if (k === 'arrowup' || k === 'w') KeyState.up = true;
+        if (k === 'arrowdown' || k === 's') KeyState.down = true;
+        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = true;
+    });
+    document.addEventListener('keydown', (e) => {
+        const k = (e.key || '').toLowerCase();
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) {
+            e.preventDefault();
+        }
+        if (k === 'arrowleft' || k === 'a') KeyState.left = true;
+        if (k === 'arrowright' || k === 'd') KeyState.right = true;
+        if (k === 'arrowup' || k === 'w') KeyState.up = true;
+        if (k === 'arrowdown' || k === 's') KeyState.down = true;
+        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+        const k = (e.key || '').toLowerCase();
+        if (k === 'arrowleft' || k === 'a') KeyState.left = false;
+        if (k === 'arrowright' || k === 'd') KeyState.right = false;
+        if (k === 'arrowup' || k === 'w') KeyState.up = false;
+        if (k === 'arrowdown' || k === 's') KeyState.down = false;
+        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = false;
+    });
+    document.addEventListener('keydown', (e) => {
+        const k = (e.key || '').toLowerCase();
+        if (k === 'e' || k === ' ' || k === 'enter') {
+            e.preventDefault();
+            checkForInteraction();
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        const k = (e.key || '').toLowerCase();
+        if (k === 'arrowleft' || k === 'a') KeyState.left = false;
+        if (k === 'arrowright' || k === 'd') KeyState.right = false;
+        if (k === 'arrowup' || k === 'w') KeyState.up = false;
+        if (k === 'arrowdown' || k === 's') KeyState.down = false;
+        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = false;
+    });
+
+    let gameState = {
+        player: {
+            x: 0,
+            y: 0,
+            speed: 2.6,
+            direction: 'down',
+            isMoving: false
+        },
+        knownWords: ['こんにちは', 'ありがとう', 'コーヒー'],
+        inMinigame: false,
+        coins: 0,
+        learnedSinceMiniGame: 0,
+        time: 10.00,
+        timeSpeed: 0.2,
+        relationships: {
+            'takeshi': 0,
+            'yuki': 0,
+            'akari': 0
+        },
+        inDialogue: false,
+        currentNPC: null,
+        gameStarted: false,
+        touchId: null,
+        playerLocation: 'street',
+        learnedWords: {
+            'こんにちは': true,
+            'ありがとう': true,
+            'コーヒー': true,
+            'おはよう': false,
+            'すみません': false,
+            'はい': false,
+            'いいえ': false,
+            '名前': false,
+            '私': false,
+            'あなた': false,
+            'お願いします': false,
+            '水': false,
+            'いくらですか': false,
+            '美味しい': false,
+            '学校': false,
+            '勉強': false,
+            '日本語': false
+        },
+        storyProgress: {
+            cafeVisited: false,
+            metTakeshi: false,
+            helpedYuki: false,
+            foundBook: false,
+            visitedSchool: false
+        },
+        newMapUnlocked: false,
+        currentMap: 'city',
+        socialPenaltyUntil: 0,
+        jobs: {
+            unlocked: {
+                cafe: false
+            },
+            currentJobId: null,
+            currentRankIndex: 0,
+            isOnShift: false,
+            lastSeenAt: Date.now(),
+            pendingEventQueue: [],
+            totalOfflineHoursWorked: 0,
+            eventsTriggered: 0,
+            extraEventAnchor: 0,
+            totalHoursWorked: 0
+        },
+        __allowPersist: true
+    };
+
+    /* =======================
+      Work system (jobs & events)
+    ========================*/
+    const JOBS = {
+        cafe: {
+            id: 'cafe',
+            name: 'Cafe',
+            unlockFlag: 'metTakeshi',
+            ranks: [{
+                    id: 'cleaner',
+                    name: 'Cleaning',
+                    rate: 4
+                },
+                {
+                    id: 'barista',
+                    name: 'Barista',
+                    rate: 7
+                },
+                {
+                    id: 'cashier',
+                    name: 'Cashier',
+                    rate: 10
+                },
+                {
+                    id: 'manager',
+                    name: 'Manager',
+                    rate: 16
+                },
+            ],
+            eventMilestones: [10, 20, 30, 50, 80, 120],
+        },
+    };
+
+    function initPlayerPosition() {
+        canvas.width || resizeCanvas();
+        gameState.player.x = canvas.width / 2;
+        gameState.player.y = canvas.height / 2;
+    }
+    initPlayerPosition();
+
+    const wordDictionary = {
+        'こんにちは': 'Hello',
+        'ありがとう': 'Thank you',
+        'コーヒー': 'Coffee',
+        'おはよう': 'Good morning',
+        'すみません': 'Excuse me/Sorry',
+        'はい': 'Yes',
+        'いいえ': 'No',
+        '名前': 'Name',
+        '私': 'I/me',
+        'あなた': 'You',
+        'お願いします': 'Please',
+        '水': 'Water',
+        'いくらですか': 'How much is it?',
+        '美味しい': 'Delicious',
+        '学校': 'School',
+        '勉強': 'Study',
+        '日本語': 'Japanese (language)'
+    };
+    const wordPOS = {
+        'こんにちは': 'interjection (greeting)',
+        'ありがとう': 'interjection (thanks)',
+        'コーヒー': 'noun',
+        'おはよう': 'interjection (greeting)',
+        'すみません': 'expression (apology/perm.)',
+        'はい': 'adverb (affirmation)',
+        'いいえ': 'adverb (negation)',
+        '名前': 'noun',
+        '私': 'pronoun',
+        'あなた': 'pronoun',
+        'お願いします': 'expression (request)',
+        '水': 'noun',
+        'いくらですか': 'expression (question)',
+        '美味しい': 'adjective',
+        '学校': 'noun',
+        '勉強': 'noun/verb-suru',
+        '日本語': 'noun'
+    };
+
+    function currentMinutesOfDay() {
+        const h = Math.floor(gameState.time);
+        const m = Math.floor((gameState.time - h) * 60);
+        return h * 60 + m;
+    }
+
+    function isSocialPenaltyActive() {
+        const now = currentMinutesOfDay();
+        return gameState.socialPenaltyUntil > 0 && now < gameState.socialPenaltyUntil;
+    }
+
+    function applyDictionaryPenalty() {
+        const now = currentMinutesOfDay();
+        gameState.socialPenaltyUntil = now + 30;
+        const badge = document.getElementById('dict-penalty-badge');
+        if (badge) badge.style.display = 'inline-block';
+        showNotification('You consulted the dictionary. Affinity reduced for 30 in‑game minutes.');
+    }
+
+    function getDictEls() {
+        return {
+            overlay: document.getElementById('dict-overlay'),
+            w: document.getElementById('dict-word'),
+            pos: document.getElementById('dict-pos'),
+            meaning: document.getElementById('dict-meaning'),
+            badge: document.getElementById('dict-penalty-badge'),
+            close: document.getElementById('dict-close')
+        };
+    }
+
+    function openDictionary(word) {
+        const els = getDictEls();
+        if (!els.overlay) return;
+        const meaning = wordDictionary[word] || '—';
+        const pos = wordPOS[word] || '—';
+        els.w.textContent = word;
+        els.pos.textContent = pos;
+        els.meaning.textContent = meaning;
+        els.badge.style.display = isSocialPenaltyActive() ? 'inline-block' : 'none';
+        els.overlay.style.display = 'flex';
+        applyDictionaryPenalty();
+        if (gameState.inDialogue && gameState.currentNPC && gameState.currentNPC.grumpyLine) {
+            const npc = gameState.currentNPC;
+            displayDialogue(gameState.currentNPC.grumpyLine, npc);
+        }
+    }
+    (function() {
+        const els = getDictEls();
+        if (els.close) {
+            els.close.addEventListener('click', () => {
+                els.overlay.style.display = 'none';
+            });
+        }
+    })();
+
+    function annotateDialogueText(rawText) {
+        let t = String(rawText);
+        Object.keys(wordDictionary).forEach((w) => {
+            if (gameState.knownWords.indexOf(w) !== -1 && t.indexOf(w) !== -1) {
+                const rep = '<span class="learned-word" data-word="' + w + '">' + w + ' (' + (wordDictionary[w] || '') + ')</span>';
+                t = t.split(w).join(rep);
+            }
+        });
+        Object.keys(wordDictionary).forEach((w) => {
+            if (gameState.knownWords.indexOf(w) === -1 && t.indexOf(w) !== -1) {
+                const rep = '<span class="unknown-word" data-word="' + w + '">' + w + '</span>';
+                t = t.split(w).join(rep);
+            }
+        });
+        return t;
+    }
+    const dictTapHandler = (e) => {
+        const t = e.target;
+        if (t && t.classList && t.classList.contains('unknown-word')) {
+            e.preventDefault();
+            e.stopPropagation();
+            const w = t.getAttribute('data-word');
+            if (w) openDictionary(w);
+        }
+    };
+    dialogueText.addEventListener('pointerup', dictTapHandler, {
+        passive: false
+    });
+    dialogueText.addEventListener('click', dictTapHandler, {
+        passive: false
+    });
+    dialogueBox.addEventListener('pointerup', dictTapHandler, {
+        passive: false
+    });
+    dialogueBox.addEventListener('click', dictTapHandler, {
+        passive: false
+    });
+
+    // NPCs (full dialogues)
+    const npcs = [{
+            id: 'takeshi',
+            name: 'Takeshi',
+            x: 0,
+            y: 0,
+            color: '#e76f51',
+            location: 'cafe',
+            grumpyLine: 'I\'m busy. If you can\'t speak, come back later.',
+            schedule: {
+                morning: 'cafe',
+                afternoon: 'cafe',
+                evening: 'park'
+            },
+            dialogues: {
+                'cafe': [{
+                        time: 'morning',
+                        japanese: 'おはよう！今日もいい天気ですね。コーヒーはいかがですか？',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 0,
+                        responses: [{
+                                words: ['こんにちは', 'コーヒー'],
+                                response: 'はい、かしこまりました。少々お待ちください。美味しいコーヒーをお出ししますね。',
+                                relationship: 1,
+                                learnWord: 'お願いします'
+                            },
+                            {
+                                words: ['こんにちは'],
+                                response: 'こんにちは！いらっしゃいませ。ゆっくりしていってください。',
+                                relationship: 0.5
+                            }
+                        ]
+                    },
+                    {
+                        time: 'afternoon',
+                        japanese: 'こんにちは！ゆっくりしていってください。',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 0,
+                        responses: [{
+                            words: ['こんにちは', 'ありがとう'],
+                            response: 'どういたしまして。またお越しください。ところで、日本語の勉強はどうですか？',
+                            relationship: 1,
+                            learnWord: 'すみません'
+                        }]
+                    }
+                ],
+                'park': [{
+                    time: 'evening',
+                    japanese: 'やあ！公園で休んでるんだ。君もコーヒー飲む？',
+                    requiredWords: ['こんにちは'],
+                    relationshipLevel: 1,
+                    responses: [{
+                        words: ['こんにちは', 'はい'],
+                        response: 'はい、どうぞ。ところで、最近どう？日本語は上手になった？',
+                        relationship: 2,
+                        learnWord: '水'
+                    }]
+                }]
+            }
+        },
+        {
+            id: 'yuki',
+            name: 'Yuki',
+            x: 0,
+            y: 0,
+            color: '#9d4edd',
+            location: 'park',
+            grumpyLine: '... Sorry, not now. Try another time.',
+            schedule: {
+                morning: 'park',
+                afternoon: 'store',
+                evening: 'park'
+            },
+            dialogues: {
+                'park': [{
+                        time: 'morning',
+                        japanese: 'おはようございます。お元気ですか？',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 0,
+                        responses: [{
+                            words: ['こんにちは'],
+                            response: '今日はいい天気ですね。公園が気に入りましたか？私はよくここで本を読みます。',
+                            relationship: 1,
+                            learnWord: 'おはよう'
+                        }]
+                    },
+                    {
+                        time: 'evening',
+                        japanese: 'あら、あなたも公園がお好きなんですか？',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 1,
+                        responses: [{
+                            words: ['はい'],
+                            response: '私もです！週末にはよくここで読書をします。この公園は静かで大好きです。',
+                            relationship: 2,
+                            learnWord: '美味しい'
+                        }]
+                    }
+                ],
+                'store': [{
+                    time: 'afternoon',
+                    japanese: 'あ、こんにちは！買い物ですか？',
+                    requiredWords: ['こんにちは'],
+                    relationshipLevel: 1,
+                    responses: [{
+                        words: ['こんにちは', 'はい'],
+                        response: '私もお菓子を買いに来ました。日本の食べ物は美味しいですよね。',
+                        relationship: 1,
+                        learnWord: 'いくらですか'
+                    }]
+                }]
+            }
+        },
+        {
+            id: 'akari',
+            name: 'Akari',
+            x: 0,
+            y: 0,
+            color: '#90e0ef',
+            location: 'school',
+            grumpyLine: 'You need to try a bit harder before talking to me.',
+            schedule: {
+                morning: 'school',
+                afternoon: 'school',
+                evening: 'shrine'
+            },
+            dialogues: {
+                'school': [{
+                        time: 'morning',
+                        japanese: 'おはよう！日本語の勉強ですか？',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 0,
+                        responses: [{
+                            words: ['こんにちは', 'はい'],
+                            response: '素晴らしい！日本語は難しいけど、楽しいですよね。私はここで英語を教えています。',
+                            relationship: 1,
+                            learnWord: '学校'
+                        }]
+                    },
+                    {
+                        time: 'afternoon',
+                        japanese: 'こんにちは！勉強ははかどっていますか？',
+                        requiredWords: ['こんにちは'],
+                        relationshipLevel: 1,
+                        responses: [{
+                            words: ['こんにちは', 'はい'],
+                            response: '良かったです！何かわからないことがあったら、いつでも聞いてくださいね。',
+                            relationship: 1,
+                            learnWord: '勉強'
+                        }]
+                    }
+                ],
+                'shrine': [{
+                    time: 'evening',
+                    japanese: 'こんばんは。神社は静かでいいですよね。',
+                    requiredWords: ['こんにちは'],
+                    relationshipLevel: 1,
+                    responses: [{
+                        words: ['こんにちは', 'はい'],
+                        response: '私はよくここに来てリラックスします。日本の文化は興味深いですよね。',
+                        relationship: 1,
+                        learnWord: '日本語'
+                    }]
+                }]
+            }
+        }
+    ];
+
+    function positionNPCs() {
+        npcs[0].x = canvas.width * 0.3;
+        npcs[0].y = canvas.height * 0.4;
+        npcs[1].x = canvas.width * 0.6;
+        npcs[1].y = canvas.height * 0.7;
+        npcs[2].x = canvas.width * 0.7;
+        npcs[2].y = canvas.height * 0.4;
+    }
+    positionNPCs();
+    window.addEventListener('resize', positionNPCs);
+
+    const novoMap = {
+        draw: function() {
+            const w = canvas.width,
+                h = canvas.height;
+            ctx.fillStyle = '#243447';
+            ctx.fillRect(0, 0, w, h);
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+            ctx.fillStyle = '#fff';
+            ctx.font = '13px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('New District (an open area to explore)', w / 2, 28);
+        },
+        checkPlayerLocation: function(px, py) {
+            return 'street';
+        }
+    };
+
+    function activeMap() {
+        return (gameState.currentMap === 'novo') ? novoMap : cityMap;
+    }
+
+    const cityMap = {
+        buildings: [{
+                x: .1,
+                y: .3,
+                width: .25,
+                height: .2,
+                color: '#e63946',
+                name: 'Cafe',
+                id: 'cafe'
+            },
+            {
+                x: .65,
+                y: .3,
+                width: .25,
+                height: .2,
+                color: '#a8dadc',
+                name: 'Store',
+                id: 'store'
+            },
+            {
+                x: .4,
+                y: .7,
+                width: .2,
+                height: .15,
+                color: '#457b9d',
+                name: 'Park',
+                id: 'park'
+            },
+            {
+                x: .1,
+                y: .7,
+                width: .2,
+                height: .15,
+                color: '#9d4edd',
+                name: 'Shrine',
+                id: 'shrine'
+            },
+            {
+                x: .65,
+                y: .7,
+                width: .25,
+                height: .2,
+                color: '#f4a261',
+                name: 'School',
+                id: 'school'
+            },
+            {
+                x: .4,
+                y: .3,
+                width: .2,
+                height: .15,
+                color: '#2a9d8f',
+                name: 'Hostel',
+                id: 'hostel'
+            }
+        ],
+        draw: function() {
+            ctx.fillStyle = '#4a4e69';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#8d99ae';
+            ctx.fillRect(canvas.width * .4, 0, canvas.width * .1, canvas.height);
+            ctx.fillRect(0, canvas.height * .5, canvas.width, canvas.height * .08);
+            this.buildings.forEach(b => {
+                const x = b.x * canvas.width,
+                    y = b.y * canvas.height,
+                    w = b.width * canvas.width,
+                    h = b.height * canvas.height;
+                ctx.fillStyle = b.color;
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(b.name, x + w / 2, y + h / 2);
+            });
+        },
+        checkPlayerLocation: function(px, py) {
+            for (const b of this.buildings) {
+                const x = b.x * canvas.width,
+                    y = b.y * canvas.height,
+                    w = b.width * canvas.width,
+                    h = b.height * canvas.height;
+                if (px >= x && px <= x + w && py >= y && py <= y + h) return b.id;
+            }
+            return 'street';
+        }
+    };
+
+    function updateTimeDisplay() {
+        const h = Math.floor(gameState.time);
+        const m = Math.floor((gameState.time - h) * 60);
+        timeDisplay.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+    }
+
+    function startGameTime() {
+        setInterval(() => {
+            gameState.time += gameState.timeSpeed / 60; // avança "hora do jogo"
+            if (gameState.time >= 24) gameState.time = 0; // reseta após 24h
+            updateTimeDisplay(); // já existe no código
+        }, 1000); // a cada 1 segundo real
+    }
+
+    function showMap() {
+        mapOverlay.style.display = 'flex';
+    }
+
+    function travelToArea(areaId) {
+        mapOverlay.style.display = 'none';
+        if (areaId === 'novo') {
+            gameState.currentMap = 'novo';
+            gameState.playerLocation = 'street';
+            updateLocationDisplay();
+            showNotification('You traveled to the New District.');
+        } else {
+            gameState.currentMap = 'city';
+            gameState.playerLocation = areaId;
+            updateLocationDisplay();
+        }
+        gameState.player.x = canvas.width / 2;
+        gameState.player.y = canvas.height / 2;
+        if (areaId === 'school') {
+            schoolScreen.style.display = 'flex';
+            if (!gameState.storyProgress.visitedSchool) {
+                gameState.storyProgress.visitedSchool = true;
+                showNotification('Welcome to school! You can study Japanese here.');
+            }
+        } else {
+            showNotification('You arrived at: ' + getLocationName(areaId));
+        }
+    }
+
+    function getLocationName(id) {
+        return ({
+            cafe: 'Cafe',
+            store: 'Store',
+            park: 'Park',
+            shrine: 'Shrine',
+            school: 'School',
+            hostel: 'Hostel',
+            street: 'Street'
+        })[id] || 'Unknown';
+    }
+
+    function learnVocabulary() {
+        const pool = ['おはよう', 'すみません', '水', '美味しい', '学校', '勉強', '日本語'];
+        const avail = pool.filter(w => !gameState.knownWords.includes(w));
+        if (avail.length) {
+            const w = avail[Math.floor(Math.random() * avail.length)];
+            gameState.knownWords.push(w);
+            gameState.learnedWords[w] = true;
+            gameState.learnedSinceMiniGame = (gameState.learnedSinceMiniGame || 0) + 1;
+            if (gameState.learnedSinceMiniGame >= 2) {
+                gameState.learnedSinceMiniGame = 0;
+                startVerbMinigame();
+            }
+            updateVocabularyCount();
+            showNotification('You learned: ' + w + ' (' + (wordDictionary[w] || '') + ')', 4000);
+        } else showNotification('You already learned all vocabulary available for today!');
+    }
+
+    function updateVocabularyCount() {
+        const el = document.getElementById('vocabulary-count');
+        if (el) el.textContent = 'Words: ' + gameState.knownWords.length;
+    }
+
+    function learnGrammar() {
+        showNotification('Grammar system under development.');
+    }
+
+    function setupTouchControls() {
+        let joystickActive = false;
+        joystick.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            gameState.joystickStartX = t.clientX;
+            gameState.joystickStartY = t.clientY;
+            joystickActive = true;
+            gameState.touchId = t.identifier;
+        });
+        joystick.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!joystickActive) return;
+            for (let i = 0; i < e.touches.length; i++) {
+                const t = e.touches[i];
+                if (t.identifier === gameState.touchId) {
+                    const dx = t.clientX - gameState.joystickStartX;
+                    const dy = t.clientY - gameState.joystickStartY;
+                    const ang = Math.atan2(dy, dx);
+                    const dist = Math.min(35, Math.hypot(dx, dy));
+                    joystick.style.transform = 'translate(' + dx * .4 + 'px,' + dy * .4 + 'px)';
+                    if (dist > 10) {
+                        gameState.player.isMoving = true;
+                        if (ang > -Math.PI / 4 && ang < Math.PI / 4) gameState.player.direction = 'right';
+                        else if (ang > Math.PI / 4 && ang < 3 * Math.PI / 4) gameState.player.direction = 'down';
+                        else if (ang < -Math.PI / 4 && ang > -3 * Math.PI / 4) gameState.player.direction = 'up';
+                        else gameState.player.direction = 'left';
+                    } else gameState.player.isMoving = false;
+                    break;
+                }
+            }
+        }, {
+            passive: false
+        });
+        const stop = () => {
+            joystickActive = false;
+            gameState.player.isMoving = false;
+            joystick.style.transform = 'translate(0,0)';
+        };
+        joystick.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            stop();
+        });
+        joystick.addEventListener('touchcancel', (e) => {
+            e.preventDefault();
+            stop();
+        });
+    }
+
+    function updateLocationDisplay() {
+        locationDisplay.textContent = 'Location: ' + getLocationName(gameState.playerLocation);
+    }
+
+    function updateCoins() {
+        const el = document.getElementById('coin-display');
+        if (el) el.textContent = 'Coins: ' + (gameState.coins || 0);
+    }
+
+    function showNotification(msg, dur = 3000) {
+        notification.textContent = msg;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, dur);
+    }
+    notification.addEventListener('pointerup', () => {
+        notification.style.display = 'none';
+    });
+
+    function drawPlayer() {
+        ctx.fillStyle = '#e9c46a';
+        ctx.beginPath();
+        ctx.arc(gameState.player.x, gameState.player.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2a9d8f';
+        if (gameState.player.direction === 'up') ctx.fillRect(gameState.player.x - 3, gameState.player.y - 18, 6, 6);
+        else if (gameState.player.direction === 'down') ctx.fillRect(gameState.player.x - 3, gameState.player.y + 12, 6, 6);
+        else if (gameState.player.direction === 'left') ctx.fillRect(gameState.player.x - 18, gameState.player.y - 3, 6, 6);
+        else if (gameState.player.direction === 'right') ctx.fillRect(gameState.player.x + 12, gameState.player.y - 3, 6, 6);
+    }
+
+    function drawNPC(npc) {
+        const tod = getTimeOfDay();
+        const place = npc.schedule[tod];
+        if (place !== gameState.playerLocation) return;
+        ctx.fillStyle = npc.color;
+        ctx.beginPath();
+        ctx.arc(npc.x, npc.y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(npc.name, npc.x, npc.y - 25);
+        const dist = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
+        if (dist < 80) {
+            npcHint.style.display = 'block';
+        }
+    }
+
+    function getTimeOfDay() {
+        if (gameState.time >= 5 && gameState.time < 12) return 'morning';
+        if (gameState.time >= 12 && gameState.time < 18) return 'afternoon';
+        return 'evening';
+    }
+
+    function updatePlayer() {
+        const sp = 2.8;
+        // keyboard: always allow movement when keys pressed
+        if (KeyState.left) {
+            gameState.player.x -= sp;
+            gameState.player.direction = 'left';
+        }
+        if (KeyState.right) {
+            gameState.player.x += sp;
+            gameState.player.direction = 'right';
+        }
+        if (KeyState.up) {
+            gameState.player.y -= sp;
+            gameState.player.direction = 'up';
+        }
+        if (KeyState.down) {
+            gameState.player.y += sp;
+            gameState.player.direction = 'down';
+        }
+
+        // mobile joystick (optional)
+        if (gameState.player.isMoving) {
+            if (gameState.player.direction === 'up') gameState.player.y -= gameState.player.speed;
+            else if (gameState.player.direction === 'down') gameState.player.y += gameState.player.speed;
+            else if (gameState.player.direction === 'left') gameState.player.x -= gameState.player.speed;
+            else if (gameState.player.direction === 'right') gameState.player.x += gameState.player.speed;
+        }
+        // clamp
+        gameState.player.x = Math.max(15, Math.min(canvas.width - 15, gameState.player.x));
+        gameState.player.y = Math.max(15, Math.min(canvas.height - 15, gameState.player.y));
+
+        // key-triggered interact (edge-trigger logic handled by keyup too)
+        if (KeyState.interact) {
+            KeyState.interact = false;
+            checkForInteraction();
+        }
+    }
+    // ==== Dialogue helpers (drop-in) ====
+
+    // Abre um diálogo com o NPC mais próximo, checando hora do dia, palavras exigidas e progresso.
+    // Requer: gameState, npcs, getTimeOfDay(), annotateDialogueText(), isSocialPenaltyActive(),
+    //         showNotification(), updateVocabularyCount(), startVerbMinigame(), npcHint, dialogueBox, etc.
+    function startDialogue(npc) {
+        if (!npc) {
+            showNotification('No one around to talk to.');
+            return;
+        }
+        // Evita trocar de NPC no meio de um diálogo
+        if (gameState.inDialogue && gameState.currentNPC && gameState.currentNPC !== npc) {
+            return;
+        }
+
+        gameState.inDialogue = true;
+        gameState.currentNPC = npc;
+
+        const tod = getTimeOfDay();
+        const allSets = npc.dialogues ? Object.values(npc.dialogues) : [];
+        const flat = [].concat.apply([], allSets);
+
+        if (!flat.length) {
+            displayDialogue('......', npc);
+            return;
+        }
+
+        // Filtra por nível de relacionamento do jogador com o NPC
+        const rel = (gameState.relationships[npc.id] || 0);
+        const avail = flat.filter(d => (d.relationshipLevel || 0) <= rel);
+        if (!avail.length) {
+            displayDialogue('...... (I need to improve my relationship with this person)', npc);
+            return;
+        }
+
+        // Escolhe fala pelo horário; fallback no primeiro disponível
+        const chosen = avail.find(d => d.time === tod || d.time === 'any') || avail[0];
+
+        // Verifica palavras obrigatórias
+        let ok = true;
+        if (chosen.requiredWords) {
+            for (const w of chosen.requiredWords) {
+                if (!gameState.knownWords.includes(w)) {
+                    ok = false;
+                    break;
+                }
+            }
+        }
+        if (!ok) {
+            const miss = chosen.requiredWords
+                .filter(w => !gameState.knownWords.includes(w))
+                .map(w => w + ' [' + (wordDictionary[w] || '') + ']').join(', ');
+            displayDialogue('...... (I need to learn: ' + miss + ')', npc);
+            return;
+        }
+
+        // Se falou com Takeshi, libera job da cafeteria (se ainda não liberou)
+        if (npc.id === 'takeshi' && !gameState.storyProgress.metTakeshi) {
+            gameState.storyProgress.metTakeshi = true;
+            showNotification('I met Takeshi, the cafe owner.');
+        }
+
+        // Mostra a fala e as respostas possíveis
+        displayDialogue(chosen.japanese, npc, chosen.responses || null);
+    }
+
+    // Renderiza o balão de diálogo + botões de resposta
+    function displayDialogue(text, npc, responses = null) {
+        // Mostra dica “Press E/Space/Enter” enquanto está perto
+        try {
+            if (npcHint) npcHint.style.display = 'block';
+        } catch {}
+
+        dialogueBox.style.display = 'block';
+        const processed = annotateDialogueText ? annotateDialogueText(text) : String(text);
+        dialogueText.innerHTML = '<strong>' + npc.name + ':</strong> ' + processed;
+
+        responseOptions.innerHTML = '';
+        if (responses && responses.length) {
+            responses.forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = 'word-option';
+
+                // Só habilita se o jogador conhece TODAS as palavras da resposta
+                const can = (r.words || []).every(w => gameState.knownWords.includes(w));
+                if (!can) {
+                    btn.textContent = '(I need more words to reply)';
+                    btn.classList.add('unknown');
+                } else {
+                    // Mostra as palavras com tradução ao lado
+                    const pretty = (r.words || []).map(w => w + ' (' + (wordDictionary[w] || '') + ')').join(' ');
+                    btn.textContent = pretty;
+                    btn.onclick = () => selectResponse(r, npc);
+                }
+                responseOptions.appendChild(btn);
+            });
+        }
+
+        // Botão de sair
+        const exit = document.createElement('button');
+        exit.className = 'word-option';
+        exit.textContent = 'Exit';
+        exit.onclick = () => {
+            dialogueBox.style.display = 'none';
+            gameState.inDialogue = false;
+            gameState.currentNPC = null;
+            try {
+                if (npcHint) npcHint.style.display = 'none';
+            } catch {}
+        };
+        responseOptions.appendChild(exit);
+    }
+
+    function isCafeUnlockResponse(npc, r) {
+        if (!npc || npc.id !== 'takeshi' || !r) return false;
+        const hasWords = Array.isArray(r.words) &&
+            r.words.includes('こんにちは') &&
+            r.words.includes('コーヒー'); // “bom dia/olá” + “café”
+        const teachesOnegai = r.learnWord === 'お願いします'; // fluxo da manhã ensina 'お願いします'
+        return hasWords || teachesOnegai;
+    }
+
+    // Processa a escolha do jogador, aplica afinidade/penalidade, ensina palavra, dispara minigame
+    function selectResponse(r, npc) {
+        let delta = r.relationship || 0;
+        // Se usou dicionário recentemente, reduz afinidade
+        if (typeof isSocialPenaltyActive === 'function' && isSocialPenaltyActive()) {
+            delta *= 0.5;
+            showNotification('Social impact active: affinity reduced (-50%).');
+        }
+        gameState.relationships[npc.id] = (gameState.relationships[npc.id] || 0) + delta;
+
+        // Aprende palavra (se houver) + checa minigame
+        if (r.learnWord && !gameState.knownWords.includes(r.learnWord)) {
+            gameState.knownWords.push(r.learnWord);
+            if (gameState.learnedWords) gameState.learnedWords[r.learnWord] = true;
+
+            gameState.learnedSinceMiniGame = (gameState.learnedSinceMiniGame || 0) + 1;
+            if (gameState.learnedSinceMiniGame >= 2) {
+                gameState.learnedSinceMiniGame = 0;
+                try {
+                    startVerbMinigame && startVerbMinigame();
+                    gameState.inMinigame = true;
+                } catch {}
+            }
+            try {
+                updateVocabularyCount && updateVocabularyCount();
+            } catch {}
+            showNotification('New word learned: ' + r.learnWord + ' (' + (wordDictionary[r.learnWord] || '') + ')');
+            if (!gameState.jobs?.unlocked?.cafe && isCafeUnlockResponse(npc, r)) {
+                if (!gameState.jobs) gameState.jobs = {
+                    unlocked: {},
+                    currentJobId: null,
+                    currentRankIndex: 0,
+                    isOnShift: false,
+                    lastSeenAt: Date.now(),
+                    pendingEventQueue: [],
+                    totalOfflineHoursWorked: 0,
+                    eventsTriggered: 0,
+                    extraEventAnchor: 0,
+                    totalHoursWorked: 0
+                };
+                if (!gameState.jobs.unlocked) gameState.jobs.unlocked = {};
+                gameState.jobs.unlocked.cafe = true;
+
+                try {
+                    saveNow && saveNow();
+                } catch {}
+                showNotification('Job unlocked: Cafe! Open the Work panel.');
+            }
+        }
+
+        // Mostra resposta do NPC
+        const resp = annotateDialogueText ? annotateDialogueText(r.response || '...') : (r.response || '...');
+        dialogueText.innerHTML = '<strong>' + npc.name + ':</strong> ' + resp;
+
+        // Substitui por botão "Continue"
+        responseOptions.innerHTML = '';
+        const cont = document.createElement('button');
+        cont.className = 'word-option';
+        cont.textContent = 'Continue';
+        cont.onclick = () => {
+            dialogueBox.style.display = 'none';
+            gameState.inDialogue = false;
+            gameState.currentNPC = null;
+            try {
+                if (npcHint) npcHint.style.display = 'none';
+            } catch {}
+        };
+        responseOptions.appendChild(cont);
+    }
+
+    function checkForInteraction() {
+        if (gameState.inDialogue && gameState.currentNPC) {
+            return;
+        }
+        let target = null,
+            bestDist = 1e9;
+        for (const npc of npcs) {
+            const d = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
+            if (d < bestDist && d <= 80 && activeMap().checkPlayerLocation(npc.x, npc.y) === gameState.playerLocation) {
+                target = npc;
+                bestDist = d;
+            }
+        }
+        if (target) {
+            startDialogue(target);
+            return;
+        }
+        // Fallback: nearest NPC by distance (debug/testing)
+        let nearest = null,
+            nd = 1e9;
+        for (const npc of npcs) {
+            const d = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
+            if (d < nd) {
+                nd = d;
+                nearest = npc;
+            }
+        }
+        if (nearest && nd <= 80) {
+            startDialogue(nearest);
+            return;
+        }
+        showNotification('There is no one nearby to interact with.');
+    }
+
+    /* =============
+      SAVE SYSTEM
+    ==============*/
+    const STORAGE_KEY = 'nihongo-journey-save-v1';
+
+    function loadSave() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) {
+                gameState.__allowPersist = false;
+                return;
+            }
+            const data = JSON.parse(raw);
+            gameState = Object.assign({}, gameState, data);
+            gameState.__allowPersist = true;
+        } catch (e) {
+            console.warn('loadSave error', e);
+            gameState.__allowPersist = false;
+        }
+    }
+
+    function saveNow() {
+        if (!gameState.__allowPersist) return;
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+        } catch (e) {
+            console.warn('saveNow error', e);
+        }
+    }
+
+    function stampLastSeen() {
+        if (!gameState.__allowPersist) return;
+        if (!gameState.jobs || !gameState.jobs.isOnShift) return;
+        gameState.jobs.lastSeenAt = Date.now();
+        saveNow();
+    }
+    window.addEventListener('beforeunload', stampLastSeen);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') stampLastSeen();
+    });
+
+    function init() {
+        loadSave();
+
+        if (gameState.storyProgress && gameState.storyProgress.metTakeshi) {
+            if (!gameState.jobs.unlocked.cafe) {
+                gameState.jobs.unlocked.cafe = true;
+                saveNow();
+            }
+        }
+
+        const MINUTES_PER_GAME_HOUR = 3; // 3 real minutes = 1 "work hour"
+        const lastLogin = gameState.jobs.lastSeenAt || Date.now();
+        const now = Date.now();
+        const diffMs = now - lastLogin;
+        const offlineHours = diffMs / (1000 * 60 * MINUTES_PER_GAME_HOUR);
+
+        if (gameState.jobs.isOnShift && gameState.jobs.currentJobId) {
+            processOfflineWork(offlineHours);
+            maybeOpenNextWorkEvent();
+        }
+
+        gameState.jobs.lastSeenAt = now;
+        saveNow();
+
+        startButton.addEventListener('click', () => {
+            gameState.inDialogue = false;
+            gameState.inMinigame = false;
+            try {
+                document.getElementById('start-screen').style.display = 'none';
+            } catch {}
+            try {
+                const c = document.getElementById('game-canvas');
+                c.focus({
+                    preventScroll: true
+                });
+            } catch {}
+            try {
+                window.focus();
+            } catch {}
+
+            startScreen.style.display = 'none';
+            gameState.gameStarted = true;
+            gameState.__allowPersist = true;
+            saveNow();
+            startGameTime();
+            gameLoop();
+        });
+        setupTouchControls();
+        canvas.addEventListener('pointerdown', () => {
+            try {
+                canvas.focus();
+            } catch {}
+        }, {
+            passive: true
+        });
+        canvas.addEventListener('click', () => {
+            checkForInteraction();
+        });
+        document.body.addEventListener('pointerdown', () => {
+            try {
+                window.focus();
+            } catch {}
+        }, {
+            passive: true
+        });
+        interactBtn.addEventListener('click', checkForInteraction);
+        closeDialogue.addEventListener('click', () => {
+            dialogueBox.style.display = 'none';
+            gameState.inDialogue = false;
+            gameState.currentNPC = null;
+            npcHint.style.display = 'none';
+        });
+        mapButton.addEventListener('click', showMap);
+        closeMap.addEventListener('click', () => {
+            mapOverlay.style.display = 'none';
+        });
+        document.querySelectorAll('.map-area').forEach(a => a.addEventListener('click', e => {
+            const id = e.target.id.replace('map-', '');
+            if (id === 'novo' && !gameState.newMapUnlocked) {
+                showNotification('Get 5 hits in a minigame to unlock the New District.');
+                return;
+            }
+            travelToArea(id);
+        }));
+        closeSchool.addEventListener('click', () => {
+            schoolScreen.style.display = 'none';
+            gameState.playerLocation = 'school';
+            updateLocationDisplay();
+        });
+        vocabLesson.addEventListener('click', learnVocabulary);
+        vocabLesson.addEventListener('pointerup', (e) => {
+            e.preventDefault();
+            learnVocabulary();
+        }, {
+            passive: false
+        });
+        grammarLesson.addEventListener('click', learnGrammar);
+        updateVocabularyCount();
+        updateTimeDisplay();
+        updateCoins();
+
+        // Work UI
+        function renderJobStatus() {
+            const cid = gameState.jobs.currentJobId;
+            const unlockedCafe = !!gameState.jobs.unlocked.cafe;
+            let html = '';
+
+            if (!unlockedCafe) {
+                html += 'No job available yet. Tip: talk to Takeshi at the Cafe.';
+            } else {
+                const job = JOBS.cafe;
+                if (!cid) {
+                    gameState.jobs.currentJobId = 'cafe';
+                }
+                const rank = job.ranks[gameState.jobs.currentRankIndex] || job.ranks[0];
+                html += `<div><b>Job:</b> ${job.name}</div>`;
+                html += `<div><b>Rank:</b> ${rank.name} (rate: ${rank.rate}/h)</div>`;
+                html += `<div><b>Status:</b> ${gameState.jobs.isOnShift? 'On shift (accumulates offline hours)':'Off shift'}</div>`;
+                html += `<div><b>Total offline hours:</b> ${gameState.jobs.totalOfflineHoursWorked.toFixed(1)}h</div>`;
+            }
+            jobStatus.innerHTML = html;
+        }
+
+        jobBtn.addEventListener('click', () => {
+            if (!gameState.jobs?.unlocked?.cafe) {
+                showNotification('You need to talk properly to Takeshi (greet + order coffee) to unlock this job.');
+                return;
+            }
+            jobOv.style.display = 'block';
+            renderJobStatus();
+        });
+
+        document.getElementById('job-close').addEventListener('click', () => {
+            jobOv.style.display = 'none';
+        });
+        document.getElementById('job-start').addEventListener('click', () => {
+            if (!gameState.jobs.unlocked.cafe) {
+                showNotification('No job unlocked.');
+                return;
+            }
+            gameState.jobs.isOnShift = true;
+            saveNow();
+            renderJobStatus();
+            showNotification('Shift started. Coins will accrue while you are offline.');
+        });
+        document.getElementById('job-stop').addEventListener('click', () => {
+            if (!gameState.jobs.unlocked.cafe) {
+                showNotification('No job unlocked.');
+                return;
+            }
+            gameState.jobs.isOnShift = false;
+            saveNow();
+            renderJobStatus();
+            showNotification('Shift ended.');
+        });
+
+        document.getElementById('workevent-close').addEventListener('click', closeWorkEvent);
+    }
+    init();
+
+    function gameLoop() {
+        if (!gameState.gameStarted) return;
+        npcHint.style.display = 'none';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        activeMap().draw();
+        npcs.forEach(drawNPC);
+        updatePlayer();
+        drawPlayer();
+        gameState.playerLocation = activeMap().checkPlayerLocation(gameState.player.x, gameState.player.y);
+        updateLocationDisplay();
+        const kdL = document.getElementById('kd-l'),
+            kdR = document.getElementById('kd-r'),
+            kdU = document.getElementById('kd-u'),
+            kdD = document.getElementById('kd-d'),
+            kdI = document.getElementById('kd-i');
+        if (kdL) {
+            kdL.textContent = KeyState.left ? 1 : 0;
+            kdR.textContent = KeyState.right ? 1 : 0;
+            kdU.textContent = KeyState.up ? 1 : 0;
+            kdD.textContent = KeyState.down ? 1 : 0;
+            kdI.textContent = KeyState.interact ? 1 : 0;
+        }
+        requestAnimationFrame(gameLoop);
+    }
+
+    /* =======================
+      Minigame — Swipe/Drag v2
+    ========================*/
+    const VERB_POOL = [{
+            w: '行く',
+            pos: 'verbo'
+        }, {
+            w: '飲む',
+            pos: 'verbo'
+        }, {
+            w: '読む',
+            pos: 'verbo'
+        }, {
+            w: '食べる',
+            pos: 'verbo'
+        },
+        {
+            w: '勉強する',
+            pos: 'verbo'
+        }, {
+            w: '見る',
+            pos: 'verbo'
+        }, {
+            w: '話す',
+            pos: 'verbo'
+        },
+        {
+            w: '学校',
+            pos: 'substantivo'
+        }, {
+            w: '水',
+            pos: 'substantivo'
+        }, {
+            w: 'コーヒー',
+            pos: 'substantivo'
+        }, {
+            w: 'ありがとう',
+            pos: 'interjeição'
+        },
+        {
+            w: '美味しい',
+            pos: 'adjetivo'
+        }, {
+            w: '日本語',
+            pos: 'substantivo'
+        }, {
+            w: '名前',
+            pos: 'substantivo'
+        }, {
+            w: 'あなた',
+            pos: 'pronome'
+        }
+    ];
+    let mgRunning = false,
+        mgScore = 0,
+        mgMistakes = 0,
+        mgItems = [],
+        mgCtx, mgCanvas,
+        mgLastSpawn = 0,
+        mgW = 960,
+        mgH = 540,
+        mgLives = 3,
+        mgTimeLeft = 60000,
+        mgLastTs = 0,
+        mgVerbHitsSinceReward = 0,
+        mgDPR = 1;
+
+    let mgPathPoints = [];
+    let mgIsDragging = false;
+    let mgLastPoint = null;
+    const mgTrailFadeMs = 220;
+    const STEP_MIN_DIST = 2;
+    const HIT_MIN_SEG = 6;
+    const HIT_PADDING = 22;
+
+    function mgResizeCanvas() {
+        const vw = Math.max(640, Math.min(window.innerWidth * 0.95, 1280));
+        const vh = Math.max(360, Math.min(window.innerHeight * 0.70, 720));
+        mgW = Math.floor(vw);
+        mgH = Math.floor(vh);
+        mgCanvas.style.width = mgW + 'px';
+        mgCanvas.style.height = mgH + 'px';
+    }
+
+    function mgApplyDPR() {
+        mgDPR = window.devicePixelRatio || 1;
+        const cssW = mgCanvas.clientWidth || mgW;
+        const cssH = mgCanvas.clientHeight || mgH;
+        mgCanvas.width = Math.round(cssW * mgDPR);
+        mgCanvas.height = Math.round(cssH * mgDPR);
+        mgCtx.setTransform(mgDPR, 0, 0, mgDPR, 0, 0);
+    }
+
+    function mgClear() {
+        mgCtx.save();
+        mgCtx.setTransform(1, 0, 0, 1, 0, 0);
+        mgCtx.clearRect(0, 0, mgCanvas.width, mgCanvas.height);
+        mgCtx.restore();
+    }
+
+    function mgHearts(n) {
+        return '❤️'.repeat(Math.max(0, n));
+    }
+
+    function mgUpdateUI() {
+        const t = Math.max(0, Math.ceil(mgTimeLeft / 1000));
+        document.getElementById('mg-lives').textContent = mgHearts(mgLives);
+        document.getElementById('mg-time').textContent = String(t);
+    }
+
+    function mgEventPos(e) {
+        if (typeof e.offsetX === 'number' && typeof e.offsetY === 'number') {
+            return {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+        }
+        const r = mgCanvas.getBoundingClientRect();
+        const touch = e.touches && e.touches[0];
+        const cx = (typeof e.clientX === 'number') ? e.clientX : (touch ? touch.clientX : 0);
+        const cy = (typeof e.clientY === 'number') ? e.clientY : (touch ? touch.clientY : 0);
+        return {
+            x: cx - r.left,
+            y: cy - r.top
+        };
+    }
+
+    function mgTextRect(ctx, text, x, y) {
+        ctx.save();
+        ctx.font = '24px Arial';
+        const w = Math.max(24, ctx.measureText(text).width);
+        ctx.restore();
+        const h = 28;
+        const pad = HIT_PADDING;
+        const rx = x - pad,
+            ry = y - h - pad,
+            rw = w + pad * 2,
+            rh = h + pad * 2;
+        return {
+            rx,
+            ry,
+            rw,
+            rh
+        };
+    }
+
+    function lineIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+        function seg(ax, ay, bx, by, cx, cy, dx, dy) {
+            const s1x = bx - ax,
+                s1y = by - ay,
+                s2x = dx - cx,
+                s2y = dy - cy;
+            const den = (-s2x * s1y + s1x * s2y);
+            if (den === 0) return false;
+            const s = (-s1y * (ax - cx) + s1x * (ay - cx)) / den;
+            const t = (s2x * (ay - cy) - s2y * (ax - cx)) / den;
+            return (s >= 0 && s <= 1 && t >= 0 && t <= 1);
+        }
+        const r1x = rx,
+            r1y = ry,
+            r2x = rx + rw,
+            r2y = ry + rh;
+        if ((x1 >= r1x && x1 <= r2x && y1 >= r1y && y1 <= r2y) || (x2 >= r1x && x2 <= r2x && y2 >= r1y && y2 <= r2y)) return true;
+        if (seg(x1, y1, x2, y2, r1x, r1y, r2x, r1y)) return true;
+        if (seg(x1, y1, x2, y2, r2x, r1y, r2x, r2y)) return true;
+        if (seg(x1, y1, x2, y2, r2x, r2y, r1x, r2y)) return true;
+        if (seg(x1, y1, x2, y2, r1x, r2y, r1x, r1y)) return true;
+        return false;
+    }
+
+    function startVerbMinigame() {
+        const overlay = document.getElementById('minigame-overlay');
+        mgCanvas = document.getElementById('minigame-canvas');
+        mgCtx = mgCanvas.getContext('2d');
+
+        mgResizeCanvas();
+        mgApplyDPR();
+        mgScore = 0;
+        mgMistakes = 0;
+        mgItems = [];
+        mgRunning = true;
+        mgLives = 3;
+        mgTimeLeft = 60000;
+        mgLastTs = 0;
+        mgVerbHitsSinceReward = 0;
+        mgPathPoints = [];
+        mgIsDragging = false;
+        mgLastPoint = null;
+        document.getElementById('mg-score').textContent = '0';
+        document.getElementById('mg-mistakes').textContent = '0';
+        mgUpdateUI();
+        overlay.style.display = 'flex';
+        window.addEventListener('resize', () => {
+            mgResizeCanvas();
+            mgApplyDPR();
+        });
+
+        mgCanvas.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            try {
+                mgCanvas.setPointerCapture(e.pointerId);
+            } catch {}
+            const p = mgEventPos(e);
+            mgIsDragging = true;
+            mgPathPoints = [{
+                x: p.x,
+                y: p.y,
+                t: Date.now()
+            }];
+            mgLastPoint = {
+                x: p.x,
+                y: p.y,
+                t: Date.now()
+            };
+        }, {
+            passive: false
+        });
+
+        function endDrag(e) {
+            if (!mgIsDragging) return;
+            e && e.preventDefault();
+            mgIsDragging = false;
+        }
+        mgCanvas.addEventListener('pointerup', endDrag, {
+            passive: false
+        });
+        mgCanvas.addEventListener('pointercancel', endDrag, {
+            passive: false
+        });
+        mgCanvas.addEventListener('pointerleave', endDrag, {
+            passive: false
+        });
+
+        mgCanvas.addEventListener('pointermove', (e) => {
+            if (!mgIsDragging || !mgRunning) return;
+            e.preventDefault();
+            const p = mgEventPos(e);
+            const dx = p.x - mgLastPoint.x,
+                dy = p.y - mgLastPoint.y;
+            const dist = Math.hypot(dx, dy);
+            if (dist >= STEP_MIN_DIST) {
+                const now = Date.now();
+                mgPathPoints.push({
+                    x: p.x,
+                    y: p.y,
+                    t: now
+                });
+                mgLastPoint = {
+                    x: p.x,
+                    y: p.y,
+                    t: now
+                };
+            }
+        }, {
+            passive: false
+        });
+
+        document.getElementById('minigame-exit').onclick = endVerbMinigame;
+
+        requestAnimationFrame(minigameLoop);
+    }
+
+    function endVerbMinigame() {
+        mgRunning = false;
+        gameState.inMinigame = false;
+        document.getElementById('minigame-overlay').style.display = 'none';
+    }
+
+    function spawnItem(ts) {
+        if (ts - mgLastSpawn < 520) return;
+        mgLastSpawn = ts;
+        const pick = VERB_POOL[Math.floor(Math.random() * VERB_POOL.length)];
+        const margin = 80;
+        const startX = margin + Math.random() * (mgW - margin * 2);
+        const item = {
+            text: pick.w,
+            pos: pick.pos,
+            x: startX,
+            y: mgH - 10,
+            vx: (Math.random() * 2 - 1) * 1.0,
+            vy: -(6 + Math.random() * 2),
+            alive: true
+        };
+        mgItems.push(item);
+    }
+
+    function updateItems() {
+        mgItems.forEach(it => {
+            if (it.vy > 7.5) it.vy = 7.5;
+            if (it.vy < -8.5) it.vy = -8.5;
+            it.x += it.vx;
+            it.y += it.vy;
+            it.vy += 0.08;
+            if (it.x < 16) {
+                it.x = 16;
+                it.vx = Math.abs(it.vx);
+            }
+            if (it.x > mgW - 16) {
+                it.x = mgW - 16;
+                it.vx = -Math.abs(it.vx);
+            }
+        });
+        mgItems = mgItems.filter(it => it.y < mgH + 40 && it.alive);
+    }
+
+    function drawItems() {
+        mgCtx.save();
+        mgCtx.fillStyle = '#ffffff';
+        mgCtx.font = '24px Arial';
+        mgItems.forEach(it => {
+            mgCtx.fillText(it.text, it.x, it.y);
+        });
+        mgCtx.restore();
+    }
+
+    function drawTrail() {
+        const now = Date.now();
+        mgPathPoints = mgPathPoints.filter(p => now - p.t < mgTrailFadeMs);
+        if (mgPathPoints.length < 2) return;
+        mgCtx.save();
+        mgCtx.lineCap = 'round';
+        mgCtx.lineJoin = 'round';
+        for (let i = 1; i < mgPathPoints.length; i++) {
+            const a = mgPathPoints[i - 1],
+                b = mgPathPoints[i];
+            const segLen = Math.hypot(b.x - a.x, b.y - a.y);
+            if (segLen < HIT_MIN_SEG) continue;
+            const age = now - b.t;
+            const alpha = Math.max(0, 1 - age / mgTrailFadeMs);
+            mgCtx.globalAlpha = alpha;
+            mgCtx.strokeStyle = '#e9c46a';
+            mgCtx.shadowColor = '#e9c46a';
+            mgCtx.shadowBlur = 10;
+            mgCtx.lineWidth = 6;
+            mgCtx.beginPath();
+            mgCtx.moveTo(a.x, a.y);
+            mgCtx.lineTo(b.x, b.y);
+            mgCtx.stroke();
+        }
+        mgCtx.restore();
+    }
+
+    function testHits() {
+        if (mgPathPoints.length < 2) return false;
+        const now = Date.now();
+        let hit = false;
+        const segs = [];
+        for (let i = 1; i < mgPathPoints.length; i++) {
+            const a = mgPathPoints[i - 1],
+                b = mgPathPoints[i];
+            const segLen = Math.hypot(b.x - a.x, b.y - a.y);
+            if (segLen < HIT_MIN_SEG) continue;
+            if (now - b.t > mgTrailFadeMs) continue;
+            segs.push([a.x, a.y, b.x, b.y]);
+        }
+        if (!segs.length) return false;
+
+        mgItems.forEach(it => {
+            if (!it.alive) return;
+            const r = mgTextRect(mgCtx, it.text, it.x, it.y);
+            for (const s of segs) {
+                if (lineIntersectsRect(s[0], s[1], s[2], s[3], r.rx, r.ry, r.rw, r.rh)) {
+                    it.alive = false;
+                    hit = true;
+                    if (it.pos === 'verbo') {
+                        mgScore++;
+                        mgVerbHitsSinceReward++;
+                        document.getElementById('mg-score').textContent = String(mgScore);
+
+                        if (mgScore >= 5 && !gameState.newMapUnlocked) {
+                            gameState.newMapUnlocked = true;
+                            const novo = document.getElementById('map-novo');
+                            if (novo) {
+                                novo.classList.remove('locked');
+                                novo.style.opacity = '1';
+                                novo.style.filter = 'none';
+                                novo.style.cursor = 'pointer';
+                            }
+                            showNotification('New District unlocked! Open the map to travel.');
+                        }
+
+                        if (mgVerbHitsSinceReward >= 2) {
+                            mgVerbHitsSinceReward = 0;
+                            gameState.coins = (gameState.coins || 0) + 10;
+                            updateCoins();
+                            showNotification('+10 coins!');
+                        }
+                    } else {
+                        mgMistakes++;
+                        if (mgLives > 0) mgLives--;
+                        document.getElementById('mg-mistakes').textContent = String(mgMistakes);
+                        document.getElementById('mg-lives').textContent = mgHearts(mgLives);
+                        if (mgLives <= 0) {
+                            endVerbMinigame();
+                            return;
+                        }
+                    }
+                    break;
+                }
+            }
+        });
+        return hit;
+    }
+
+    function minigameLoop(ts) {
+        if (!mgRunning) return;
+        if (!mgLastTs) mgLastTs = ts;
+        const dt = ts - mgLastTs;
+        mgLastTs = ts;
+        mgTimeLeft -= dt;
+        mgUpdateUI();
+        if (mgTimeLeft <= 0) {
+            endVerbMinigame();
+            return;
+        }
+
+        mgClear();
+        spawnItem(ts);
+        updateItems();
+        drawItems();
+        drawTrail();
+
+        if (testHits()) {
+            mgPathPoints = [];
+            mgLastPoint = null;
+            mgIsDragging = false;
+        }
+        requestAnimationFrame(minigameLoop);
+    }
+
+    // Game loop + init already defined; bind buttons now:
+    document.getElementById('start-button').addEventListener('click', () => {
+        if (DBG.mg) console.debug('[Game] start');
+    });
+    document.getElementById('map-button').addEventListener('click', () => {
+        if (DBG.mg) console.debug('[UI] open map');
+    });
+
+    function maybeOpenNextWorkEvent() {
+        if (gameState.inDialogue || gameState.inMinigame) return;
+        if (gameState.jobs.pendingEventQueue.length === 0) return;
+        const ev = gameState.jobs.pendingEventQueue.shift();
+        saveNow();
+        openWorkEvent(ev);
+    }
+
+    function openWorkEvent(ev) {
+        const ov = document.getElementById('workevent-overlay');
+        const t = document.getElementById('workevent-title');
+        const body = document.getElementById('workevent-text');
+        const box = document.getElementById('workevent-choices');
+        t.textContent = ev.title;
+        body.textContent = ev.text;
+        box.innerHTML = '';
+        ev.choices.forEach((c) => {
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.textContent = c.label;
+            btn.onclick = () => resolveWorkChoice(ev, c.effects);
+            box.appendChild(btn);
+        });
+        ov.style.display = 'flex';
+    }
+
+    function closeWorkEvent() {
+        document.getElementById('workevent-overlay').style.display = 'none';
+        setTimeout(maybeOpenNextWorkEvent, 150);
+    }
+
+    function resolveWorkChoice(ev, effects) {
+        if (effects.coins) {
+            gameState.coins = (gameState.coins || 0) + effects.coins;
+            updateCoins();
+            if (effects.coins > 0) showNotification(`Bonus +${effects.coins} coins!`);
+            if (effects.coins < 0) showNotification(`Cost ${Math.abs(effects.coins)} coins.`);
+        }
+        if (effects.relTakeshi) {
+            gameState.relationships['takeshi'] = (gameState.relationships['takeshi'] || 0) + effects.relTakeshi;
+        }
+        let p = Math.max(0, (effects.promoChance || 0));
+        p += Math.max(0, Math.min(0.10, (gameState.relationships['takeshi'] || 0) * 0.02));
+        p += Math.min(0.10, (gameState.jobs.totalOfflineHoursWorked || 0) * 0.002);
+        if (Math.random() < p) {
+            tryPromote();
+        } else {
+            showNotification('Event resolved. Keep it up!');
+        }
+        saveNow();
+        closeWorkEvent();
+    }
+
+    function tryPromote() {
+        const job = JOBS[gameState.jobs.currentJobId || 'cafe'];
+        if (!job) return;
+        if (gameState.jobs.currentRankIndex < job.ranks.length - 1) {
+            gameState.jobs.currentRankIndex++;
+            const newRank = job.ranks[gameState.jobs.currentRankIndex];
+            showNotification(`Promotion! New rank: ${newRank.name} (+${newRank.rate}/h).`, 4000);
+        } else {
+            showNotification('You are already at the top of this career!');
+        }
+        saveNow();
+    }
+
+    function makeRandomWorkEvent(job) {
+        const templates = [{
+                title: `${job.name}: delicate situation with a customer`,
+                text: `A homeless person entered the ${job.name} asking for water and a piece of bread. The manager wasn’t around.`,
+                choices: [{
+                        label: 'Offer water and calmly explain the rules.',
+                        effects: {
+                            coins: +5,
+                            relTakeshi: +1,
+                            promoChance: +0.15
+                        }
+                    },
+                    {
+                        label: 'Ignore and keep working.',
+                        effects: {
+                            coins: +0,
+                            relTakeshi: -1,
+                            promoChance: +0.00
+                        }
+                    },
+                    {
+                        label: 'Ask them to leave in a harsh tone.',
+                        effects: {
+                            coins: +2,
+                            relTakeshi: -2,
+                            promoChance: -0.05
+                        }
+                    },
+                ]
+            },
+            {
+                title: `${job.name}: impatient customer`,
+                text: `The line is long and a customer starts complaining out loud.`,
+                choices: [{
+                        label: 'Apologize and offer a small coupon.',
+                        effects: {
+                            coins: -3,
+                            relTakeshi: +1,
+                            promoChance: +0.10
+                        }
+                    },
+                    {
+                        label: 'Ignore and focus on speeding orders.',
+                        effects: {
+                            coins: +0,
+                            relTakeshi: +0,
+                            promoChance: +0.02
+                        }
+                    },
+                    {
+                        label: 'Talk back to the customer.',
+                        effects: {
+                            coins: +0,
+                            relTakeshi: -2,
+                            promoChance: -0.10
+                        }
+                    },
+                ]
+            },
+            {
+                title: `${job.name}: extra opportunity`,
+                text: `A supplier offers a crash course on perfect espresso extraction.`,
+                choices: [{
+                        label: 'Join during your free time.',
+                        effects: {
+                            coins: -5,
+                            skill: +1,
+                            promoChance: +0.20
+                        }
+                    },
+                    {
+                        label: 'Decline (no time).',
+                        effects: {
+                            coins: +0,
+                            promoChance: +0.00
+                        }
+                    },
+                ]
+            },
+        ];
+        return templates[Math.floor(Math.random() * templates.length)];
+    }
+
+    function processOfflineWork(offlineHours) {
+        const jobId = gameState.jobs.currentJobId;
+        if (!jobId) return;
+        const job = JOBS[jobId];
+        const rank = job.ranks[gameState.jobs.currentRankIndex] || job.ranks[0];
+
+        const coinsEarned = Math.floor(offlineHours * rank.rate);
+        if (coinsEarned > 0) {
+            gameState.coins = (gameState.coins || 0) + coinsEarned;
+            updateCoins();
+            showNotification(`You worked offline for ${offlineHours.toFixed(1)}h and earned ${coinsEarned} coins.`);
+        }
+
+        gameState.jobs.totalOfflineHoursWorked += offlineHours;
+        gameState.jobs.totalHoursWorked = (gameState.jobs.totalHoursWorked || 0) + offlineHours;
+
+        while (gameState.jobs.eventsTriggered < job.eventMilestones.length &&
+            gameState.jobs.totalHoursWorked >= job.eventMilestones[gameState.jobs.eventsTriggered]) {
+            gameState.jobs.pendingEventQueue.push(makeRandomWorkEvent(job));
+            gameState.jobs.eventsTriggered++;
+        }
+
+        const lastAnchor = job.eventMilestones.at(-1) || 0;
+        if (gameState.jobs.eventsTriggered >= job.eventMilestones.length && gameState.jobs.extraEventAnchor === 0) {
+            gameState.jobs.extraEventAnchor = lastAnchor;
+        }
+        while (gameState.jobs.eventsTriggered >= job.eventMilestones.length &&
+            gameState.jobs.totalHoursWorked >= gameState.jobs.extraEventAnchor + 30) {
+            gameState.jobs.pendingEventQueue.push(makeRandomWorkEvent(job));
+            gameState.jobs.extraEventAnchor += 30;
+        }
+        saveNow();
+    }
+  </script>
+</body>
+</html>
