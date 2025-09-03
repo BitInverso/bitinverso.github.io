@@ -43,6 +43,29 @@
     /* Minigame */
     #minigame-overlay{position:absolute; inset:0; background:rgba(0,0,0,.85); display:none; z-index:80; align-items:center; justify-content:center; flex-direction:column; touch-action:none; -webkit-user-select:none; user-select:none;}
     #minigame-canvas{background:#0e1826; border:0; margin:0; box-shadow:0 0 0 2px #778da9 inset; border-radius:10px; max-width:95vw; max-height:70vh; touch-action:none; display:block;}
+
+    /* Battle (turn-based JP) */
+    #battle-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);display:none;z-index:95;align-items:center;justify-content:center;padding:20px}
+    #battle-card{width:min(720px,92vw);background:#1b263b;border:2px solid #778da9;border-radius:14px;padding:18px;color:#e0e1dd;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+    #battle-title{font-size:1.2rem;color:#e9c46a;margin-bottom:10px}
+    #hp-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+    #hp-bar{flex:1;height:12px;background:#0e1826;border:1px solid #778da9;border-radius:999px;overflow:hidden}
+    #hp-fill{height:100%;width:100%;background:#2a9d8f;transition:width .2s}
+    #hp-text{font-size:.9rem}
+    #battle-instr{opacity:.9;margin-bottom:10px}
+    #battle-pool, #battle-ordered{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;padding:8px;border:1px dashed #778da9;border-radius:10px;margin-bottom:10px}
+    .word-chip{background:#415a77;border:none;border-radius:999px;color:#e0e1dd;padding:8px 12px;font-size:.95rem;cursor:pointer}
+    .word-chip.disabled{opacity:.5;cursor:not-allowed}
+    #battle-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+    .btn{background:#415a77;border:none;border-radius:10px;color:#e0e1dd;padding:10px 16px;font-size:.95rem;cursor:pointer}
+
+    /* Defense mini-skill */
+    #defense-panel{margin-top:10px;padding:10px;border:1px solid #778da9;border-radius:10px;background:rgba(13,27,42,.6);display:none}
+    #defense-prompt{font-size:.95rem;margin-bottom:8px}
+    #defense-row{display:flex;gap:8px;align-items:center}
+    #defense-input{flex:1;min-width:120px;background:#0e1826;border:1px solid #778da9;border-radius:8px;color:#e0e1dd;padding:8px}
+    #defense-timer{font-variant-numeric:tabular-nums;opacity:.9}
+
   </style>
 </head>
 <body>
@@ -96,6 +119,7 @@
     <div id="keydebug" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:8px;font-size:.75rem;display:none;z-index:99">
       L:<span id="kd-l">0</span> R:<span id="kd-r">0</span> U:<span id="kd-u">0</span> D:<span id="kd-d">0</span> I:<span id="kd-i">0</span>
     </div>
+    
 
     <!-- Minigame -->
     <div id="minigame-overlay">
@@ -162,7 +186,7 @@
       <div class="panel" style="max-width:560px;text-align:center">
         <div id="logo" style="font-size:2rem;color:#e9c46a;margin-bottom:15px;text-shadow:0 0 10px rgba(233,196,106,.5)">Nihongo Journey</div>
         <div id="instructions" style="margin-bottom:22px;line-height:1.6;font-size:.95rem;">
-          <p>You’ve arrived in <b>Japan</b> as a backpacker, without knowing the language.</p>
+          <p>You've arrived in <b>Japan</b> as a backpacker, without knowing the language.</p>
           <p>Explore the city, <b>learn Japanese words</b>, and make friends to experience authentic culture.</p>
           <p><b>Move:</b> WASD / Arrows • <b>Interact:</b> E / Space / Enter • Or use on‑screen controls.</p>
         </div>
@@ -170,6 +194,44 @@
       </div>
     </div>
   </div>
+
+  <!-- Turn-based Battle (JP sentences) -->
+  <div id="battle-overlay" class="overlay">
+    <div id="battle-card">
+      <div id="battle-title">野生のチャレンジが現れた！</div>
+
+      <div id="hp-wrap">
+        <div id="hp-text">HP: <span id="hp-val">10</span>/10</div>
+        <div id="hp-bar"><div id="hp-fill" style="width:100%"></div></div>
+      </div>
+
+      <div id="battle-instr">日本語の文を正しい順序に並べよう（1ターンにつき <b>1語のみ</b>）</div>
+
+      <div style="font-size:.95rem;opacity:.8;margin-bottom:6px">単語プール</div>
+      <div id="battle-pool"></div>
+
+      <div style="font-size:.95rem;opacity:.8;margin:8px 0 6px">あなたの文</div>
+      <div id="battle-ordered"></div>
+
+      <div id="battle-actions">
+        <button id="battle-undo" class="btn">Undo</button>
+        <button id="battle-clear" class="btn">Clear</button>
+        <button id="battle-endturn" class="btn">End Turn</button>
+        <button id="battle-flee" class="btn">Flee</button>
+      </div>
+
+      <!-- Defense mini-skill (enemy turn) -->
+      <div id="defense-panel">
+        <div id="defense-prompt">Defense: type <b><span id="defense-label">ka</span></b> quickly!</div>
+        <div id="defense-row">
+          <input id="defense-input" type="text" autocomplete="off" />
+          <button id="defense-submit" class="btn">Guard</button>
+          <div id="defense-timer">3.0s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <script>
     /* =======================
@@ -343,6 +405,16 @@
             extraEventAnchor: 0,
             totalHoursWorked: 0
         },
+        inBattle: false,
+        encounterTimerId: null,
+        battle: {
+          hp: 10,
+          targetWords: [],
+          targetAnswer: '',
+          turn: 'player',        // 'player' | 'enemy'
+          pickedThisTurn: false, // garante 1 palavra por turno
+          history: []            // para Undo (uma palavra)
+        },
         __allowPersist: true
     };
 
@@ -424,6 +496,16 @@
         '勉強': 'noun/verb-suru',
         '日本語': 'noun'
     };
+
+    const JP_SENTENCES = [
+      { words:["私","は","学生","です"],            answer:"私は学生です" },
+      { words:["おはよう","ございます"],             answer:"おはようございます" },
+      { words:["日本語","を","勉強","します"],        answer:"日本語を勉強します" },
+      { words:["水","を","ください"],               answer:"水をください" },
+      { words:["ここ","は","公園","です"],          answer:"ここは公園です" },
+      { words:["コーヒー","を","お願いします"],       answer:"コーヒーをお願いします" },
+      { words:["すみません","駅","は","どこ","です","か"], answer:"すみません駅はどこですか" },
+    ];
 
     function currentMinutesOfDay() {
         const h = Math.floor(gameState.time);
@@ -836,29 +918,52 @@
         mapOverlay.style.display = 'flex';
     }
 
-    function travelToArea(areaId) {
-        mapOverlay.style.display = 'none';
-        if (areaId === 'novo') {
-            gameState.currentMap = 'novo';
-            gameState.playerLocation = 'street';
-            updateLocationDisplay();
-            showNotification('You traveled to the New District.');
-        } else {
-            gameState.currentMap = 'city';
-            gameState.playerLocation = areaId;
-            updateLocationDisplay();
+    function startEncounterLoop(){
+      // alto índice de encontro: a cada 3s, 35% de chance
+      if (gameState.encounterTimerId) clearInterval(gameState.encounterTimerId);
+      gameState.encounterTimerId = setInterval(()=>{
+        if (!gameState.gameStarted) return;
+        if (gameState.currentMap !== 'novo') return;
+        if (gameState.inBattle || gameState.inDialogue || gameState.inMinigame) return;
+        if (Math.random() < 0.35){
+          openBattle();
         }
-        gameState.player.x = canvas.width / 2;
-        gameState.player.y = canvas.height / 2;
-        if (areaId === 'school') {
-            schoolScreen.style.display = 'flex';
-            if (!gameState.storyProgress.visitedSchool) {
-                gameState.storyProgress.visitedSchool = true;
-                showNotification('Welcome to school! You can study Japanese here.');
-            }
-        } else {
-            showNotification('You arrived at: ' + getLocationName(areaId));
+      }, 3000);
+    }
+    function stopEncounterLoop(){
+      if (gameState.encounterTimerId){
+        clearInterval(gameState.encounterTimerId);
+        gameState.encounterTimerId = null;
+      }
+    }
+
+    function travelToArea(areaId){
+      mapOverlay.style.display='none';
+      if (areaId==='novo') {
+        gameState.currentMap='novo';
+        gameState.playerLocation='street';
+        updateLocationDisplay();
+        showNotification('You traveled to the New District.');
+        startEncounterLoop();
+        // chance de cair em batalha imediatamente
+        if (!gameState.inBattle && Math.random()<0.5) openBattleJP();
+      } else {
+        gameState.currentMap='city';
+        gameState.playerLocation=areaId;
+        updateLocationDisplay();
+        stopEncounterLoop();
+      }
+      gameState.player.x = canvas.width/2; gameState.player.y = canvas.height/2;
+
+      if (areaId==='school'){
+        schoolScreen.style.display='flex';
+        if(!gameState.storyProgress.visitedSchool){
+          gameState.storyProgress.visitedSchool=true;
+          showNotification('Welcome to school! You can study Japanese here.');
         }
+      } else {
+        showNotification('You arrived at: '+getLocationName(areaId));
+      }
     }
 
     function getLocationName(id) {
@@ -981,9 +1086,11 @@
     }
 
     function drawNPC(npc) {
+        if (gameState.currentMap !== 'city') return; // nunca desenha NPC fora da cidade
         const tod = getTimeOfDay();
         const place = npc.schedule[tod];
         if (place !== gameState.playerLocation) return;
+        
         ctx.fillStyle = npc.color;
         ctx.beginPath();
         ctx.arc(npc.x, npc.y, 15, 0, Math.PI * 2);
@@ -1006,6 +1113,8 @@
 
     function updatePlayer() {
         const sp = 2.8;
+
+        if (gameState.inBattle) return;
         // keyboard: always allow movement when keys pressed
         if (KeyState.left) {
             gameState.player.x -= sp;
@@ -1233,38 +1342,38 @@
         responseOptions.appendChild(cont);
     }
 
-    function checkForInteraction() {
-        if (gameState.inDialogue && gameState.currentNPC) {
-            return;
+    function checkForInteraction(){
+      // sem interação durante batalha/minigame
+      if (gameState.inBattle || gameState.inMinigame) return;
+
+      // só existe NPC na cidade; no New District nunca interage
+      if (gameState.currentMap !== 'city'){
+        showNotification('There is no one around to interact with.');
+        return;
+      }
+
+      const tod = getTimeOfDay();
+      let target = null, bestDist = 1e9;
+
+      for (const npc of npcs){
+        // NPC precisa estar **na mesma localização** (segundo agenda do horário)
+        const placeNow = npc.schedule ? npc.schedule[tod] : null;
+        if (placeNow !== gameState.playerLocation) continue;
+
+        // distância no canvas
+        const d = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
+        if (d < bestDist && d <= 100){
+          target = npc; bestDist = d;
         }
-        let target = null,
-            bestDist = 1e9;
-        for (const npc of npcs) {
-            const d = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
-            if (d < bestDist && d <= 80 && activeMap().checkPlayerLocation(npc.x, npc.y) === gameState.playerLocation) {
-                target = npc;
-                bestDist = d;
-            }
-        }
-        if (target) {
-            startDialogue(target);
-            return;
-        }
-        // Fallback: nearest NPC by distance (debug/testing)
-        let nearest = null,
-            nd = 1e9;
-        for (const npc of npcs) {
-            const d = Math.hypot(gameState.player.x - npc.x, gameState.player.y - npc.y);
-            if (d < nd) {
-                nd = d;
-                nearest = npc;
-            }
-        }
-        if (nearest && nd <= 80) {
-            startDialogue(nearest);
-            return;
-        }
-        showNotification('There is no one nearby to interact with.');
+      }
+
+      if (target){
+        startDialogue(target);
+        return;
+      }
+
+      // sem fallback aqui (isso que causava o bug)
+      showNotification('There is no one nearby to interact with.');
     }
 
     /* =============
@@ -1465,6 +1574,7 @@
         });
 
         document.getElementById('workevent-close').addEventListener('click', closeWorkEvent);
+        bindBattleButtonsJP();
     }
     init();
 
@@ -2112,6 +2222,246 @@
             gameState.jobs.extraEventAnchor += 30;
         }
         saveNow();
+    }
+
+    function shuffle(arr){
+      const a = arr.slice();
+      for (let i=a.length-1; i>0; i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+      return a;
+    }
+
+    function updateHPUI(){
+      const hpEl = document.getElementById('hp-val');
+      const fill = document.getElementById('hp-fill');
+      const pct = Math.max(0, Math.min(100, (gameState.battle.hp/10)*100));
+      if (hpEl) hpEl.textContent = String(gameState.battle.hp);
+      if (fill) fill.style.width = pct + '%';
+    }
+
+    function renderBattleUI(){
+      const pool = document.getElementById('battle-pool');
+      const ordered = document.getElementById('battle-ordered');
+      pool.innerHTML = ''; ordered.innerHTML = '';
+
+      // monta o pool (palavras disponíveis)
+      gameState.battle.targetWords.forEach(w=>{
+        const b = document.createElement('button');
+        b.className = 'word-chip';
+        b.textContent = w;
+        // se já usada na ordem, desabilita no pool (ficará sumida de qualquer forma)
+        const alreadyUsedCount = Array.from(ordered.querySelectorAll('.word-chip'))
+          .filter(ch => ch.textContent === w).length;
+        const countInTarget = gameState.battle.targetWords.filter(x=>x===w).length;
+        if (alreadyUsedCount >= countInTarget) b.classList.add('disabled');
+
+        b.onclick = ()=>{
+          if (gameState.battle.turn !== 'player') return;
+          if (gameState.battle.pickedThisTurn) return; // 1 palavra por turno
+          if (b.classList.contains('disabled')) return;
+
+          // move para ordered
+          const chip = document.createElement('button');
+          chip.className = 'word-chip';
+          chip.textContent = w;
+          ordered.appendChild(chip);
+
+          gameState.battle.history.push(w);          // salva pra Undo
+          gameState.battle.pickedThisTurn = true;    // gastou ação do turno
+          // Desabilita esse chip no pool (apenas visual)
+          b.classList.add('disabled');
+        };
+
+        pool.appendChild(b);
+      });
+    }
+
+    function joinOrderedSentence(){
+      const ordered = document.getElementById('battle-ordered');
+      const words = Array.from(ordered.querySelectorAll('.word-chip')).map(x=>x.textContent);
+      return words.join('');
+    }
+
+    function openBattleJP(){
+      gameState.inBattle = true;
+      gameState.battle.hp = 10;
+      gameState.battle.turn = 'player';
+      gameState.battle.pickedThisTurn = false;
+      gameState.battle.history = [];
+
+      const pick = JP_SENTENCES[Math.floor(Math.random()*JP_SENTENCES.length)];
+      gameState.battle.targetWords = shuffle(pick.words);
+      gameState.battle.targetAnswer = pick.answer;
+
+      // UI
+      const ov = document.getElementById('battle-overlay');
+      document.getElementById('battle-ordered').innerHTML = '';
+      updateHPUI();
+      renderBattleUI();
+      hideDefensePanel();
+      ov.style.display = 'flex';
+    }
+
+    function closeBattleJP(message){
+      const ov = document.getElementById('battle-overlay');
+      ov.style.display = 'none';
+      gameState.inBattle = false;
+      if (message) showNotification(message);
+    }
+
+    function endPlayerTurn(){
+      // só permite se o jogador tiver escolhido 1 palavra neste turno
+      if (!gameState.battle.pickedThisTurn){
+        showNotification('Pick one word first (1 per turn).');
+        return;
+      }
+      // Verifica vitória (se já completou todas as palavras)
+      const orderedStr = joinOrderedSentence();
+      if (orderedStr.length === gameState.battle.targetAnswer.length){
+        if (orderedStr === gameState.battle.targetAnswer){
+          const reward = 6 + Math.floor(Math.random()*7); // 6–12
+          gameState.coins = (gameState.coins||0) + reward;
+          updateCoins && updateCoins();
+          closeBattleJP(`正解！ +${reward} coins`);
+          return;
+        } else {
+          // frase completa porém incorreta: inimigo ataca e mantém estado
+          showNotification('Hmm… not correct yet.');
+        }
+      }
+
+      // passa a vez para o inimigo
+      gameState.battle.turn = 'enemy';
+      gameState.battle.pickedThisTurn = false;
+      enemyTurn();
+    }
+
+    /* ========= Enemy turn: Defense mini-skill ========= */
+    let defenseTimer=null, defenseTimeLeftMs=0, defenseAnswer='';
+    const DEF_SKILLS = [
+      { label:'ka', answer:'ka' },
+      { label:'shi', answer:'shi' },
+      { label:'arigatou', answer:'arigatou' },
+      { label:'su', answer:'su' },
+      { label:'mi', answer:'mi' },
+      { label:'ko', answer:'ko' },
+    ];
+
+    function showDefensePanel(label, ms){
+      const p = document.getElementById('defense-panel');
+      document.getElementById('defense-label').textContent = label;
+      const input = document.getElementById('defense-input');
+      input.value=''; input.focus();
+      document.getElementById('defense-timer').textContent = (ms/1000).toFixed(1)+'s';
+      p.style.display='block';
+    }
+    function hideDefensePanel(){
+      const p = document.getElementById('defense-panel');
+      p.style.display='none';
+    }
+
+    function enemyTurn(){
+      // Inimigo “ataca”: jogador pode defender digitando rápido
+      const pick = DEF_SKILLS[Math.floor(Math.random()*DEF_SKILLS.length)];
+      defenseAnswer = pick.answer;
+      defenseTimeLeftMs = 3000; // 3s
+      showDefensePanel(pick.label, defenseTimeLeftMs);
+
+      if (defenseTimer) clearInterval(defenseTimer);
+      const tEl = document.getElementById('defense-timer');
+      defenseTimer = setInterval(()=>{
+        defenseTimeLeftMs -= 100;
+        if (defenseTimeLeftMs <= 0){
+          clearInterval(defenseTimer); defenseTimer=null;
+          applyEnemyDamage(); // tempo esgotou → dano
+        } else {
+          if (tEl) tEl.textContent = (defenseTimeLeftMs/1000).toFixed(1)+'s';
+        }
+      }, 100);
+    }
+
+    function guardAttempt(){
+      const val = (document.getElementById('defense-input').value||'').trim().toLowerCase();
+      if (val === defenseAnswer){
+        // defesa bem-sucedida
+        hideDefensePanel();
+        if (defenseTimer){ clearInterval(defenseTimer); defenseTimer=null; }
+        showNotification('Guard! No damage taken.');
+        // volta ao turno do jogador
+        gameState.battle.turn = 'player';
+        renderBattleUI(); // re-render para liberar nova palavra
+        return;
+      } else {
+        // falhou defesa → dano
+        if (defenseTimer){ clearInterval(defenseTimer); defenseTimer=null; }
+        applyEnemyDamage();
+      }
+    }
+    function applyEnemyDamage(){
+      hideDefensePanel();
+      // dano aleatório 1–5
+      const dmg = 1 + Math.floor(Math.random()*5);
+      gameState.battle.hp = Math.max(0, gameState.battle.hp - dmg);
+      updateHPUI();
+      if (gameState.battle.hp <= 0){
+        closeBattleJP('You fainted! Better luck next time.');
+      } else {
+        showNotification(`You took ${dmg} damage.`);
+        // devolve turno ao jogador
+        gameState.battle.turn = 'player';
+        renderBattleUI();
+      }
+    }
+
+    /* ========= Battle buttons ========= */
+    function bindBattleButtonsJP(){
+      document.getElementById('battle-endturn').onclick = endPlayerTurn;
+      document.getElementById('battle-clear').onclick = ()=>{
+        if (gameState.battle.turn !== 'player') return;
+        const pool = document.getElementById('battle-pool');
+        const ordered = document.getElementById('battle-ordered');
+        Array.from(ordered.querySelectorAll('.word-chip')).forEach(ch=>{
+          // devolve pro pool (uma instância a mais; UI recalcula)
+          ch.remove();
+        });
+        gameState.battle.history = [];
+        renderBattleUI();
+      };
+      document.getElementById('battle-undo').onclick = ()=>{
+        if (gameState.battle.turn !== 'player') return;
+        const ordered = document.getElementById('battle-ordered');
+        const last = ordered.lastElementChild;
+        if (!last) return;
+        const val = last.textContent;
+        last.remove();
+        gameState.battle.history.pop();
+        gameState.battle.pickedThisTurn = false; // pode escolher outra nesse mesmo turno (já que “des-escolheu”)
+        renderBattleUI();
+      };
+      document.getElementById('battle-flee').onclick = ()=> closeBattleJP('You fled the encounter.');
+      document.getElementById('defense-submit').onclick = guardAttempt;
+      document.getElementById('defense-input').addEventListener('keydown', (e)=>{
+        if (e.key==='Enter'){ e.preventDefault(); guardAttempt(); }
+      });
+    }
+
+    /* ========= Random encounter loop (New District) ========= */
+    function startEncounterLoop(){
+      if (gameState.encounterTimerId) clearInterval(gameState.encounterTimerId);
+      gameState.encounterTimerId = setInterval(()=>{
+        if (!gameState.gameStarted) return;
+        if (gameState.currentMap !== 'novo') return;              // só no New District
+        if (gameState.inBattle || gameState.inDialogue || gameState.inMinigame) return;
+        if (Math.random() < 0.35){ openBattleJP(); }              // taxa de encontro alta
+      }, 3000);
+    }
+    function stopEncounterLoop(){
+      if (gameState.encounterTimerId){
+        clearInterval(gameState.encounterTimerId);
+        gameState.encounterTimerId = null;
+      }
     }
   </script>
 </body>
