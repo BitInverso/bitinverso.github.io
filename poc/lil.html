@@ -661,7 +661,7 @@
 
     const SAVE_KEY = 'NJ:SAVE:v2';     // mude a versão se quiser invalidar saves antigos
     let HAS_LOADED_FROM_STORAGE = false;
-    let AUTOSAVE_ENABLED = false;      // só liga depois do Start
+    let AUTOSAVE_ENABLED = true;      // só liga depois do Start
     let matrixRAF = 0, mxCtx = null, mxCols = [], mxW=0, mxH=0, mxFont=16;
 
 
@@ -1867,190 +1867,189 @@
       }catch{}
     });
 
-    (function hydrateFromStorage(){
-      const persisted = loadGameFromStorage();
-      if (persisted){
-        gameState = Object.assign({}, gameState, persisted);
-      }
-    })();
-
     function init() {
-        if (gameState.storyProgress?.metTakeshi) {
-          gameState.jobs = gameState.jobs || { unlocked:{} };
-          gameState.jobs.unlocked = gameState.jobs.unlocked || {};
-          if (!gameState.jobs.unlocked.cafe) {
-            gameState.jobs.unlocked.cafe = true;
-            // NÃO salvar aqui; marca para persistir depois do Start
-            gameState._needsPersist = true;
+      loadGameFromStorage();
+      if (gameState.storyProgress?.metTakeshi) {
+        gameState.jobs = gameState.jobs || { unlocked:{} };
+        gameState.jobs.unlocked = gameState.jobs.unlocked || {};
+        if (!gameState.jobs.unlocked.cafe) {
+          gameState.jobs.unlocked.cafe = true;
+          // NÃO salvar aqui; marca para persistir depois do Start
+          gameState._needsPersist = true;
+        }
+      }
+
+      const MINUTES_PER_GAME_HOUR = 3; // 3 real minutes = 1 "work hour"
+      const lastLogin = gameState.jobs.lastSeenAt || Date.now();
+      const now = Date.now();
+      const diffMs = now - lastLogin;
+      const offlineHours = diffMs / (1000 * 60 * MINUTES_PER_GAME_HOUR);
+
+      if (gameState.jobs?.isOnShift && gameState.jobs.currentJobId) {
+        processOfflineWork(offlineHours);
+        maybeOpenNextWorkEvent();
+      }
+
+      gameState.jobs = gameState.jobs || {};
+      gameState.jobs.lastSeenAt = now;
+      saveGameToStorage(); // <- NÃO salva nada antes do Start (usa o gate AUTOSAVE_ENABLED)
+      startButton.addEventListener('click', () => {
+          gameState.inDialogue = false;
+          gameState.inMinigame = false;
+          try {
+              document.getElementById('start-screen').style.display = 'none';
+          } catch {}
+          try {
+              const c = document.getElementById('game-canvas');
+              c.focus({
+                  preventScroll: true
+              });
+          } catch {}
+          try {
+              window.focus();
+          } catch {}
+
+          startScreen.style.display = 'none';
+          gameState.gameStarted = true;
+          gameState.__allowPersist = true;
+          saveGameToStorage();
+          startGameTime();
+          gameLoop();
+      });
+      setupTouchControls();
+      canvas.addEventListener('pointerdown', () => {
+          try {
+              canvas.focus();
+          } catch {}
+      }, {
+          passive: true
+      });
+      canvas.addEventListener('click', () => {
+          checkForInteraction();
+      });
+      document.body.addEventListener('pointerdown', () => {
+          try {
+              window.focus();
+          } catch {}
+      }, {
+          passive: true
+      });
+      interactBtn.addEventListener('click', checkForInteraction);
+      closeDialogue.addEventListener('click', () => {
+          dialogueBox.style.display = 'none';
+          gameState.inDialogue = false;
+          gameState.currentNPC = null;
+          npcHint.style.display = 'none';
+      });
+      mapButton.addEventListener('click', showMap);
+      closeMap.addEventListener('click', () => {
+          mapOverlay.style.display = 'none';
+      });
+      document.querySelectorAll('.map-area').forEach(a => a.addEventListener('click', e => {
+          const id = e.target.id.replace('map-', '');
+          if (id === 'novo' && !gameState.newMapUnlocked) {
+              showNotification('Get 5 hits in a minigame to unlock the New District.');
+              return;
           }
-        }
+          travelToArea(id);
+      }));
+      closeSchool.addEventListener('click', () => {
+          schoolScreen.style.display = 'none';
+          gameState.playerLocation = 'school';
+          updateLocationDisplay();
+      });
+      vocabLesson.addEventListener('click', learnVocabulary);
+      vocabLesson.addEventListener('pointerup', (e) => {
+          e.preventDefault();
+          learnVocabulary();
+      }, {
+          passive: false
+      });
+      grammarLesson.addEventListener('click', learnGrammar);
+      updateVocabularyCount();
+      updateTimeDisplay();
+      updateCoins();
 
-        const MINUTES_PER_GAME_HOUR = 3; // 3 real minutes = 1 "work hour"
-        const lastLogin = gameState.jobs.lastSeenAt || Date.now();
-        const now = Date.now();
-        const diffMs = now - lastLogin;
-        const offlineHours = diffMs / (1000 * 60 * MINUTES_PER_GAME_HOUR);
+      // Work UI
+      function renderJobStatus() {
+          const cid = gameState.jobs.currentJobId;
+          const unlockedCafe = !!gameState.jobs.unlocked.cafe;
+          let html = '';
 
-        if (gameState.jobs?.isOnShift && gameState.jobs.currentJobId) {
-          processOfflineWork(offlineHours);
-          maybeOpenNextWorkEvent();
-        }
-
-        gameState.jobs = gameState.jobs || {};
-        gameState.jobs.lastSeenAt = now;
-        saveGameToStorage(); // <- NÃO salva nada antes do Start (usa o gate AUTOSAVE_ENABLED)
-        startButton.addEventListener('click', () => {
-            gameState.inDialogue = false;
-            gameState.inMinigame = false;
-            try {
-                document.getElementById('start-screen').style.display = 'none';
-            } catch {}
-            try {
-                const c = document.getElementById('game-canvas');
-                c.focus({
-                    preventScroll: true
-                });
-            } catch {}
-            try {
-                window.focus();
-            } catch {}
-
-            startScreen.style.display = 'none';
-            gameState.gameStarted = true;
-            gameState.__allowPersist = true;
-            saveGameToStorage();
-            startGameTime();
-            gameLoop();
-        });
-        setupTouchControls();
-        canvas.addEventListener('pointerdown', () => {
-            try {
-                canvas.focus();
-            } catch {}
-        }, {
-            passive: true
-        });
-        canvas.addEventListener('click', () => {
-            checkForInteraction();
-        });
-        document.body.addEventListener('pointerdown', () => {
-            try {
-                window.focus();
-            } catch {}
-        }, {
-            passive: true
-        });
-        interactBtn.addEventListener('click', checkForInteraction);
-        closeDialogue.addEventListener('click', () => {
-            dialogueBox.style.display = 'none';
-            gameState.inDialogue = false;
-            gameState.currentNPC = null;
-            npcHint.style.display = 'none';
-        });
-        mapButton.addEventListener('click', showMap);
-        closeMap.addEventListener('click', () => {
-            mapOverlay.style.display = 'none';
-        });
-        document.querySelectorAll('.map-area').forEach(a => a.addEventListener('click', e => {
-            const id = e.target.id.replace('map-', '');
-            if (id === 'novo' && !gameState.newMapUnlocked) {
-                showNotification('Get 5 hits in a minigame to unlock the New District.');
-                return;
-            }
-            travelToArea(id);
-        }));
-        closeSchool.addEventListener('click', () => {
-            schoolScreen.style.display = 'none';
-            gameState.playerLocation = 'school';
-            updateLocationDisplay();
-        });
-        vocabLesson.addEventListener('click', learnVocabulary);
-        vocabLesson.addEventListener('pointerup', (e) => {
-            e.preventDefault();
-            learnVocabulary();
-        }, {
-            passive: false
-        });
-        grammarLesson.addEventListener('click', learnGrammar);
-        updateVocabularyCount();
-        updateTimeDisplay();
-        updateCoins();
-
-        // Work UI
-        function renderJobStatus() {
-            const cid = gameState.jobs.currentJobId;
-            const unlockedCafe = !!gameState.jobs.unlocked.cafe;
-            let html = '';
-
-            if (!unlockedCafe) {
-                html += 'No job available yet. Tip: talk to Takeshi at the Cafe.';
-            } else {
-                const job = JOBS.cafe;
-                if (!cid) {
-                    gameState.jobs.currentJobId = 'cafe';
-                }
-                const rank = job.ranks[gameState.jobs.currentRankIndex] || job.ranks[0];
-                html += `<div><b>Job:</b> ${job.name}</div>`;
-                html += `<div><b>Rank:</b> ${rank.name} (rate: ${rank.rate}/h)</div>`;
-                html += `<div><b>Status:</b> ${gameState.jobs.isOnShift? 'On shift (accumulates offline hours)':'Off shift'}</div>`;
-                html += `<div><b>Total offline hours:</b> ${gameState.jobs.totalOfflineHoursWorked.toFixed(1)}h</div>`;
-            }
-            jobStatus.innerHTML = html;
-        }
-
-        jobBtn.addEventListener('click', () => {
-            if (!gameState.jobs?.unlocked?.cafe) {
-                showNotification('You need to talk properly to Takeshi (greet + order coffee) to unlock this job.');
-                return;
-            }
-            jobOv.style.display = 'block';
-            renderJobStatus();
-        });
-
-        document.getElementById('job-close').addEventListener('click', () => {
-            jobOv.style.display = 'none';
-        });
-        // START SHIFT
-        document.getElementById('job-start').addEventListener('click', () => {
-          ensureJobs();
-          if (!gameState.jobs.unlocked.cafe){
-            showNotification('No job unlocked.');
-            return;
+          if (!unlockedCafe) {
+              html += 'No job available yet. Tip: talk to Takeshi at the Cafe.';
+          } else {
+              const job = JOBS.cafe;
+              if (!cid) {
+                  gameState.jobs.currentJobId = 'cafe';
+              }
+              const rank = job.ranks[gameState.jobs.currentRankIndex] || job.ranks[0];
+              html += `<div><b>Job:</b> ${job.name}</div>`;
+              html += `<div><b>Rank:</b> ${rank.name} (rate: ${rank.rate}/h)</div>`;
+              html += `<div><b>Status:</b> ${gameState.jobs.isOnShift? 'On shift (accumulates offline hours)':'Off shift'}</div>`;
+              html += `<div><b>Total offline hours:</b> ${gameState.jobs.totalOfflineHoursWorked.toFixed(1)}h</div>`;
           }
-          gameState.jobs.isOnShift = true;
-          gameState.jobs.currentJobId = gameState.jobs.currentJobId || 'cafe';
-          gameState.jobs.lastSeenAt = Date.now();             // âncora para contar offline depois
-          saveGameToStorage();                                 // << gated por AUTOSAVE_ENABLED
+          jobStatus.innerHTML = html;
+      }
+
+      jobBtn.addEventListener('click', () => {
+          if (!gameState.jobs?.unlocked?.cafe) {
+              showNotification('You need to talk properly to Takeshi (greet + order coffee) to unlock this job.');
+              return;
+          }
+          jobOv.style.display = 'block';
           renderJobStatus();
-          showNotification('Shift started. Coins will accrue while you are offline.');
-        });
-        // STOP SHIFT (opção: “liquidar” o que ficou pendente até agora)
-        document.getElementById('job-stop').addEventListener('click', () => {
-          ensureJobs();
-          if (!gameState.jobs.unlocked.cafe){
-            showNotification('No job unlocked.');
-            return;
-          }
+      });
 
-          // Se quiser, processa imediatamente o período desde o último carimbo:
-          if (gameState.jobs.isOnShift && gameState.jobs.lastSeenAt){
-            const now = Date.now();
-            const ms = Math.max(0, now - gameState.jobs.lastSeenAt);
-            const offlineHours = ms / REAL_MS_PER_JOB_HOUR;
-            if (offlineHours > 0){
-              try { processOfflineWork(offlineHours); } catch {}
-              try { maybeOpenNextWorkEvent(); } catch {}
-            }
-          }
+      document.getElementById('job-close').addEventListener('click', () => {
+          jobOv.style.display = 'none';
+      });
+      // START SHIFT
+      document.getElementById('job-start').addEventListener('click', () => {
+        ensureJobs();
+        if (!gameState.jobs.unlocked.cafe){
+          showNotification('No job unlocked.');
+          return;
+        }
+        gameState.jobs.isOnShift = true;
+        gameState.jobs.currentJobId = gameState.jobs.currentJobId || 'cafe';
+        gameState.jobs.lastSeenAt = Date.now();             // âncora para contar offline depois
+        saveGameToStorage();                                 // << gated por AUTOSAVE_ENABLED
+        renderJobStatus();
 
-          gameState.jobs.isOnShift = false;
-          gameState.jobs.lastSeenAt = Date.now();             // carimba fim do turno
-          saveGameToStorage();                                 // << gated
-          renderJobStatus();
-          showNotification('Shift ended.');
-        });
-        document.getElementById('workevent-close').addEventListener('click', closeWorkEvent);
-        bindBattleButtonsJP();
+        if (gameState.jobs.isOnShift) {
+          showNotification('You already started your Shift!');
+          return;
+        }
+        showNotification('Shift started. Coins will accrue while you are offline.');
+      });
+      // STOP SHIFT (opção: “liquidar” o que ficou pendente até agora)
+      document.getElementById('job-stop').addEventListener('click', () => {
+        ensureJobs();
+        if (!gameState.jobs.unlocked.cafe){
+          showNotification('No job unlocked.');
+          return;
+        }
+
+        // Se quiser, processa imediatamente o período desde o último carimbo:
+        if (gameState.jobs.isOnShift && gameState.jobs.lastSeenAt){
+          const now = Date.now();
+          const ms = Math.max(0, now - gameState.jobs.lastSeenAt);
+          const offlineHours = ms / REAL_MS_PER_JOB_HOUR;
+          if (offlineHours > 0){
+            try { processOfflineWork(offlineHours); } catch {}
+            try { maybeOpenNextWorkEvent(); } catch {}
+          }
+        }
+
+        gameState.jobs.isOnShift = false;
+        gameState.jobs.lastSeenAt = Date.now();             // carimba fim do turno
+        saveGameToStorage();                                 // << gated
+        renderJobStatus();
+        showNotification('Shift ended.');
+      });
+      document.getElementById('workevent-close').addEventListener('click', closeWorkEvent);
+      bindBattleButtonsJP();
     }
     init();
 
@@ -3101,11 +3100,6 @@
 
     /* ========= Battle buttons ========= */
     function bindBattleButtonsJP(){
-      // Attack virou apenas informativo
-      // document.getElementById('battle-attack').onclick = ()=>{
-      //   showNotification('Tap a Japanese word to attack.');
-      // };
-
       document.getElementById('battle-ordered').addEventListener('click', (e)=>{
         if (gameState.battle.skillActive) return;
         if (!e.target.classList.contains('word-chip')) return;
@@ -3114,21 +3108,6 @@
         e.target.remove();
         renderBattleUI();
       });
-
-      // document.getElementById('battle-clear').onclick = ()=>{
-      //   if (gameState.battle.turn !== 'player') return;
-      //   document.getElementById('battle-ordered').innerHTML = '';
-      //   renderBattleUI();
-      // };
-
-      // document.getElementById('battle-attack').onclick = ()=>{
-      //   if (gameState.battle.turn !== 'player') return;
-      //   const ordered = document.getElementById('battle-ordered');
-      //   const last = ordered.lastElementChild;
-      //   if (!last) return;
-      //   last.remove();
-      //   renderBattleUI();
-      // };
 
       const btnDef = document.getElementById('battle-defend');
       if (btnDef) btnDef.onclick = ()=>{
@@ -3333,69 +3312,88 @@
    * Senão, aplica 20–40% do HP do inimigo como dano.
    * Consome o turno do jogador.
    */
+  // Skill: Earthquake — Full, self-contained (helpers inclusas dentro)
   function triggerEarthquake(){
-    if (gameState.battle.turn !== 'player') return;
+    // ==== Guards de batalha ====
+    if (!window.gameState || !gameState.battle) return;
     if (gameState.battle.victoryFxRunning || gameState.battle.battleEnded) return;
-    if (gameState.battle.skillActive) return;
+    if (gameState.battle.turn !== 'player') return;
+    if (gameState.battle.defensePending || gameState.battle.skillActive) return;
 
-    const overlay = document.getElementById('eq-overlay');
-    const layer   = document.getElementById('eq-layer');
-    const canvas  = document.getElementById('eq-matrix');
-    const card    = document.getElementById('battle-card');
-    if (!overlay || !layer || !canvas || !card) return;
+    // ==== DOM base ====
+    const overlay = document.getElementById('eq-overlay');   // full viewport
+    const layer   = document.getElementById('eq-layer');     // onde vão as peças
+    const canvas  = document.getElementById('eq-matrix');    // matrix rain
+    const card    = document.getElementById('battle-card');  // pra tremor
+    if (!overlay || !layer || !canvas || !card){
+      console.warn('[Earthquake] Missing DOM: #eq-overlay/#eq-layer/#eq-matrix/#battle-card');
+      return;
+    }
 
+    // ==== Configs ====
+    const ENEMY_MAX_HP = (typeof window.ENEMY_MAX_HP === 'number' ? ENEMY_MAX_HP : 10);
+    const PAIRS_SRC = Array.isArray(window.EQ_PAIRS) && window.EQ_PAIRS.length
+      ? window.EQ_PAIRS
+      : [
+          { kanji:'水', en:'water' }, { kanji:'火', en:'fire' }, { kanji:'木', en:'tree' },
+          { kanji:'山', en:'mountain' }, { kanji:'川', en:'river' }, { kanji:'茶', en:'tea' },
+          { kanji:'駅', en:'station' }, { kanji:'本', en:'book' }, { kanji:'空', en:'sky' },
+          { kanji:'雨', en:'rain' },
+        ];
+    const DURATION_MS = 5000; // 5s máx
+
+    // ==== Estado da skill ====
     gameState.battle.skillActive = true;
     card.classList.add('quake');
 
-    /* 1) Mostrar overlay ANTES de medir */
+    // Mostrar overlay ANTES de medir tamanho (se estava hidden)
     overlay.style.display = 'block';
-    // força layout (reflow) para garantir dimensões corretas
-    overlay.getBoundingClientRect();
+    overlay.getBoundingClientRect(); // força reflow
 
-    /* 2) Iniciar a “matrix rain” agora que o canvas já está visível */
+    // Iniciar Matrix rain agora que o canvas está visível
     startMatrixRain(canvas);
 
-    /* 3) Gerar peças com viewport cheio */
-    const pairs = shuffle(EQ_PAIRS).slice(0, 5);
+    // Criar peças (kanji/en) a partir dos pares
+    const pairs = shuffle(PAIRS_SRC).slice(0, 5); // 5 pares (10 peças)
+    layer.innerHTML = ''; // limpar camada antes
     const pieces = spawnFallingPieces(layer, pairs);
-    // estado de seleção
-    let selected = null; // {type:'kanji'|'en', id:number, el:HTMLElement}
+
+    // Seleção de par
+    let selected = null;       // {type, id, el}
     let successHitKill = false;
 
-    // handler de clique nas peças
-    overlay.addEventListener('click', pieceClickHandler);
     function pieceClickHandler(e){
       const t = e.target;
       if (!t.classList.contains('eq-piece')) return;
-      const pid = Number(t.getAttribute('data-pair')||'-1');
+      const pid = Number(t.getAttribute('data-pair') || '-1');
       const typ = t.getAttribute('data-type'); // 'kanji'|'en'
-      if (pid<0) return;
+      if (pid < 0) return;
 
       if (!selected){
         selected = { type: typ, id: pid, el: t };
         t.classList.add('sel');
       } else {
         if (selected.id === pid && selected.type !== typ){
-          // MATCH → hit kill
+          // MATCH: Hit Kill
           successHitKill = true;
-          // feedback visual
           selected.el.classList.add('sel');
           t.classList.add('sel');
           endEarthquake(true);
         } else {
-          // reset seleção (permite tentar de novo)
+          // troca a seleção (falhou pareamento)
           selected.el.classList.remove('sel');
           selected = { type: typ, id: pid, el: t };
           t.classList.add('sel');
         }
       }
     }
+    overlay.addEventListener('click', pieceClickHandler);
 
-    // animação de queda (5s ou até acertar)
+    // ===== Animação de queda =====
     const start = performance.now();
     let animId = 0;
     function step(ts){
-      const dt = Math.min(32, ts - (step._last||ts)); step._last = ts;
+      const dt = Math.min(32, ts - (step._last || ts)); step._last = ts;
 
       pieces.forEach(p=>{
         if (p.dead) return;
@@ -3408,7 +3406,7 @@
       });
 
       const elapsed = ts - start;
-      if (!successHitKill && elapsed < 5000){
+      if (!successHitKill && elapsed < DURATION_MS){
         animId = requestAnimationFrame(step);
       } else {
         endEarthquake(successHitKill);
@@ -3416,62 +3414,62 @@
     }
     animId = requestAnimationFrame(step);
 
-    // encerra skill
+    // ===== Encerramento / aplicação de dano =====
     function endEarthquake(kill){
+      // previne múltiplas finalizações
       if (!gameState.battle.skillActive) return;
 
       cancelAnimationFrame(animId);
       overlay.removeEventListener('click', pieceClickHandler);
 
-      stopMatrixRain();                 // para o canvas
-      layer.innerHTML = '';             // limpa SOMENTE as peças
+      // para Matrix, limpa peças, some overlay e para tremor
+      stopMatrixRain(canvas);
+      layer.innerHTML = '';
       overlay.style.display = 'none';
       card.classList.remove('quake');
 
       gameState.battle.skillActive = false;
 
-      // aplica dano/kill
+      // Aplica efeito
       if (kill){
-        const hpLeft = applyEnemyDamage(gameState.battle.enemyHp); // zera
+        // Zera HP do inimigo
+        const hpLeft = applyEnemyDamage(gameState.battle.enemyHp);
         showNotification('Earthquake Match! Instant kill!');
         if (hpLeft <= 0){
           const reward = 8 + Math.floor(Math.random()*7);
           gameState.coins = (gameState.coins||0) + reward;
-          updateCoins && updateCoins();
-          handleVictoryAndClose ? handleVictoryAndClose(reward)
-                                : closeBattleJP(`Enemy defeated! +${reward} coins`);
+          if (typeof updateCoins === 'function') updateCoins();
+          if (typeof handleVictoryAndClose === 'function') handleVictoryAndClose(reward);
+          else closeBattleJP && closeBattleJP(`Enemy defeated! +${reward} coins`, 1500);
           return;
         }
       } else {
-        // 20–40% do HP máx (arredonda pelo menos 1)
+        // Dano parcial 20-40% do HP máximo
         const frac = 0.20 + Math.random()*0.20;
         const dmg  = Math.max(1, Math.round(ENEMY_MAX_HP * frac));
         applyEnemyDamage(dmg);
-        showNotification(`Earthquake shakes the foe! -${dmg} HP`);
+        showNotification(`Earthquake shakes the foe! -${dmg} HP`, 1200);
         if (gameState.battle.enemyHp <= 0){
           const reward = 8 + Math.floor(Math.random()*7);
           gameState.coins = (gameState.coins||0) + reward;
-          updateCoins && updateCoins();
-          handleVictoryAndClose ? handleVictoryAndClose(reward)
-                                : closeBattleJP(`Enemy defeated! +${reward} coins`);
+          if (typeof updateCoins === 'function') updateCoins();
+          if (typeof handleVictoryAndClose === 'function') handleVictoryAndClose(reward);
+          else closeBattleJP && closeBattleJP(`Enemy defeated! +${reward} coins`);
           return;
         }
       }
 
-      // consome o turno do jogador: inimigo ataca após a skill
+      // Consome o turno do jogador → inimigo age
       gameState.battle.turn = 'enemy';
-      setTimeout(()=> enemyTurn && enemyTurn(), 350);
+      setTimeout(()=> { if (typeof enemyTurn === 'function') enemyTurn(); }, 350);
     }
 
-    // torna overlay visível no fim da preparação
-    overlay.style.display='block';
-
-    // helpers internos ------------- //
+    // Cria peças clicáveis distribuídas por toda a largura do viewport
     function spawnFallingPieces(root, pairs){
-      const W = Math.max(window.innerWidth, document.documentElement.clientWidth);
-      const H = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      const W = Math.max(window.innerWidth,  document.documentElement.clientWidth  || 0);
+      const H = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
 
-      // Criar lista: kanji + en e embaralhar
+      // duplica em kanji/en e embaralha
       const items = [];
       pairs.forEach((p, idx)=>{
         items.push({ text:p.kanji, type:'kanji', pair:idx });
@@ -3479,11 +3477,9 @@
       });
       const arr = shuffle(items);
 
-      // Distribuir em colunas por toda a largura
-      const targetCols = Math.min(10, Math.max(6, Math.floor(W / 120))); // ~120px de espaçamento
+      const targetCols = Math.min(10, Math.max(6, Math.floor(W / 120))); // ~120px base
       const colWidth = W / targetCols;
 
-      // Para variar e evitar sobreposição, vamos cortar em “ondas”
       return arr.map((it, i)=>{
         const el = document.createElement('div');
         el.className = 'eq-piece';
@@ -3492,37 +3488,32 @@
         el.setAttribute('data-pair', String(it.pair));
         root.appendChild(el);
 
-        // coluna e jitter
         const colIdx = i % targetCols;
         const jitter = (Math.random() * (colWidth * 0.5)) - (colWidth * 0.25);
-        const baseX  = (colIdx + 0.5) * colWidth + jitter;
+        const x = (colIdx + 0.5) * colWidth + jitter;
 
-        // posição inicial (acima da viewport) com offset de onda para não caírem todos juntos
         const wave = Math.floor(i / targetCols);
-        const startY = - (40 + wave * 50 + Math.random()*40);
+        const y = - (40 + wave * 50 + Math.random()*40);
 
-        // velocidade “Matrix” (suave)
-        const speed = 70 + Math.random() * 80; // px/s
+        const speed = 70 + Math.random()*80; // px/s (estilo matrix)
 
-        // aplicar transform inicial
-        el.style.transform = `translate3d(${Math.round(baseX)}px, ${Math.round(startY)}px, 0)`;
-
-        return { el, x: baseX, y: startY, speed, dead:false, rootH: H };
+        el.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+        return { el, x, y, speed, dead:false, rootH: H };
       });
     }
 
-    // Matrix rain simples no canvas
+    // Matrix rain no canvas (viewport)
     function startMatrixRain(cnv){
       const ctx = cnv.getContext('2d');
-      let mxW=0, mxH=0, mxFont=16, matrixRAF=0, mxCols=[];
+      let mxW=0, mxH=0, mxFont=16, raf=0, cols=[];
 
       const resize = ()=>{
-        cnv.width  = Math.max(window.innerWidth,  document.documentElement.clientWidth);
-        cnv.height = Math.max(window.innerHeight, document.documentElement.clientHeight);
+        cnv.width  = Math.max(window.innerWidth,  document.documentElement.clientWidth  || 0);
+        cnv.height = Math.max(window.innerHeight, document.documentElement.clientHeight || 0);
         mxW = cnv.width; mxH = cnv.height;
         mxFont = 16;
-        const cols = Math.floor(mxW / mxFont);
-        mxCols = new Array(cols).fill(0);
+        const n = Math.floor(mxW / mxFont);
+        cols = new Array(n).fill(0);
       };
       resize();
       window.addEventListener('resize', resize);
@@ -3530,38 +3521,38 @@
       const glyphs = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789';
 
       function draw(){
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; // rastro
         ctx.fillRect(0,0,mxW,mxH);
 
         ctx.fillStyle = '#00ff9c';
         ctx.font = mxFont + 'px monospace';
 
-        for (let i=0;i<mxCols.length;i++){
-          const text = glyphs[Math.floor(Math.random()*glyphs.length)];
+        for (let i=0;i<cols.length;i++){
+          const ch = glyphs[Math.floor(Math.random()*glyphs.length)];
           const x = i * mxFont;
-          const y = mxCols[i] * mxFont;
-          ctx.fillText(text, x, y);
-          if (y > mxH && Math.random() > 0.975) mxCols[i] = 0;
-          mxCols[i]++;
+          const y = cols[i] * mxFont;
+          ctx.fillText(ch, x, y);
+          if (y > mxH && Math.random() > 0.975) cols[i] = 0;
+          cols[i]++;
         }
-        matrixRAF = requestAnimationFrame(draw);
+        raf = requestAnimationFrame(draw);
       }
       draw();
 
+      // attach stopper ao canvas
       cnv._stopMatrix = ()=>{
-        cancelAnimationFrame(matrixRAF);
+        cancelAnimationFrame(raf);
         window.removeEventListener('resize', resize);
         ctx.clearRect(0,0,mxW,mxH);
       };
     }
-    function stopMatrixRain(){
-      const cnv = document.getElementById('eq-matrix');
-      cnv && cnv._stopMatrix && cnv._stopMatrix();
+
+    function stopMatrixRain(cnv){
+      if (cnv && typeof cnv._stopMatrix === 'function') cnv._stopMatrix();
     }
   }
-
-
-    window.factoryReset = factoryReset;
+  
+   window.factoryReset = factoryReset;
   </script>
 </body>
 </html>
