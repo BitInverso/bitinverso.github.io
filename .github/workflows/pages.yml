@@ -104,11 +104,11 @@ jobs:
 
       # Gera CSS do root com Tailwind CLI (ajuste -i/-o se seus paths forem outros)
       - name: Build CSS (root via Tailwind CLI)
-        run: npx tailwindcss -c tailwind.config.js -i ./src/index.css -o ./assets/index.css --minify
+        run: npx tailwindcss -c tailwind.config.js -i ./src/tailwind.css -o ./assets/tailwind.css --minify
 
       # Opcional: passa no PostCSS (autoprefixer/cssnano) mesmo sem postcss-cli no repo
       - name: PostCSS (autoprefixer/cssnano)
-        run: npx --yes postcss-cli@latest ./assets/index.css -o ./assets/index.css
+        run: npx --yes postcss-cli@latest ./assets/tailwind.css -o ./assets/tailwind.css
 
       # ---------- POC (Vite) ----------
       - name: Install deps (poc)
