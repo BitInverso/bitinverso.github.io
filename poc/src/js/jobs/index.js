@@ -1,0 +1,1 @@
+export const unlockJob = (k, toast) => window.unlockJob ? window.unlockJob(k, toast) : null;

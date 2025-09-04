@@ -1,475 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Nihongo Journey — Full (Desktop+Mobile, Jobs, Minigame, Events)</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-    body{font-family:Inter,Segoe UI,Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#14213d 0%,#0b132b 100%);color:#e0e1dd;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-    a{color:#90e0ef}
-    #game-header{padding:12px 15px;background:rgba(13,27,42,.95);border-bottom:2px solid #778da9;z-index:10;display:flex;justify-content:space-between;align-items:center}
-    #game-container{flex:1;position:relative;overflow:hidden}
-    #game-canvas{position:absolute;top:0;left:0;width:100%;height:100%;background:#1b263b}
-    #hud{position:absolute;top:15px;left:15px;background:rgba(13,27,42,.8);padding:10px;border-radius:10px;z-index:5;display:flex;flex-direction:column;gap:5px;max-width:60%}
-    #vocabulary-count,#time-display,#location-display{font-size:.8rem}
-    #map-button{position:absolute;top:15px;right:15px;background:rgba(13,27,42,.85);border:1px solid #778da9;border-radius:8px;padding:8px 12px;color:#e0e1dd;font-size:.8rem;z-index:6}
-    #job-button{position:absolute;top:15px;right:95px;background:rgba(13,27,42,.85);border:1px solid #778da9;border-radius:8px;padding:8px 12px;color:#e0e1dd;font-size:.8rem;z-index:6}
-    #controls{position:absolute;bottom:20px;left:20px;width:140px;height:140px;z-index:6}
-    #joystick{position:absolute;width:70px;height:70px;background:rgba(65,90,119,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e0e1dd;font-size:11px;text-align:center;user-select:none;touch-action:none;border:2px solid #778da9}
-    #interact-btn{position:absolute;bottom:20px;right:20px;width:86px;height:86px;background:rgba(65,90,119,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e0e1dd;font-size:12px;text-align:center;z-index:6;border:2px solid #778da9}
-    #npc-hint{position:absolute;bottom:120px;right:20px;background:rgba(13,27,42,.8);border:1px solid #778da9;border-radius:10px;padding:8px 10px;font-size:.8rem;display:none;z-index:6}
-    #dialogue-box{position:absolute;bottom:100px;left:15px;right:15px;background:rgba(13,27,42,.96);border:2px solid #778da9;border-radius:12px;padding:15px;z-index:7;display:none;box-shadow:0 0 15px rgba(0,0,0,.6)}
-    #dialogue-text{margin-bottom:15px;line-height:1.45;font-size:.95rem;max-height:200px;overflow-y:auto;padding:5px}
-    #response-options{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;padding:5px}
-    .word-option{background:#415a77;border:none;border-radius:8px;padding:10px;color:#e0e1dd;font-size:.9rem;cursor:pointer;transition:all .2s;text-align:left}
-    .word-option:active{background:#778da9;transform:scale(.98)}
-    .word-option.unknown{background:#2d3748;color:#718096;cursor:not-allowed}
-    #close-dialogue{position:absolute;top:-10px;right:-10px;width:28px;height:28px;background:#e63946;border:2px solid #778da9;border-radius:50%;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer}
-    #notification{position:absolute;top:20px;left:50%;transform:translateX(-50%);background:rgba(13,27,42,.9);padding:10px 15px;border-radius:20px;z-index:100;font-size:.85rem;display:none;text-align:center;max-width:80%}
-    /* overlays: generic */
-    .overlay{position:absolute;inset:0;display:none}
-    .overlay[style*="display: none"]{pointer-events:none}
-    .panel{background:#1b263b;border:2px solid #778da9;border-radius:14px;padding:18px;color:#e0e1dd}
-    /* Dictionary */
-    #dict-overlay{ position:fixed; inset:0; background:rgba(13,27,42,.96); display:none; z-index:9999; align-items:center; justify-content:center; padding:24px; }
-    #dict-card{ width:min(560px,92vw); background:#1b263b; border:2px solid #778da9; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.45); padding:18px; color:#e0e1dd; }
-    #dict-title{ font-size:1.2rem; color:#e9c46a; margin-bottom:8px; }
-    #dict-actions{ margin-top:14px; display:flex; gap:10px; justify-content:flex-end; }
-    .btn{ background:#415a77; border:none; border-radius:10px; color:#e0e1dd; padding:10px 16px; font-size:.95rem; cursor:pointer;}
-    .badge{ display:inline-block; background:#e63946; color:#fff; padding:2px 8px; border-radius:999px; font-size:.75rem; margin-left:8px; }
-    .learned-word{color:#90e0ef;font-weight:700;border-bottom:1px dotted #94d2bd}
-    .unknown-word{ text-decoration: underline dashed; cursor:pointer; color:#e0e1dd; }
-    /* Minigame */
-    #minigame-overlay{position:absolute; inset:0; background:rgba(0,0,0,.85); display:none; z-index:80; align-items:center; justify-content:center; flex-direction:column; touch-action:none; -webkit-user-select:none; user-select:none;}
-    #minigame-canvas{background:#0e1826; border:0; margin:0; box-shadow:0 0 0 2px #778da9 inset; border-radius:10px; max-width:95vw; max-height:70vh; touch-action:none; display:block;}
 
-    /* Battle (turn-based JP) */
-    #battle-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);display:none;z-index:95;align-items:center;justify-content:center;padding:20px}
-    #battle-card{width:min(720px,92vw);background:#1b263b;border:2px solid #778da9;border-radius:14px;padding:18px;color:#e0e1dd;box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #battle-title{font-size:1.2rem;color:#e9c46a;margin-bottom:10px}
-    #hp-wrap{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-    #hp-bar{flex:1;height:12px;background:#0e1826;border:1px solid #778da9;border-radius:999px;overflow:hidden}
-    #hp-fill{height:100%;width:100%;background:#2a9d8f;transition:width .2s}
-    #hp-text{font-size:.9rem}
-    #battle-instr{opacity:.9;margin-bottom:10px}
-    #battle-pool, #battle-ordered{display:flex;flex-wrap:wrap;gap:8px;min-height:44px;padding:8px;border:1px dashed #778da9;border-radius:10px;margin-bottom:10px}
-    .word-chip{background:#415a77;border:none;border-radius:999px;color:#e0e1dd;padding:8px 12px;font-size:.95rem;cursor:pointer}
-    .word-chip.disabled {
-      opacity: 0.4;
-      cursor: not-allowed;  /* visual */
-    }
-    .word-chip.wrong { animation: chipShake .18s linear 1; }
-    @keyframes chipShake {
-      0% { transform: translateX(0) }
-      25% { transform: translateX(-3px) }
-      50% { transform: translateX(3px) }
-      100% { transform: translateX(0) }
-    }
-    #battle-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
-    .btn{background:#415a77;border:none;border-radius:10px;color:#e0e1dd;padding:10px 16px;font-size:.95rem;cursor:pointer}
-
-    /* Defense mini-skill */
-    #defense-panel{
-      position: relative;       /* fica dentro do card */
-      z-index: 130;             /* acima dos chips/barras */
-      margin-top: 10px;
-      background: rgba(13,27,42,.9);
-      border: 1px solid #778da9;
-      border-radius: 10px;
-      padding: 10px;
-      pointer-events: auto;
-    }
-    #defense-panel[hidden]{
-      display: none !important;
-      pointer-events: none !important;
-    }
-
-    /* Input e timer */
-    #defense-row{ display:flex; align-items:center; gap:8px; margin-top:8px; }
-    #defense-input{ flex:1; padding:8px; border-radius:8px; border:1px solid #778da9; background:#0e1826; color:#e0e1dd; }
-    #defense-timer{ min-width:48px; text-align:right; opacity:.9; }
-
-    /* Enemy HP */
-    #enemyhp-wrap{display:flex;align-items:center;gap:10px;margin:8px 0 14px}
-    #enemyhp-text{font-size:.9rem}
-    #enemyhp-bar{flex:1;height:12px;background:#0e1826;border:1px solid #778da9;border-radius:999px;overflow:hidden}
-    #enemyhp-fill{height:100%;width:100%;background:#e76f51;transition:width .2s}
-
-    /* Skills overlay */
-    #skills-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:none;z-index:98;align-items:center;justify-content:center;padding:20px}
-    #skills-card{width:min(520px,92vw);background:#1b263b;border:2px solid #778da9;border-radius:14px;padding:16px;color:#e0e1dd;box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #skills-title{font-size:1.1rem;color:#e9c46a;margin-bottom:10px}
-    #skills-list{display:flex;flex-direction:column;gap:8px}
-    .skill-item{background:#415a77;border:none;border-radius:10px;color:#e0e1dd;padding:10px 14px;text-align:left;cursor:pointer;font-size:.95rem}
-    #skills-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
-
-    #enemyhp-fill.hit { animation: hpBlink .35s ease-in-out 1; }
-    @keyframes hpBlink {
-      0% { filter: brightness(1.4); }
-      100% { filter: brightness(1); }
-    }
-
-    #turn-banner {
-      position: absolute; top: 14%; left: 50%; transform: translateX(-50%);
-      background: rgba(233,196,106,.95); color:#0b132b;
-      padding: 10px 16px; border-radius: 999px; font-weight: 700;
-      box-shadow: 0 6px 18px rgba(0,0,0,.35);
-      opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
-      z-index: 120;
-    }
-    #turn-banner.show { opacity: 1; transform: translateX(-50%) scale(1.05); }
-
-    /* --- HP flashes --- */
-    #hp-fill.hit, #enemyhp-fill.hit { animation: hpBlink .35s ease-in-out 1; }
-    @keyframes hpBlink { 0%{filter:brightness(1.5)} 100%{filter:brightness(1)} }
-
-    /* --- Screenshake leve quando leva dano --- */
-    .shake { animation: shake .18s linear 1; }
-    @keyframes shake {
-      0% { transform: translate(0,0) }
-      25% { transform: translate(-3px,0) }
-      50% { transform: translate(3px,0) }
-      100% { transform: translate(0,0) }
-    }
-
-    /* --- Floater de dano --- */
-    .damage-floater {
-      position:absolute; color:#e76f51; font-weight:700; text-shadow:0 2px 6px rgba(0,0,0,.35);
-      animation: dmgFloat .6s ease-out forwards; pointer-events:none; z-index:121;
-    }
-    @keyframes dmgFloat {
-      0% { opacity:1; transform: translateY(0) }
-      100% { opacity:0; transform: translateY(-20px) }
-    }
-
-    /* Defense panel: quando escondido, não bloqueia clique */
-    #defense-panel { pointer-events:auto; }
-    #defense-panel[hidden] { display:none !important; pointer-events:none !important; }
-
-    /* Overlay (só se não tiver) para turn banner container */
-    #battle-card { position: relative; }
-
-    /* ===== VICTORY FX ===== */
-    #victory-overlay {
-      position:absolute; inset:0; z-index:200;
-      display:none; align-items:center; justify-content:center;
-      pointer-events:none;
-    }
-
-    .victory-flash {
-      position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%);
-      animation: vicFlash .7s ease-out 1;
-    }
-    @keyframes vicFlash { from {opacity:0} 20%{opacity:1} to{opacity:0} }
-
-    .victory-burst {
-      position:absolute; width:220vmax; height:220vmax; border-radius:50%;
-      background: radial-gradient(closest-side, rgba(233,196,106,.35), rgba(233,196,106,0) 60%);
-      mix-blend-mode: screen; transform: scale(0.2); opacity:0;
-      animation: vicBurst .9s ease-out forwards;
-    }
-    @keyframes vicBurst { 0%{opacity:0; transform:scale(0.2)} 30%{opacity:1} 100%{opacity:0; transform:scale(1)} }
-
-    .victory-banner {
-      position:relative;
-      background:linear-gradient(135deg, #e9c46a, #f4d35e);
-      color:#0b132b; padding:16px 26px; border-radius:999px;
-      font-weight:900; font-size:1.4rem; letter-spacing:.04em;
-      box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.6);
-      transform: scale(.8); opacity:0;
-      animation: vicBanner .6s cubic-bezier(.2,1.4,.2,1) .15s forwards;
-      text-transform:uppercase;
-    }
-    @keyframes vicBanner { to { transform:scale(1); opacity:1 } }
-
-    .victory-banner::before, .victory-banner::after {
-      content:"";
-      position:absolute; top:50%; width:120px; height:2px; opacity:.8;
-      background:linear-gradient(to right, transparent, rgba(233,196,106,1));
-    }
-    .victory-banner::before { left:-130px; transform:translateY(-50%); }
-    .victory-banner::after  { right:-130px; transform:translateY(-50%) rotate(180deg); }
-
-    .victory-coins, .victory-confetti {
-      position:absolute; inset:0; overflow:hidden; pointer-events:none;
-    }
-    .vic-piece {
-      position:absolute; width:10px; height:10px; border-radius:50%;
-      animation: vicFall linear forwards;
-    }
-    @keyframes vicFall {
-      0%   { transform: translateY(-10vh) rotate(0deg); opacity:1 }
-      100% { transform: translateY(100vh) rotate(600deg); opacity:0.8 }
-    }
-
-    /* shake o card do inimigo para “morrer” */
-    .victory-shake { animation: vicShake .4s ease-in-out 2; }
-    @keyframes vicShake {
-      0%{ transform:translate(0,0) } 25%{ transform:translate(-4px,0)} 50%{ transform:translate(4px,0)} 100%{ transform:translate(0,0)}
-    }
-
-    /* fade out suave do overlay todo */
-    .victory-out { animation: vicOut .35s ease-out forwards; }
-    /* === Earthquake (full viewport) === */
-    #eq-overlay{
-      position: fixed; inset: 0; z-index: 180; display: none;
-      pointer-events: auto;        /* recebe cliques nas peças */
-    }
-
-    #eq-matrix{
-      position: absolute; inset: 0;
-      width: 100vw; height: 100vh; /* cobre o viewport */
-      opacity: 0.35;
-    }
-
-    #eq-layer{                     /* camada das peças clicáveis */
-      position: absolute; inset: 0;
-      width: 100vw; height: 100vh;
-    }
-
-    .eq-piece{
-      position: absolute;
-      padding: 6px 10px; border-radius: 8px;
-      background: rgba(20,255,120,0.14);
-      border: 1px solid rgba(80,255,160,0.35);
-      color: #aaffcc; font-weight: 700; user-select: none; cursor: pointer;
-      text-shadow: 0 0 6px rgba(0,255,140,.6);
-      will-change: transform;
-      transform: translate3d(0,0,0);
-    }
-    .eq-piece.sel{ outline:2px solid #e9c46a; background:rgba(233,196,106,.2); color:#fff; }
-
-    /* tremor no card (opcional manter) */
-    #battle-card.quake { animation: quakeShake .08s linear infinite; }
-    @keyframes quakeShake {
-      0%{ transform:translate(0,0) rotate(0deg) }
-      25%{ transform:translate(-2px,1px) rotate(-0.2deg) }
-      50%{ transform:translate(2px,-1px) rotate(0.2deg) }
-      75%{ transform:translate(-1px,-2px) rotate(0deg) }
-      100%{ transform:translate(0,0) rotate(0deg) }
-    }
-    /* Skills modal bem simples */
-    #skills-modal{
-      position:absolute; inset:0; display:none; z-index:170;
-      align-items:center; justify-content:center; background:rgba(0,0,0,.55);
-    }
-    #skills-card{
-      background:#0e1826; border:1px solid #778da9; border-radius:12px;
-      padding:14px; min-width:260px; color:#e0e1dd; box-shadow:0 10px 30px rgba(0,0,0,.4);
-    }
-    #skills-list .skill-btn{ width:100%; margin-top:8px; }
-
-  </style>
-</head>
-<body>
-  <div id="game-header">
-    <h1>日本への旅</h1>
-    <div id="time-display">10:00</div>
-  </div>
-
-  <div id="game-container">
-    <!-- Dictionary -->
-    <div id="dict-overlay">
-      <div id="dict-card">
-        <div id="dict-title">Pocket Dictionary <span id="dict-penalty-badge" class="badge" style="display:none;">Social impact active</span></div>
-        <div id="dict-body">
-          <div><strong>Word:</strong> <span id="dict-word">—</span></div>
-          <div><strong>Part of speech:</strong> <span id="dict-pos">—</span></div>
-          <div><strong>Meaning:</strong> <span id="dict-meaning">—</span></div>
-          <div style="margin-top:10px; font-size:.9rem; opacity:.9;">
-            Using the dictionary during conversations may be noticed by locals.
-            <strong>Consequence:</strong> affinity gained with NPCs is reduced for <u>30 in‑game minutes</u> after each lookup.
-          </div>
-        </div>
-        <div id="dict-actions">
-          <button id="dict-close" class="btn">Got it</button>
-        </div>
-      </div>
-    </div>
-
-    <canvas id="game-canvas" tabindex="0"></canvas>
-
-    <div id="hud">
-      <div id="vocabulary-count">Words: 3</div>
-      <div id="location-display">Location: Street</div>
-      <div id="coin-display">Coins: 0</div>
-    </div>
-    <button id="job-button">Work</button>
-    <button id="map-button">Map</button>
-    <div id="npc-hint">Press E / Space / Enter to interact</div>
-
-    <div id="controls"><div id="joystick">Move</div></div>
-    <div id="interact-btn">Interact</div>
-
-    <div id="dialogue-box">
-      <div id="close-dialogue">X</div>
-      <div id="dialogue-text"></div>
-      <div id="response-options"></div>
-    </div>
-
-    <div id="notification"></div>
-
-    <div id="keydebug" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:8px;font-size:.75rem;display:none;z-index:99">
-      L:<span id="kd-l">0</span> R:<span id="kd-r">0</span> U:<span id="kd-u">0</span> D:<span id="kd-d">0</span> I:<span id="kd-i">0</span>
-    </div>
-    
-
-    <!-- Minigame -->
-    <div id="minigame-overlay">
-      <div style="color:#e9c46a; font-size:1.2rem; margin-bottom:10px;">Mini Game — Slice only the <b>verbs</b>!</div>
-      <canvas id="minigame-canvas"></canvas>
-      <div id="minigame-ui" style="margin-top:10px; color:#e0e1dd;">Score: <span id="mg-score">0</span> • Mistakes: <span id="mg-mistakes">0</span> • Time: <span id="mg-time">60</span>s • Lives: <span id="mg-lives">❤️❤️❤️</span></div>
-      <button id="minigame-exit" class="btn" style="margin-top:10px;">Exit</button>
-    </div>
-
-    <!-- Map -->
-    <div id="map-overlay" class="overlay" style="background:rgba(13,27,42,.95);z-index:40;display:none;align-items:center;flex-direction:column;padding:20px;">
-      <div class="panel" style="width:min(720px,92vw);">
-        <div id="map-title" style="color:#e9c46a;font-size:1.2rem;margin-bottom:12px;">City Map</div>
-        <div id="map-content" style="width:100%;height:60vh;background:#0f1a28;border-radius:10px;position:relative;overflow:hidden;border:2px solid #778da9;margin-bottom:12px;">
-          <div class="map-area" id="map-cafe" style="position:absolute;top: 15%; left: 20%; width: 25%; height: 20%; background: #e63946;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Cafe</div>
-          <div class="map-area" id="map-store" style="position:absolute;top: 15%; left: 55%; width: 25%; height: 20%; background: #a8dadc;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Store</div>
-          <div class="map-area" id="map-park" style="position:absolute;top: 45%; left: 38%; width: 25%; height: 20%; background: #457b9d;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Park</div>
-          <div class="map-area" id="map-shrine" style="position:absolute;top: 45%; left: 10%; width: 25%; height: 20%; background: #9d4edd;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Shrine</div>
-          <div class="map-area" id="map-school" style="position:absolute;top: 45%; left: 65%; width: 25%; height: 20%; background: #f4a261;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">School</div>
-          <div class="map-area" id="map-hostel" style="position:absolute;top: 75%; left: 38%; width: 25%; height: 20%; background: #2a9d8f;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Hostel</div>
-          <div class="map-area locked" id="map-novo" style="position:absolute;top: 75%; left: 70%; width: 25%; height: 20%; background: #264653;display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:.45;filter:grayscale(.6);cursor:not-allowed;">New District</div>
-        </div>
-        <div style="text-align:right"><button id="close-map" class="btn">Close Map</button></div>
-      </div>
-    </div>
-
-    <!-- School -->
-    <div id="school-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:50;display:none;align-items:center;justify-content:center;padding:20px;">
-      <div class="panel" style="max-width:560px; width:92vw; text-align:center;">
-        <h2 style="color:#e9c46a; margin-bottom:30px;">Japanese School</h2>
-        <button class="btn" id="vocab-lesson">Study Vocabulary</button>
-        <button class="btn" id="grammar-lesson">Learn Grammar</button>
-        <button class="btn" id="close-school">Back to City</button>
-      </div>
-    </div>
-
-    <!-- Work Panel -->
-    <div id="job-overlay" class="overlay" style="background:rgba(13,27,42,.96);z-index:70;display:none;align-items:center;justify-content:center;padding:20px;">
-      <div class="panel" style="max-width:620px; width:92vw;">
-        <h3 style="color:#e9c46a; font-size:1.2rem; margin-bottom:8px;">Work</h3>
-        <div id="job-status" style="font-size:.95rem; line-height:1.5; margin-bottom:12px;"></div>
-        <div id="job-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
-          <button class="btn" id="job-start">Start shift</button>
-          <button class="btn" id="job-stop">End shift</button>
-          <button class="btn" id="job-close">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Work Event -->
-    <div id="workevent-overlay" class="overlay" style="background:rgba(0,0,0,.85);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;">
-      <div class="panel" style="width:min(640px,92vw);">
-        <div id="workevent-title" style="color:#e9c46a; font-size:1.1rem; margin-bottom:10px;">Work event</div>
-        <div id="workevent-text" style="line-height:1.5; margin-bottom:14px;"></div>
-        <div id="workevent-choices" style="display:flex; flex-direction:column; gap:8px;"></div>
-        <div style="margin-top:12px; text-align:right;">
-          <button class="btn" id="workevent-close">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Start -->
-    <div id="start-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;">
-      <div class="panel" style="max-width:560px;text-align:center">
-        <div id="logo" style="font-size:2rem;color:#e9c46a;margin-bottom:15px;text-shadow:0 0 10px rgba(233,196,106,.5)">Nihongo Journey</div>
-        <div id="instructions" style="margin-bottom:22px;line-height:1.6;font-size:.95rem;">
-          <p>You've arrived in <b>Japan</b> as a backpacker, without knowing the language.</p>
-          <p>Explore the city, <b>learn Japanese words</b>, and make friends to experience authentic culture.</p>
-          <p><b>Move:</b> WASD / Arrows • <b>Interact:</b> E / Space / Enter • Or use on‑screen controls.</p>
-        </div>
-        <button id="start-button" class="btn" style="border-radius:25px;padding:14px 35px;">Start Journey</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Turn-based Battle (JP sentences) -->
-  <div id="battle-overlay" class="overlay">
-    <div id="battle-card">
-      <div id="turn-banner">Your Turn</div>
-      <div id="victory-overlay">
-        <div class="victory-flash"></div>
-        <div class="victory-burst"></div>
-        <div class="victory-confetti"></div>
-        <div class="victory-coins"></div>
-        <div class="victory-banner">Victory!</div>
-      </div>
-      <div id="skills-modal">
-        <div id="skills-card">
-          <div style="font-weight:700; margin-bottom:6px;">Select a Skill</div>
-          <div id="skills-list">
-            <button id="skill-earthquake" class="btn skill-btn">Earthquake</button>
-          </div>
-          <div style="text-align:right; margin-top:10px;">
-            <button id="skills-close" class="btn">Close</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Earthquake overlay -->
-      <div id="eq-overlay">
-        <canvas id="eq-matrix"></canvas>
-        <div id="eq-layer"></div>
-      </div>
-      <div id="battle-title">A wild challenge appeared!</div>
-
-      <div id="hp-wrap">
-        <div id="hp-text">HP: <span id="hp-val">10</span>/10</div>
-        <div id="hp-bar"><div id="hp-fill" style="width:100%"></div></div>
-      </div>
-
-      <div id="enemyhp-wrap">
-        <div id="enemyhp-text">Enemy HP: <span id="enemyhp-val">10</span>/10</div>
-        <div id="enemyhp-bar"><div id="enemyhp-fill" style="width:100%"></div></div>
-      </div>
-
-      <div id="battle-instr">Pick ONE Japanese word. On pick, you ATTACK: if the ORDER so far is correct, you deal damage.</div>
-
-      <div style="font-size:.95rem;opacity:.8;margin-bottom:6px">Word Pool</div>
-      <div id="battle-pool"></div>
-
-      <div style="font-size:.95rem;opacity:.8;margin:8px 0 6px">Your Sentence</div>
-      <div id="battle-ordered"></div>
-
-      <div id="battle-actions">
-        <button id="battle-defend" class="btn">Defend</button>
-        <!-- <button id="battle-attack" class="btn">Attack</button> -->
-        <button id="battle-skills" class="btn">Skills</button>
-        <button id="battle-flee" class="btn">Flee</button>
-      </div>
-
-      <!-- Defense mini-skill (enemy turn) -->
-      <div id="defense-panel">
-        <div id="defense-prompt">Defense: type <b><span id="defense-label">ka</span></b> quickly!</div>
-        <div id="defense-row">
-          <input id="defense-input" type="text" autocomplete="off" />
-          <button id="defense-submit" class="btn">Guard</button>
-          <div id="defense-timer">3.0s</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="skills-overlay">
-    <div id="skills-card">
-      <div id="skills-title">Choose a Skill</div>
-      <div id="skills-list">
-        <button id="skill-earthquake" class="skill-item">Earthquake</button>
-      </div>
-      <div id="skills-actions">
-        <button id="skills-close" class="btn">Close</button>
-      </div>
-    </div>
-  </div>
-
-
-  <script>
     /* =======================
       Config & Utilities
     ========================*/
@@ -538,34 +67,8 @@
         if (k === 'arrowdown' || k === 's') KeyState.down = true;
         if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = true;
     });
-    document.addEventListener('keydown', (e) => {
-        const k = (e.key || '').toLowerCase();
-        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) {
-            e.preventDefault();
-        }
-        if (k === 'arrowleft' || k === 'a') KeyState.left = true;
-        if (k === 'arrowright' || k === 'd') KeyState.right = true;
-        if (k === 'arrowup' || k === 'w') KeyState.up = true;
-        if (k === 'arrowdown' || k === 's') KeyState.down = true;
-        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = true;
-    });
-
+    
     window.addEventListener('keyup', (e) => {
-        const k = (e.key || '').toLowerCase();
-        if (k === 'arrowleft' || k === 'a') KeyState.left = false;
-        if (k === 'arrowright' || k === 'd') KeyState.right = false;
-        if (k === 'arrowup' || k === 'w') KeyState.up = false;
-        if (k === 'arrowdown' || k === 's') KeyState.down = false;
-        if (k === 'e' || k === ' ' || k === 'enter') KeyState.interact = false;
-    });
-    document.addEventListener('keydown', (e) => {
-        const k = (e.key || '').toLowerCase();
-        if (k === 'e' || k === ' ' || k === 'enter') {
-            e.preventDefault();
-            checkForInteraction();
-        }
-    });
-    document.addEventListener('keyup', (e) => {
         const k = (e.key || '').toLowerCase();
         if (k === 'arrowleft' || k === 'a') KeyState.left = false;
         if (k === 'arrowright' || k === 'd') KeyState.right = false;
@@ -656,14 +159,151 @@
           victoryFxRunning: false
         },
         gameMinutesTotal: 0,
-        socialPenaltyUntilAbs: 0
+        socialPenaltyUntilAbs: 0,
+        routeDaily: {},
+        flags: {},
+        npcTempGrumpy: {}
     };
+
+// expose to window for modules and skills
+window.gameState = window.gameState || gameState;
 
     const SAVE_KEY = 'NJ:SAVE:v2';     // mude a versão se quiser invalidar saves antigos
     let HAS_LOADED_FROM_STORAGE = false;
     let AUTOSAVE_ENABLED = true;      // só liga depois do Start
     let matrixRAF = 0, mxCtx = null, mxCols = [], mxW=0, mxH=0, mxFont=16;
 
+    // ==== Dialogue Graph Core ====
+    /** Node de diálogo */
+    class DialogueNode {
+      constructor({ id, npc, text, requirements = {}, options = [], effects = {}, cooldown = 0, tags = [] }) {
+        Object.assign(this, { id, npc, text, requirements, options, effects, cooldown, tags });
+        this.lastSeenAtAbsMin = -Infinity;
+      }
+    }
+
+    /** util: checa requisitos contra contexto */
+    function checkReq(req, ctx, opts){
+      const { ignoreCooldown=false, allowAnyTimeInSession=false } = opts || {};
+      if (req.location && req.location !== ctx.location) return false;
+
+      if (req.time && !allowAnyTimeInSession){
+        const h = Math.floor(ctx.gameTime);
+        const slot = (h < 12) ? "morning" : (h < 18 ? "afternoon" : "evening");
+        if (Array.isArray(req.time) ? !req.time.includes(slot) : req.time !== slot) return false;
+      }
+
+      if (typeof req.minRel === "number" && (ctx.relNpc||0) < req.minRel) return false;
+      if (Array.isArray(req.requiredWords)){
+        for (const w of req.requiredWords) if (!ctx.knownWords.includes(w)) return false;
+      }
+      if (req.flagsAll){ for (const f of req.flagsAll) if (!ctx.flags[f]) return false; }
+      if (req.flagsNone){ for (const f of req.flagsNone) if (ctx.flags[f]) return false; }
+      if (req.noPenalty && ctx.isPenaltyActive) return false;
+
+      if (!ignoreCooldown && ctx.nodeCooldown){
+        if (ctx.nowAbsMin - ctx.nodeCooldown.lastSeenAtAbsMin < (req.minCooldown||0)) return false;
+      }
+      return true;
+    }
+
+    function routeNextNode(npcId, graph, ctx, opts){
+      const candidates = graph.filter(n => n.npc === npcId);
+      const now = ctx.nowAbsMin;
+      return candidates.find(n=>{
+        n.lastSeenAtAbsMin ??= -Infinity;
+        return checkReq(
+          Object.assign({minCooldown: n.cooldown||0}, n.requirements),
+          Object.assign({}, ctx, { nodeCooldown: n, nowAbsMin: now }),
+          opts
+        );
+      });
+    }
+
+    function normWord(w){
+      return (w ?? "").toString().trim().normalize("NFKC"); // evita variantes semelhantes
+    }
+
+    function ensureVocabState(){
+      gameState.learnedWords ||= {};   // { "こんにちは": { firstSeenAt, source } }
+      gameState.knownWords   ||= [];   // usado só pra UI/legado; manteremos dedup com learnedWords
+    }
+
+    function learnWordUnique(word, source="dialogue"){
+      ensureVocabState();
+      const w = normWord(word);
+      if (!w) return false;
+
+      const already = !!gameState.learnedWords[w];
+      if (!already){
+        gameState.learnedWords[w] = { firstSeenAt: gameState.gameMinutesTotal||0, source };
+        // mantém array legado em sincronia sem duplicar
+        if (!gameState.knownWords.includes(w)) gameState.knownWords.push(w);
+        if (typeof updateVocabularyCount === "function") updateVocabularyCount();
+      }
+      return !already;
+    }
+
+    /** aplica efeitos atômicos */
+    function applyDialogueEffects(effects, ctx){
+      const st = ctx.state;
+
+      // afinidade (com multiplicador se penalidade ativa)
+      if (typeof effects.relationship === "number"){
+        const mult = ctx.isPenaltyActive ? 0.5 : 1.0; // pênalti reduz ganhos
+        st.relationships[ctx.npcId] = (st.relationships[ctx.npcId]||0) + (effects.relationship * mult);
+      }
+
+      // fofoca (impacto cross-NPC)
+      if (effects.gossip){
+        const { target, delta = 0 } = effects.gossip;
+        if (target) st.relationships[target] = (st.relationships[target]||0) + delta;
+      }
+
+      // grumpy temporário
+      if (effects.grumpyFor){         // minutos de jogo
+        st.npcTempGrumpy = st.npcTempGrumpy || {};
+        st.npcTempGrumpy[ctx.npcId] = (st.gameMinutesTotal||0) + effects.grumpyFor;
+      }
+
+      if (effects.learnWord){
+        learnWordUnique(effects.learnWord, "dialogue");
+      }
+
+      if (typeof effects.coins === "number"){
+        st.coins = (st.coins||0) + effects.coins;
+        if (typeof updateCoins === "function") updateCoins();
+      }
+      if (effects.setFlag){
+        st.storyProgress = st.storyProgress || {};
+        st.storyProgress[effects.setFlag] = true;
+      }
+      if (effects.unlockArea === "novo"){
+        st.newMapUnlocked = true;
+        showNotification("New District unlocked!");
+      }
+      if (typeof effects.jobPromoChance === "number"){
+        // empilha chance de promoção (usada no resolveWorkChoice)
+        st.jobs = st.jobs || {};
+        st.jobs.extraEventAnchor = (st.jobs.extraEventAnchor||0) + effects.jobPromoChance;
+      }
+
+      if (effects.setFlag){
+        gameState.storyProgress ||= {};
+        if (!gameState.storyProgress[effects.setFlag]) {
+          gameState.storyProgress[effects.setFlag] = true;
+          if (effects.toast && typeof showNotification === "function"){
+            showNotification(effects.toast);
+          }
+        }
+      }
+
+      if (effects.unlocked){
+        const u = effects.unlocked;
+        if (typeof u === "string") unlockJob(u);
+        else if (u && u.key) unlockJob(u.key, u.toast);
+      }
+    }
 
     const persisted = loadGameFromStorage();
     if (persisted){
@@ -720,6 +360,38 @@
     gameState.battle.defensePending = false;   // defesa em andamento (skill overlay aberto)
     initPlayerPosition();
 
+    const DICT = {
+      "こんにちは": "olá",
+      "ありがとう": "obrigado(a)",
+      "コーヒー": "café",
+      "お願いします": "por favor",
+      "すみません": "com licença / desculpa",
+      "はい": "sim",
+      "水": "água",
+      "学校": "escola",
+      "勉強": "estudo",
+      "日本語": "língua japonesa"
+    };
+
+    // Palavras “neutras” que NÃO geram penalidade ao consultar (opcional)
+    const DICT_SAFE = new Set(["水"]); // exemplo: olhar “água” não pega mal
+
+    // Quanto tempo (em minutos in-game) dura a bronca social
+    const DICT_PENALTY_MINUTES = 30;
+
+    // Se o uso do dicionário gera fofoca (impacto em outra relação)
+    const DICT_GOSSIP = { enabled: true, target: "yuki", delta: -1 };
+
+    let JP_SENTENCES = [
+      { words:["私","は","学生","です"],            answer:"私は学生です" },
+      { words:["おはよう","ございます"],             answer:"おはようございます" },
+      { words:["日本語","を","勉強","します"],        answer:"日本語を勉強します" },
+      { words:["水","を","ください"],               answer:"水をください" },
+      { words:["ここ","は","公園","です"],          answer:"ここは公園です" },
+      { words:["コーヒー","を","お願いします"],       answer:"コーヒーをお願いします" },
+      { words:["すみません","駅","は","どこ","です","か"], answer:"すみません駅はどこですか" },
+    ];
+
     const wordDictionary = {
         'こんにちは': 'Hello',
         'ありがとう': 'Thank you',
@@ -759,20 +431,8 @@
         '日本語': 'noun'
     };
 
-    let JP_SENTENCES = [
-      { words:["私","は","学生","です"],            answer:"私は学生です" },
-      { words:["おはよう","ございます"],             answer:"おはようございます" },
-      { words:["日本語","を","勉強","します"],        answer:"日本語を勉強します" },
-      { words:["水","を","ください"],               answer:"水をください" },
-      { words:["ここ","は","公園","です"],          answer:"ここは公園です" },
-      { words:["コーヒー","を","お願いします"],       answer:"コーヒーをお願いします" },
-      { words:["すみません","駅","は","どこ","です","か"], answer:"すみません駅はどこですか" },
-    ];
-
 
     gameState.battle.skillActive = false;
-    // HP do inimigo (se usar outra fonte, ajuste aqui também)
-    const ENEMY_MAX_HP = 10;
 
     // pool simples de pares Kanji → EN
     const EQ_PAIRS = [
@@ -787,6 +447,12 @@
       { kanji:'空', en:'sky' },
       { kanji:'雨', en:'rain' },
     ];
+
+    
+    // ==== Configs ====
+    const ENEMY_MAX_HP = 10;
+    const PAIRS_SRC = EQ_PAIRS;
+    const DURATION_MS = 5000; // 5s máx
 
     // --- Helpers de limpeza ---
     function stripQuotes(raw){
@@ -954,16 +620,33 @@
         return h * 60 + m;
     }
 
+    // helpers de estado (se ainda não existirem)
     function isSocialPenaltyActive(){
-      return (gameState.socialPenaltyUntilAbs || 0) > (gameState.gameMinutesTotal || 0);
+      return (gameState.gameMinutesTotal || 0) < (gameState.socialPenaltyUntil || 0);
     }
 
-    function applyDictionaryPenalty(){
-      const nowAbs = gameState.gameMinutesTotal || 0;
-      gameState.socialPenaltyUntilAbs = nowAbs + 30; // 30 min de jogo
-      const badge = document.getElementById('dict-penalty-badge');
-      if (badge) badge.style.display = 'inline-block';
-      showNotification('You checked the dictionary. Affinity gains reduced for 30 in-game minutes.');
+    function ensureState(){
+      gameState.relationships ||= {};
+      gameState.npcTempGrumpy ||= {};
+      gameState.knownWords ||= [];
+      gameState.learnedWords ||= {};
+    }
+
+    function triggerDictionaryPenalty(npcId){
+      const now = gameState.gameMinutesTotal || 0;
+      gameState.socialPenaltyUntil = now + DICT_PENALTY_MINUTES;       // reduz ganhos de afinidade
+      gameState.npcTempGrumpy[npcId] = now + DICT_PENALTY_MINUTES;     // NPC ranzinza
+
+      if (DICT_GOSSIP.enabled && DICT_GOSSIP.target){
+        gameState.relationships[DICT_GOSSIP.target] =
+          (gameState.relationships[DICT_GOSSIP.target]||0) + (DICT_GOSSIP.delta||0);
+      }
+    }
+
+    // NPC está grumpy?
+    function isNpcGrumpy(npcId){
+      const until = gameState.npcTempGrumpy?.[npcId] || 0;
+      return (gameState.gameMinutesTotal||0) < until;
     }
 
     function getDictEls() {
@@ -977,22 +660,64 @@
         };
     }
 
+    // === SUBSTITUA sua função por esta ===
     function openDictionary(word) {
+      ensureState();
+
+      // 1) abrir/atualizar o overlay existente (coloque aqui o SEU código atual)
+      //    ex.: showDictionaryOverlay(word);
+      // -----------------------------------------
+      // showDictionaryOverlay(word); // <— se tiver uma função assim
+      // -----------------------------------------
+
+      // se nada foi passado (ou veio undefined), não prossiga
+      if (!word) return;
+
+      // aprender a palavra (se essa é a regra do seu jogo)
+      learnWordIfNew(word);
+
+      // 2) penalidade social só quando:
+      //    - estamos conversando
+      //    - há um NPC atual
+      //    - a palavra NÃO é "safe"
+      if (gameState.inDialogue && gameState.currentNPC && !DICT_SAFE.has(word)) {
+        const npcId = gameState.currentNPC.id;
+        const now = gameState.gameMinutesTotal || 0;
+
+        // estende/renova a janela de penalidade baseada em tempo
+        gameState.socialPenaltyUntil = now + DICT_PENALTY_MINUTES;
+
+        // deixa o NPC atual “grumpy” pelo mesmo período
+        gameState.npcTempGrumpy[npcId] = now + DICT_PENALTY_MINUTES;
+
+        // (opcional) fofoca/impacto em outro NPC
+        // gameState.relationships.yuki = (gameState.relationships.yuki || 0) - 1;
+
         const els = getDictEls();
         if (!els.overlay) return;
+
+        // popula overlay com teus dados
         const meaning = wordDictionary[word] || '—';
         const pos = wordPOS[word] || '—';
         els.w.textContent = word;
         els.pos.textContent = pos;
         els.meaning.textContent = meaning;
+
+        // badge de penalidade (usa tua função existente)
         els.badge.style.display = isSocialPenaltyActive() ? 'inline-block' : 'none';
+
+        // mostra overlay (mantém teu visual)
         els.overlay.style.display = 'flex';
-        applyDictionaryPenalty();
-        if (gameState.inDialogue && gameState.currentNPC && gameState.currentNPC.grumpyLine) {
-            const npc = gameState.currentNPC;
-            displayDialogue(gameState.currentNPC.grumpyLine, npc);
+
+        if (typeof showNotification === "function") {
+          // mostra só quando a penalidade NÃO estava ativa (evita spam)
+          if (!isSocialPenaltyActive() || (gameState.socialPenaltyUntil - now) <= DICT_PENALTY_MINUTES + 0.1) {
+            showNotification("They noticed you checking the dictionary…");
+          }
         }
+      }
     }
+
     (function() {
         const els = getDictEls();
         if (els.close) {
@@ -1040,173 +765,628 @@
         passive: false
     });
 
+    function currentTimeSlot(gameTimeHour){
+      const h = Math.floor(gameTimeHour||0);
+      return (h < 12) ? "morning" : (h < 18 ? "afternoon" : "evening");
+    }
+
+    // Constrói nós a partir do objeto legado
+    function buildGraphFromLegacy(npcs){
+      const graph = [];
+      for (const npc of npcs){
+        for (const place of Object.keys(npc.dialogues||{})){
+          (npc.dialogues[place]||[]).forEach((dlg, idx)=>{
+            graph.push(new DialogueNode({
+              id: `${npc.id}_${place}_${dlg.time}_${idx}`,
+              npc: npc.id,
+              text: dlg.japanese || "",
+              requirements: {
+                location: place,
+                time: dlg.time,
+                minRel: dlg.relationshipLevel || 0,
+                requiredWords: dlg.requiredWords || []
+              },
+              options: (dlg.responses||[]).map(r=>({
+                label: r.words?.length ? `Falar: ${r.words.join(" + ")}` : "Responder",
+                needsWords: r.words || [],
+                goto: null,
+                effects: {
+                  relationship: typeof r.relationship === "number" ? r.relationship : 0,
+                  learnWord: r.learnWord || undefined,
+                  // 👇 guardamos o texto de volta do NPC
+                  say: r.response || null
+                }
+              })),
+              cooldown: 8
+            }));
+          });
+        }
+      }
+      return graph;
+    }
+
+
     // NPCs (full dialogues)
     const npcs = [{
-            id: 'takeshi',
-            name: 'Takeshi',
-            x: 0,
-            y: 0,
-            color: '#e76f51',
-            location: 'cafe',
-            grumpyLine: 'I\'m busy. If you can\'t speak, come back later.',
-            schedule: {
-                morning: 'cafe',
-                afternoon: 'cafe',
-                evening: 'park'
-            },
-            dialogues: {
-                'cafe': [{
-                        time: 'morning',
-                        japanese: 'おはよう！今日もいい天気ですね。コーヒーはいかがですか？',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 0,
-                        responses: [{
-                                words: ['こんにちは', 'コーヒー'],
-                                response: 'はい、かしこまりました。少々お待ちください。美味しいコーヒーをお出ししますね。',
-                                relationship: 1,
-                                learnWord: 'お願いします'
-                            },
-                            {
-                                words: ['こんにちは'],
-                                response: 'こんにちは！いらっしゃいませ。ゆっくりしていってください。',
-                                relationship: 0.5
-                            }
-                        ]
-                    },
-                    {
-                        time: 'afternoon',
-                        japanese: 'こんにちは！ゆっくりしていってください。',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 0,
-                        responses: [{
-                            words: ['こんにちは', 'ありがとう'],
-                            response: 'どういたしまして。またお越しください。ところで、日本語の勉強はどうですか？',
-                            relationship: 1,
-                            learnWord: 'すみません'
-                        }]
-                    }
-                ],
-                'park': [{
-                    time: 'evening',
-                    japanese: 'やあ！公園で休んでるんだ。君もコーヒー飲む？',
-                    requiredWords: ['こんにちは'],
-                    relationshipLevel: 1,
-                    responses: [{
-                        words: ['こんにちは', 'はい'],
-                        response: 'はい、どうぞ。ところで、最近どう？日本語は上手になった？',
-                        relationship: 2,
-                        learnWord: '水'
-                    }]
-                }]
-            }
+      id: 'takeshi',
+      name: 'Takeshi',
+      x: 0,
+      y: 0,
+      color: '#e76f51',
+      location: 'cafe',
+      schedule: {
+          morning: 'cafe',
+          afternoon: 'cafe',
+          evening: 'park'
+      },
+    },
+    {
+      id: 'yuki',
+      name: 'Yuki',
+      x: 0,
+      y: 0,
+      color: '#9d4edd',
+      location: 'park',
+      schedule: {
+          morning: 'park',
+          afternoon: 'store',
+          evening: 'park'
+      },
+    },
+    {
+      id: 'akari',
+      name: 'Akari',
+      x: 0,
+      y: 0,
+      color: '#90e0ef',
+      location: 'school',
+      schedule: {
+        morning: 'school',
+        afternoon: 'school',
+        evening: 'shrine'
+      },
+    }
+];
+
+    // ==== Dialogue Graph: Takeshi ====
+    const DIALOGUE_GRAPH = [
+      // ======================
+      // TAKESHI — CAFE
+      // ======================
+      {
+        id: "takeshi:cafe:0",
+        npc: "takeshi",
+        text: "おはよう！今日もいい天気ですね。コーヒーはいかがですか？",
+        requirements: {
+          location: "cafe",
+          time: "morning",
+          minRel: 0,
+          requiredWords: ["こんにちは"]
         },
-        {
-            id: 'yuki',
-            name: 'Yuki',
-            x: 0,
-            y: 0,
-            color: '#9d4edd',
-            location: 'park',
-            grumpyLine: '... Sorry, not now. Try another time.',
-            schedule: {
-                morning: 'park',
-                afternoon: 'store',
-                evening: 'park'
-            },
-            dialogues: {
-                'park': [{
-                        time: 'morning',
-                        japanese: 'おはようございます。お元気ですか？',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 0,
-                        responses: [{
-                            words: ['こんにちは'],
-                            response: '今日はいい天気ですね。公園が気に入りましたか？私はよくここで本を読みます。',
-                            relationship: 1,
-                            learnWord: 'おはよう'
-                        }]
-                    },
-                    {
-                        time: 'evening',
-                        japanese: 'あら、あなたも公園がお好きなんですか？',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 1,
-                        responses: [{
-                            words: ['はい'],
-                            response: '私もです！週末にはよくここで読書をします。この公園は静かで大好きです。',
-                            relationship: 2,
-                            learnWord: '美味しい'
-                        }]
-                    }
-                ],
-                'store': [{
-                    time: 'afternoon',
-                    japanese: 'あ、こんにちは！買い物ですか？',
-                    requiredWords: ['こんにちは'],
-                    relationshipLevel: 1,
-                    responses: [{
-                        words: ['こんにちは', 'はい'],
-                        response: '私もお菓子を買いに来ました。日本の食べ物は美味しいですよね。',
-                        relationship: 1,
-                        learnWord: 'いくらですか'
-                    }]
-                }]
-            }
+        options: [
+          {
+            label: "Falar: こんにちは + コーヒー",
+            needsWords: ["こんにちは", "コーヒー"],
+            goto: "takeshi:cafe:0:reply#0",
+            effects: { relationship: 1, learnWord: "お願いします",  unlocked: { key: "cafe", toast: "Cafe job unlocked!" } }
+          },
+          {
+            label: "Falar: こんにちは",
+            needsWords: ["こんにちは"],
+            goto: "takeshi:cafe:0:reply#1",
+            effects: { relationship: 0.5 }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "takeshi:cafe:0:reply#0",
+        npc: "takeshi",
+        text: "はい、かしこまりました。少々お待ちください。美味しいコーヒーをお出ししますね。",
+        requirements: {},
+        options: [
+          { label: "Continuar", goto: "takeshi:cafe:1", effects: {} }
+        ],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+      {
+        id: "takeshi:cafe:0:reply#1",
+        npc: "takeshi",
+        text: "こんにちは！いらっしゃいませ。ゆっくりしていってください。",
+        requirements: {},
+        options: [
+          { label: "Continuar", goto: "takeshi:cafe:1", effects: {} }
+        ],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      {
+        id: "takeshi:cafe:1",
+        npc: "takeshi",
+        text: "こんにちは！ゆっくりしていってください。",
+        requirements: {
+          location: "cafe",
+          time: "afternoon",
+          minRel: 0,
+          requiredWords: ["こんにちは"]
         },
-        {
-            id: 'akari',
-            name: 'Akari',
-            x: 0,
-            y: 0,
-            color: '#90e0ef',
-            location: 'school',
-            grumpyLine: 'You need to try a bit harder before talking to me.',
-            schedule: {
-                morning: 'school',
-                afternoon: 'school',
-                evening: 'shrine'
-            },
-            dialogues: {
-                'school': [{
-                        time: 'morning',
-                        japanese: 'おはよう！日本語の勉強ですか？',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 0,
-                        responses: [{
-                            words: ['こんにちは', 'はい'],
-                            response: '素晴らしい！日本語は難しいけど、楽しいですよね。私はここで英語を教えています。',
-                            relationship: 1,
-                            learnWord: '学校'
-                        }]
-                    },
-                    {
-                        time: 'afternoon',
-                        japanese: 'こんにちは！勉強ははかどっていますか？',
-                        requiredWords: ['こんにちは'],
-                        relationshipLevel: 1,
-                        responses: [{
-                            words: ['こんにちは', 'はい'],
-                            response: '良かったです！何かわからないことがあったら、いつでも聞いてくださいね。',
-                            relationship: 1,
-                            learnWord: '勉強'
-                        }]
-                    }
-                ],
-                'shrine': [{
-                    time: 'evening',
-                    japanese: 'こんばんは。神社は静かでいいですよね。',
-                    requiredWords: ['こんにちは'],
-                    relationshipLevel: 1,
-                    responses: [{
-                        words: ['こんにちは', 'はい'],
-                        response: '私はよくここに来てリラックスします。日本の文化は興味深いですよね。',
-                        relationship: 1,
-                        learnWord: '日本語'
-                    }]
-                }]
-            }
-        }
+        options: [
+          {
+            label: "Falar: こんにちは + ありがとう",
+            needsWords: ["こんにちは", "ありがとう"],
+            goto: "takeshi:cafe:1:reply#0",
+            effects: { relationship: 1, learnWord: "すみません" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "takeshi:cafe:1:reply#0",
+        npc: "takeshi",
+        text: "どういたしまして。またお越しください。ところで、日本語の勉強はどうですか？",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      // ======================
+      // TAKESHI — PARK
+      // ======================
+      {
+        id: "takeshi:park:0",
+        npc: "takeshi",
+        text: "やあ！公園で休んでるんだ。君もコーヒー飲む？",
+        requirements: {
+          location: "park",
+          time: "evening",
+          minRel: 1,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは + はい",
+            needsWords: ["こんにちは", "はい"],
+            goto: "takeshi:park:0:reply#0",
+            effects: { relationship: 2, learnWord: "水" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "takeshi:park:0:reply#0",
+        npc: "takeshi",
+        text: "はい、どうぞ。ところで、最近どう？日本語は上手になった？",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      // ======================
+      // YUKI — PARK
+      // ======================
+      {
+        id: "yuki:park:0",
+        npc: "yuki",
+        text: "おはようございます。お元気ですか？",
+        requirements: {
+          location: "park",
+          time: "morning",
+          minRel: 0,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは",
+            needsWords: ["こんにちは"],
+            goto: "yuki:park:0:reply#0",
+            effects: { relationship: 1, learnWord: "おはよう" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "yuki:park:0:reply#0",
+        npc: "yuki",
+        text: "今日はいい天気ですね。公園が気に入りましたか？私はよくここで本を読みます。",
+        requirements: {},
+        options: [
+          { label: "Continuar", goto: "yuki:park:1", effects: {} }
+        ],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      {
+        id: "yuki:park:1",
+        npc: "yuki",
+        text: "あら、あなたも公園がお好きなんですか？",
+        requirements: {
+          location: "park",
+          time: "evening",
+          minRel: 1,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: はい",
+            needsWords: ["はい"],
+            goto: "yuki:park:1:reply#0",
+            effects: { relationship: 2, learnWord: "美味しい" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "yuki:park:1:reply#0",
+        npc: "yuki",
+        text: "私もです！週末にはよくここで読書をします。この公園は静かで大好きです。",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      // ======================
+      // YUKI — STORE
+      // ======================
+      {
+        id: "yuki:store:0",
+        npc: "yuki",
+        text: "あ、こんにちは！買い物ですか？",
+        requirements: {
+          location: "store",
+          time: "afternoon",
+          minRel: 1,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは + はい",
+            needsWords: ["こんにちは", "はい"],
+            goto: "yuki:store:0:reply#0",
+            effects: { relationship: 1, learnWord: "いくらですか" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "yuki:store:0:reply#0",
+        npc: "yuki",
+        text: "私もお菓子を買いに来ました。日本の食べ物は美味しいですよね。",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      // ======================
+      // AKARI — SCHOOL
+      // ======================
+      {
+        id: "akari:school:0",
+        npc: "akari",
+        text: "おはよう！日本語の勉強ですか？",
+        requirements: {
+          location: "school",
+          time: "morning",
+          minRel: 0,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは + はい",
+            needsWords: ["こんにちは", "はい"],
+            goto: "akari:school:0:reply#0",
+            effects: { relationship: 1, learnWord: "学校" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "akari:school:0:reply#0",
+        npc: "akari",
+        text: "素晴らしい！日本語は難しいけど、楽しいですよね。私はここで英語を教えています。",
+        requirements: {},
+        options: [
+          { label: "Continuar", goto: "akari:school:1", effects: {} }
+        ],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      {
+        id: "akari:school:1",
+        npc: "akari",
+        text: "こんにちは！勉強ははかどっていますか？",
+        requirements: {
+          location: "school",
+          time: "afternoon",
+          minRel: 1,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは + はい",
+            needsWords: ["こんにちは", "はい"],
+            goto: "akari:school:1:reply#0",
+            effects: { relationship: 1, learnWord: "勉強" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "akari:school:1:reply#0",
+        npc: "akari",
+        text: "良かったです！何かわからないことがあったら、いつでも聞いてくださいね。",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      },
+
+      // ======================
+      // AKARI — SHRINE
+      // ======================
+      {
+        id: "akari:shrine:0",
+        npc: "akari",
+        text: "こんばんは。神社は静かでいいですよね。",
+        requirements: {
+          location: "shrine",
+          time: "evening",
+          minRel: 1,
+          requiredWords: ["こんにちは"]
+        },
+        options: [
+          {
+            label: "Falar: こんにちは + はい",
+            needsWords: ["こんにちは", "はい"],
+            goto: "akari:shrine:0:reply#0",
+            effects: { relationship: 1, learnWord: "日本語" }
+          }
+        ],
+        effects: {},
+        cooldown: 8,
+        tags: ["legacy-base"]
+      },
+      {
+        id: "akari:shrine:0:reply#0",
+        npc: "akari",
+        text: "私はよくここに来てリラックスします。日本の文化は興味深いですよね。",
+        requirements: {},
+        options: [],
+        effects: {},
+        cooldown: 0,
+        tags: ["legacy-reply"]
+      }
     ];
+
+    // Abra diálogo com roteamento
+    function openNpcDialogue(npc){
+      gameState.inDialogue = true;
+      gameState.currentNPC = npc;
+
+      // localização do player e slot de horário atual
+      const location = gameState.playerLocation || npc.location; // ou derive do mapa
+      const slot = currentTimeSlot(gameState.time);
+
+      if (isNpcGrumpy(npc.id) && npc.grumpyLine){
+        renderSimpleLine(npc, npc.grumpyLine);
+        return;
+      }
+
+      const ctx = {
+        state: gameState,
+        npcId: npc.id,
+        location,
+        gameTime: gameState.time,
+        knownWords: gameState.knownWords || [],
+        relNpc: (gameState.relationships||{})[npc.id]||0,
+        flags: Object.assign({}, gameState.storyProgress||{}, gameState.flags||{}),
+        isPenaltyActive: isSocialPenaltyActive(),
+        nowAbsMin: gameState.gameMinutesTotal||0
+      };
+
+      const node = routeNextNode(npc.id, DIALOGUE_GRAPH, ctx)
+              || fallbackSmallTalkNode(npc.id, location, slot);
+
+      renderDialogueNode(npc, node, ctx);
+    }
+
+    function renderSimpleLine(npc, text){
+      dialogueText.textContent = text;
+      responseOptions.innerHTML = "";
+      dialogueBox.style.display = "block";
+    }
+
+    function closeDialogueBox() {
+      if (typeof dialogueBox !== "undefined") {
+        dialogueBox.style.display = "none";
+      }
+      gameState.inDialogue = false;
+      gameState.currentNPC = null;
+    }
+
+    function renderDialogueNode(npc, node, ctx){
+      // Texto do NPC com seu anotador (mantém overlay do dicionário)
+      dialogueText.innerHTML = annotateDialogueText(node.text || "");
+
+      // Zera opções SEMPRE antes de repovoar
+      responseOptions.innerHTML = "";
+
+      // Garante que options é um array
+      const opts = Array.isArray(node.options) ? node.options : [];
+
+      // Se não houver opções, finalize o diálogo
+      if (opts.length === 0){
+        // fecha a caixa de diálogo e reseta estado
+        if (typeof closeDialogueBox === "function") {
+          closeDialogueBox();
+        } else {
+          dialogueBox.style.display = "none";
+          gameState.inDialogue = false;
+          gameState.currentNPC = null;
+        }
+        return;
+      }
+
+      opts.forEach(opt=>{
+        const btn = document.createElement("button");
+        btn.className = "word-option";
+        btn.textContent = opt.label;
+
+        // trava se faltar vocabulário
+        if (opt.needsWords){
+          const ok = opt.needsWords.every(w => (ctx.knownWords || []).includes(w));
+          if (!ok){ btn.disabled = true; btn.classList.add("unknown"); }
+        }
+
+        btn.addEventListener("click", ()=>{
+          // evita múltiplos disparos
+          if (btn.disabled) return;
+          btn.disabled = true;
+
+          // aplica efeitos
+          applyDialogueEffects(opt.effects || {}, ctx);
+
+          // marca cooldown do nó atual
+          node.lastSeenAtAbsMin = ctx.nowAbsMin;
+
+          // limpa as opções imediatamente (evita “acúmulo infinito”)
+          responseOptions.innerHTML = "";
+
+          // prepara ctx atualizado (afinidade pode ter mudado)
+          const nextCtx = Object.assign({}, ctx, {
+            relNpc: (gameState.relationships||{})[npc.id]||0,
+            nowAbsMin: gameState.gameMinutesTotal||0
+          });
+
+          // segue determinístico: só se houver goto
+          if (opt.goto){
+            const next = DIALOGUE_GRAPH.find(n => n.id === opt.goto);
+            if (next){
+              renderDialogueNode(npc, next, nextCtx);
+              return;
+            }
+          }
+
+          // sem goto -> finaliza
+          if (typeof closeDialogueBox === "function") {
+            closeDialogueBox();
+          } else {
+            dialogueBox.style.display = "none";
+            gameState.inDialogue = false;
+            gameState.currentNPC = null;
+          }
+        });
+
+        responseOptions.appendChild(btn);
+      });
+
+      dialogueBox.style.display = "block";
+    }
+
+    function annotateWithDictionary(text){
+      if (!text) return "";
+      // substitui cada termo conhecido por um botão clicável
+      // cuidado com regex: ordena por comprimento desc. pra evitar sobreposição
+      const words = Object.keys(DICT).sort((a,b)=>b.length - a.length);
+      let html = text;
+      for (const w of words){
+        const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const rx = new RegExp(safe, "g");
+        html = html.replace(rx, `<button class="dict-word" data-word="${w}" title="Clique para ver">${w}</button>`);
+      }
+      return html;
+    }
+
+    function wireDictionaryButtons(){
+      document.querySelectorAll(".dict-word").forEach(btn=>{
+        btn.onclick = ()=>{
+          const w = btn.dataset.word;
+          openDictionaryInline(w, btn);
+        };
+      });
+    }
+
+    function openDictionaryInline(word, anchorEl){
+      const meaning = DICT[word] || "(sem registro)";
+      // mostra a tradução ao lado
+      let tip = anchorEl.nextElementSibling;
+      if (!tip || !tip.classList.contains("dict-tooltip")){
+        tip = document.createElement("span");
+        tip.className = "dict-tooltip";
+        anchorEl.after(tip);
+      }
+      tip.textContent = `= ${meaning}`;
+
+      // Aprender palavra automaticamente (ou chame seu minigame antes)
+      learnWordIfNew(word);
+
+      // Se estiver em diálogo com alguém, e a palavra NÃO for “safe”, aplica penalidade
+      const npc = gameState.currentNPC;
+      if (gameState.inDialogue && npc && !DICT_SAFE.has(word)){
+        triggerDictionaryPenalty(npc.id);
+        showNotification("They noticed you checking the dictionary… (-social)");
+      }
+    }
+
+    function learnWordIfNew(w){
+      gameState.knownWords ||= [];
+      gameState.learnedWords ||= {};
+      if (!gameState.knownWords.includes(w)){
+        gameState.knownWords.push(w);
+        gameState.learnedWords[w] = true;
+        if (typeof updateVocabularyCount === "function") updateVocabularyCount();
+      }
+    }
+
+
+    function canAdvanceToday(npcId){
+      const day = Math.floor((gameState.gameMinutesTotal||0) / (24*60));
+      const entry = gameState.routeDaily[npcId] || { lastDay: day, advancesToday: 0 };
+      if (entry.lastDay !== day){ entry.lastDay = day; entry.advancesToday = 0; }
+      gameState.routeDaily[npcId] = entry;
+      return entry.advancesToday < 2; // máx 2 avanços/dia por NPC
+    }
+
+    function markAdvance(npcId){
+      const day = Math.floor((gameState.gameMinutesTotal||0) / (24*60));
+      const entry = gameState.routeDaily[npcId] || { lastDay: day, advancesToday: 0 };
+      if (entry.lastDay !== day){ entry.lastDay = day; entry.advancesToday = 0; }
+      entry.advancesToday++;
+      gameState.routeDaily[npcId] = entry;
+    }
+
 
     function positionNPCs() {
         npcs[0].x = canvas.width * 0.3;
@@ -1580,68 +1760,84 @@
     }
     // ==== Dialogue helpers (drop-in) ====
 
-    // Abre um diálogo com o NPC mais próximo, checando hora do dia, palavras exigidas e progresso.
-    // Requer: gameState, npcs, getTimeOfDay(), annotateDialogueText(), isSocialPenaltyActive(),
-    //         showNotification(), updateVocabularyCount(), startVerbMinigame(), npcHint, dialogueBox, etc.
     function startDialogue(npc) {
-        if (!npc) {
-            showNotification('No one around to talk to.');
-            return;
-        }
-        // Evita trocar de NPC no meio de um diálogo
-        if (gameState.inDialogue && gameState.currentNPC && gameState.currentNPC !== npc) {
-            return;
-        }
+      if (!npc) { showNotification('No one around to talk to.'); return; }
 
-        gameState.inDialogue = true;
-        gameState.currentNPC = npc;
+      // Evita trocar de NPC no meio do diálogo
+      if (gameState.inDialogue && gameState.currentNPC && gameState.currentNPC !== npc) {
+        return;
+      }
 
-        const tod = getTimeOfDay();
-        const allSets = npc.dialogues ? Object.values(npc.dialogues) : [];
-        const flat = [].concat.apply([], allSets);
+      gameState.inDialogue = true;
+      gameState.currentNPC = npc;
 
-        if (!flat.length) {
-            displayDialogue('......', npc);
-            return;
-        }
+      // Localização e horário atuais
+      const playerLoc = gameState.playerLocation || npc.location || 'cafe';
+      const tod = getTimeOfDay(); // deve retornar "morning" | "afternoon" | "evening"
 
-        // Filtra por nível de relacionamento do jogador com o NPC
-        const rel = (gameState.relationships[npc.id] || 0);
-        const avail = flat.filter(d => (d.relationshipLevel || 0) <= rel);
-        if (!avail.length) {
-            displayDialogue('...... (I need to improve my relationship with this person)', npc);
-            return;
-        }
+      // Se o NPC está "grumpy", mostra a linha curta e sai
+      if (typeof isNpcGrumpy === "function" && isNpcGrumpy(npc.id) && npc.grumpyLine) {
+        displayDialogue(npc.grumpyLine, npc, null);
+        return;
+      }
 
-        // Escolhe fala pelo horário; fallback no primeiro disponível
-        const chosen = avail.find(d => d.time === tod || d.time === 'any') || avail[0];
+      // Contexto para o roteador
+      const ctx = {
+        state: gameState,
+        npcId: npc.id,
+        location: playerLoc,
+        // Se seu getTimeOfDay já retorna os slots "morning/afternoon/evening",
+        // e seu routeNextNode converte internamente, ok. Se não, mapeie para hora aqui.
+        gameTime: (function mapTodToHour(slot){
+          if (slot === "morning") return 9;
+          if (slot === "afternoon") return 15;
+          return 20; // evening
+        })(tod),
+        knownWords: gameState.knownWords || [],
+        relNpc: (gameState.relationships || {})[npc.id] || 0,
+        flags: Object.assign({}, gameState.storyProgress || {}, gameState.flags || {}),
+        isPenaltyActive: isSocialPenaltyActive ? !!isSocialPenaltyActive() : false,
+        nowAbsMin: gameState.gameMinutesTotal || 0
+      };
 
-        // Verifica palavras obrigatórias
-        let ok = true;
-        if (chosen.requiredWords) {
-            for (const w of chosen.requiredWords) {
-                if (!gameState.knownWords.includes(w)) {
-                    ok = false;
-                    break;
-                }
-            }
-        }
-        if (!ok) {
-            const miss = chosen.requiredWords
-                .filter(w => !gameState.knownWords.includes(w))
-                .map(w => w + ' [' + (wordDictionary[w] || '') + ']').join(', ');
-            displayDialogue('...... (I need to learn: ' + miss + ')', npc);
-            return;
-        }
+      // Roteia nó atual do grafo
+      const node = routeNextNode(npc.id, DIALOGUE_GRAPH, ctx) || fallbackSmallTalkNode(npc.id, playerLoc, tod);
 
-        // Se falou com Takeshi, libera job da cafeteria (se ainda não liberou)
-        if (npc.id === 'takeshi' && !gameState.storyProgress.metTakeshi) {
-            gameState.storyProgress.metTakeshi = true;
-            showNotification('I met Takeshi, the cafe owner.');
-        }
+      // (Exemplo de gatilho de história preservado do seu código)
+      if (npc.id === 'takeshi' && !(gameState.storyProgress || {}).metTakeshi) {
+        gameState.storyProgress = gameState.storyProgress || {};
+        gameState.storyProgress.metTakeshi = true;
+        showNotification('I met Takeshi, the cafe owner.');
+      }
 
-        // Mostra a fala e as respostas possíveis
-        displayDialogue(chosen.japanese, npc, chosen.responses || null);
+      // Renderiza usando o novo formato (opção A: renderer da engine)
+      renderDialogueNode(npc, node, ctx);
+
+      // --------
+      // Se você quiser manter TEMPORARIAMENTE o displayDialogue antigo (texto + responses),
+      // descomente o "adapter" abaixo e comente a linha acima.
+      // Ele converte node.options -> responses (somente para compatibilidade visual).
+      //
+      // const legacyResponses = (node.options || []).map(opt => ({
+      //   words: opt.needsWords || [],
+      //   response: (opt.effects && (opt.effects.responseText || opt.effects.say)) || "(...)",
+      //   _goto: opt.goto || null,         // guardamos para navegar manualmente
+      //   _effects: opt.effects || {}
+      // }));
+      // displayDialogue(node.text || "", npc, legacyResponses);
+      // dialogueBox.dataset.engineGraph = "1"; // marca visual para debug
+      // --------
+    }
+
+    // Nó fallback minimalista quando nenhum requisito bate
+    function fallbackSmallTalkNode(npcId, location, slot){
+      return new DialogueNode({
+        id: `${npcId}_fallback_${location}_${slot}`,
+        npc: npcId,
+        text: "……今は忙しい。", // "…estou ocupado agora."
+        requirements: {},
+        options: []
+      });
     }
 
     // Renderiza o balão de diálogo + botões de resposta
@@ -1970,6 +2166,7 @@
       updateTimeDisplay();
       updateCoins();
 
+
       // Work UI
       function renderJobStatus() {
           const cid = gameState.jobs.currentJobId;
@@ -2011,16 +2208,18 @@
           showNotification('No job unlocked.');
           return;
         }
+        
+        if (gameState.jobs.isOnShift) {
+          showNotification('You already started your Shift!');
+          return;
+        }
+
         gameState.jobs.isOnShift = true;
         gameState.jobs.currentJobId = gameState.jobs.currentJobId || 'cafe';
         gameState.jobs.lastSeenAt = Date.now();             // âncora para contar offline depois
         saveGameToStorage();                                 // << gated por AUTOSAVE_ENABLED
         renderJobStatus();
 
-        if (gameState.jobs.isOnShift) {
-          showNotification('You already started your Shift!');
-          return;
-        }
         showNotification('Shift started. Coins will accrue while you are offline.');
       });
       // STOP SHIFT (opção: “liquidar” o que ficou pendente até agora)
@@ -2082,6 +2281,32 @@
             kdI.textContent = KeyState.interact ? 1 : 0;
         }
         requestAnimationFrame(gameLoop);
+    }
+
+    function ensureJobsState(){
+      if (!gameState.jobs) gameState.jobs = {
+        unlocked: {},
+        currentJobId: null,
+        currentRankIndex: 0,
+        isOnShift: false,
+        lastSeenAt: Date.now(),
+        pendingEventQueue: [],
+        totalOfflineHoursWorked: 0,
+        eventsTriggered: 0,
+        extraEventAnchor: 0,
+        totalHoursWorked: 0
+      };
+      if (!gameState.jobs.unlocked) gameState.jobs.unlocked = {};
+    }
+
+    function unlockJob(jobKey, toastMsg="Cafe job unlocked!"){
+      ensureJobsState();
+      if (!gameState.jobs.unlocked[jobKey]) {
+        gameState.jobs.unlocked[jobKey] = true;
+        if (typeof showNotification === "function") showNotification(toastMsg);
+        // se houver UI específica, atualize aqui:
+        if (typeof refreshWorkActions === "function") refreshWorkActions();
+      }
     }
 
     /* =======================
@@ -2749,13 +2974,6 @@
       return next; // retorna HP restante
     }
 
-    // Efeitos (opcional, mas ajudam a ver)
-    function flashEnemyHP(){
-      const fill = document.getElementById('enemyhp-fill');
-      if (!fill) return;
-      fill.classList.remove('hit'); void fill.offsetWidth; fill.classList.add('hit');
-    }
-
     function updateHPUI(){
       const hpEl = document.getElementById('hp-val');
       const fill = document.getElementById('hp-fill');
@@ -2991,27 +3209,6 @@
       { label:'mi', answer:'mi' },
       { label:'ko', answer:'ko' },
     ];
-
-    // ===== Safe show/hide
-    function showDefensePanel(label, ms){
-      const p = document.getElementById('defense-panel');
-      const lab = document.getElementById('defense-label');
-      const inp = document.getElementById('defense-input');
-      const tim = document.getElementById('defense-timer');
-      if (!p || !lab || !inp || !tim){
-        console.warn('[Defend] Missing defense panel elements'); 
-        return;
-      }
-      lab.textContent = label;
-      inp.value = ''; inp.blur(); inp.focus();
-      tim.textContent = (ms/1000).toFixed(1)+'s';
-      p.removeAttribute('hidden');              // garante visível
-    }
-
-    function hideDefensePanel(){
-      const p = document.getElementById('defense-panel');
-      if (p) p.setAttribute('hidden','');       // garante invisível + sem bloquear clique
-    }
 
     // ===== Flow
     function chooseDefend(){
@@ -3306,6 +3503,40 @@
     if (sm) sm.style.display='flex';
   }
 
+  function ensureEqDom() {
+    let overlay = document.getElementById('eq-overlay');
+    let layer   = document.getElementById('eq-layer');
+    let canvas  = document.getElementById('eq-matrix');
+
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'eq-overlay';
+      overlay.style.cssText = 'display:none;position:fixed;inset:0;z-index:11000;pointer-events:auto;';
+      // estrutura interna
+      const inner = document.createElement('div');
+      inner.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;';
+      layer = document.createElement('div');
+      layer.id = 'eq-layer';
+      layer.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:auto;';
+      canvas = document.createElement('canvas');
+      canvas.id = 'eq-matrix';
+      canvas.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;';
+      inner.appendChild(canvas);
+      inner.appendChild(layer);
+      overlay.appendChild(inner);
+      document.body.appendChild(overlay);
+    } else {
+      layer  = layer  || document.getElementById('eq-layer');
+      canvas = canvas || document.getElementById('eq-matrix');
+    }
+
+    // assegura posicionamentos/z-index mesmo se CSS externo mudou
+    overlay.style.zIndex = '11000';
+    overlay.style.position = 'fixed';
+
+    return { overlay, layer, canvas };
+  }
+
   /** Skill: Earthquake
    * Dura até 5s. Tremor + "matrix rain" + peças clicáveis (kanji/en).
    * Se acertar um par (kanji→en) dentro do tempo → hit kill.
@@ -3314,33 +3545,29 @@
    */
   // Skill: Earthquake — Full, self-contained (helpers inclusas dentro)
   function triggerEarthquake(){
-    // ==== Guards de batalha ====
-    if (!window.gameState || !gameState.battle) return;
-    if (gameState.battle.victoryFxRunning || gameState.battle.battleEnded) return;
-    if (gameState.battle.turn !== 'player') return;
-    if (gameState.battle.defensePending || gameState.battle.skillActive) return;
+  const GS = window.gameState ?? (typeof gameState !== 'undefined' ? gameState : null);
+  const B  = GS?.battle;
+  if (!GS || !B) { console.warn('[EQ] exit: no gameState/battle'); return 'no-battle'; }
+  if (B.victoryFxRunning || B.battleEnded) { console.warn('[EQ] exit: victoryFxRunning/battleEnded'); return 'ended'; }
+  if (B.turn !== 'player') { console.warn('[EQ] exit: not player turn'); return 'not-player'; }
+  if (B.defensePending || B.skillActive) { console.warn('[EQ] exit: defensePending/skillActive'); return 'busy'; }
 
-    // ==== DOM base ====
-    const overlay = document.getElementById('eq-overlay');   // full viewport
-    const layer   = document.getElementById('eq-layer');     // onde vão as peças
-    const canvas  = document.getElementById('eq-matrix');    // matrix rain
-    const card    = document.getElementById('battle-card');  // pra tremor
+
+    // ==== DEBUG: diga exatamente por que sair ====
+    const b = gameState?.battle;
+    if (!gameState || !b) { console.warn("[EQ] exit: no gameState/battle"); return "no-battle"; }
+    if (b.victoryFxRunning || b.battleEnded) { console.warn("[EQ] exit: victoryFxRunning/battleEnded"); return "ended"; }
+    if (b.turn !== 'player') { console.warn("[EQ] exit: not player turn"); return "not-player"; }
+    if (b.defensePending || b.skillActive) { console.warn("[EQ] exit: defensePending/skillActive"); return "busy"; }
+
+    // ==== DOM base (robusto) ====
+    const { overlay, layer, canvas } = ensureEqDom(); // definido na seção B
+    const card = document.getElementById('battle-card');
+
     if (!overlay || !layer || !canvas || !card){
-      console.warn('[Earthquake] Missing DOM: #eq-overlay/#eq-layer/#eq-matrix/#battle-card');
-      return;
+      console.warn('[EQ] exit: Missing DOM after ensureEqDom');
+      return "missing-dom";
     }
-
-    // ==== Configs ====
-    const ENEMY_MAX_HP = (typeof window.ENEMY_MAX_HP === 'number' ? ENEMY_MAX_HP : 10);
-    const PAIRS_SRC = Array.isArray(window.EQ_PAIRS) && window.EQ_PAIRS.length
-      ? window.EQ_PAIRS
-      : [
-          { kanji:'水', en:'water' }, { kanji:'火', en:'fire' }, { kanji:'木', en:'tree' },
-          { kanji:'山', en:'mountain' }, { kanji:'川', en:'river' }, { kanji:'茶', en:'tea' },
-          { kanji:'駅', en:'station' }, { kanji:'本', en:'book' }, { kanji:'空', en:'sky' },
-          { kanji:'雨', en:'rain' },
-        ];
-    const DURATION_MS = 5000; // 5s máx
 
     // ==== Estado da skill ====
     gameState.battle.skillActive = true;
@@ -3387,7 +3614,9 @@
         }
       }
     }
-    overlay.addEventListener('click', pieceClickHandler);
+    overlay.removeEventListener?.('click', overlay._eqClickHandler);
+    overlay._eqClickHandler = pieceClickHandler;
+    overlay.addEventListener('click', overlay._eqClickHandler);
 
     // ===== Animação de queda =====
     const start = performance.now();
@@ -3553,6 +3782,10 @@
   }
   
    window.factoryReset = factoryReset;
-  </script>
-</body>
-</html>
+  
+
+
+// Expose some APIs for external UI/bindings
+window.triggerEarthquake = window.triggerEarthquake || triggerEarthquake;
+window.openDictionary = window.openDictionary || openDictionary;
+

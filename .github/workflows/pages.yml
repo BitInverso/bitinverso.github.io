@@ -31,7 +31,6 @@ jobs:
       - name: Permissões no script
         run: chmod +x tools/encode_videos.sh
 
-      # ✅ Restaura do cache (pula re-encode se fonte/script não mudaram)
       - name: Restore encoded videos cache
         id: restore-encodes
         uses: actions/cache/restore@v4
@@ -47,14 +46,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-encodes-
 
-      # 🔁 Só re-encode se NÃO houver cache hit
       - name: Re-encoder vídeos (MP4 + WEBM em 480/720/1080)
         if: steps.restore-encodes.outputs.cache-hit != 'true'
-        run: |
-          tools/encode_videos.sh assets/hero-background.mp4
-          # ou: tools/encode_videos.sh assets/hero-background.mp4 --force
+        run: tools/encode_videos.sh assets/hero-background.mp4
 
-      # 💾 Salva no cache (apenas quando reprocessou)
       - name: Save encoded videos cache
         if: steps.restore-encodes.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -77,7 +72,6 @@ jobs:
           test -f assets/hero-background-1080.webm
           test -f assets/hero-background-1080.mp4
 
-      # Publica os assets gerados/restaurados para o próximo job
       - name: Upload encoded assets
         uses: actions/upload-artifact@v4
         with:
@@ -93,7 +87,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Baixa os assets encodados do job anterior
       - name: Download encoded assets
         uses: actions/download-artifact@v4
         with:
@@ -105,16 +98,58 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install deps (Node)
+      # ---------- ROOT (Tailwind + PostCSS) ----------
+      - name: Install deps (root)
         run: npm ci || true
 
-      - name: Build CSS
+      # Gera CSS do root com Tailwind CLI (ajuste -i/-o se seus paths forem outros)
+      - name: Build CSS (root via Tailwind CLI)
+        run: npx tailwindcss -c tailwind.config.js -i ./src/index.css -o ./assets/index.css --minify
+
+      # Opcional: passa no PostCSS (autoprefixer/cssnano) mesmo sem postcss-cli no repo
+      - name: PostCSS (autoprefixer/cssnano)
+        run: npx --yes postcss-cli@latest ./assets/index.css -o ./assets/index.css
+
+      # ---------- POC (Vite) ----------
+      - name: Install deps (poc)
+        run: npm ci || true
+        working-directory: ./poc
+
+      - name: Build (poc - Vite)
         run: NODE_ENV=production npm run build --if-present
+        working-directory: ./poc
+
+      # ---------- Monta artefato para Pages ----------
+      - name: Montar diretório de publicação
+        run: |
+          rm -rf gh-pages
+          mkdir -p gh-pages
+
+          # copia o site raiz (HTML, assets, imagens, etc) – exclui coisas de dev
+          rsync -av \
+            --exclude '.git*' \
+            --exclude 'node_modules' \
+            --exclude '.github' \
+            --exclude 'poc' \
+            --exclude 'package*.json' \
+            --exclude 'vite.config.js' \
+            --exclude 'tailwind.config.js' \
+            --exclude 'postcss.config.js' \
+            --exclude 'README.md' \
+            ./ gh-pages/
+
+          # garante que os vídeos existam no artefato final
+          mkdir -p gh-pages/assets
+          cp -n assets/hero-background-* gh-pages/assets/ 2>/dev/null || true
+
+          # subsite /poc (build do Vite)
+          mkdir -p gh-pages/poc
+          if [ -d poc/dist ]; then cp -r poc/dist/* gh-pages/poc/; fi
 
       - name: Upload artifact (site)
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: gh-pages
 
   deploy:
     needs: build

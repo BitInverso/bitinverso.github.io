@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Nihongo Journey</title>
+    <link rel="stylesheet" href="src/css/styles.css" />
+  </head>
+  <body>
+    
+
+  <div id="game-header">
+    <h1>日本への旅</h1>
+    <div id="time-display">10:00</div>
+  </div>
+
+  <div id="game-container">
+    <!-- Dictionary -->
+    <div id="dict-overlay">
+      <div id="dict-card">
+        <div id="dict-title">Pocket Dictionary <span id="dict-penalty-badge" class="badge" style="display:none;">Social impact active</span></div>
+        <div id="dict-body">
+          <div><strong>Word:</strong> <span id="dict-word">—</span></div>
+          <div><strong>Part of speech:</strong> <span id="dict-pos">—</span></div>
+          <div><strong>Meaning:</strong> <span id="dict-meaning">—</span></div>
+          <div style="margin-top:10px; font-size:.9rem; opacity:.9;">
+            Using the dictionary during conversations may be noticed by locals.
+            <strong>Consequence:</strong> affinity gained with NPCs is reduced for <u>30 in‑game minutes</u> after each lookup.
+          </div>
+        </div>
+        <div id="dict-actions">
+          <button id="dict-close" class="btn">Got it</button>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="game-canvas" tabindex="0"></canvas>
+
+    <div id="hud">
+      <div id="vocabulary-count">Words: 3</div>
+      <div id="location-display">Location: Street</div>
+      <div id="coin-display">Coins: 0</div>
+    </div>
+    <button id="job-button">Work</button>
+    <button id="map-button">Map</button>
+    <div id="npc-hint">Press E / Space / Enter to interact</div>
+
+    <div id="controls"><div id="joystick">Move</div></div>
+    <div id="interact-btn">Interact</div>
+
+    <div id="dialogue-box">
+      <div id="close-dialogue">X</div>
+      <div id="dialogue-text"></div>
+      <div id="response-options"></div>
+    </div>
+
+    <div id="notification"></div>
+
+    <div id="keydebug" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);padding:6px 8px;border-radius:8px;font-size:.75rem;display:none;z-index:99">
+      L:<span id="kd-l">0</span> R:<span id="kd-r">0</span> U:<span id="kd-u">0</span> D:<span id="kd-d">0</span> I:<span id="kd-i">0</span>
+    </div>
+    
+
+    <!-- Minigame -->
+    <div id="minigame-overlay">
+      <div style="color:#e9c46a; font-size:1.2rem; margin-bottom:10px;">Mini Game — Slice only the <b>verbs</b>!</div>
+      <canvas id="minigame-canvas"></canvas>
+      <div id="minigame-ui" style="margin-top:10px; color:#e0e1dd;">Score: <span id="mg-score">0</span> • Mistakes: <span id="mg-mistakes">0</span> • Time: <span id="mg-time">60</span>s • Lives: <span id="mg-lives">❤️❤️❤️</span></div>
+      <button id="minigame-exit" class="btn" style="margin-top:10px;">Exit</button>
+    </div>
+
+    <!-- Map -->
+    <div id="map-overlay" class="overlay" style="background:rgba(13,27,42,.95);z-index:40;display:none;align-items:center;flex-direction:column;padding:20px;">
+      <div class="panel" style="width:min(720px,92vw);">
+        <div id="map-title" style="color:#e9c46a;font-size:1.2rem;margin-bottom:12px;">City Map</div>
+        <div id="map-content" style="width:100%;height:60vh;background:#0f1a28;border-radius:10px;position:relative;overflow:hidden;border:2px solid #778da9;margin-bottom:12px;">
+          <div class="map-area" id="map-cafe" style="position:absolute;top: 15%; left: 20%; width: 25%; height: 20%; background: #e63946;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Cafe</div>
+          <div class="map-area" id="map-store" style="position:absolute;top: 15%; left: 55%; width: 25%; height: 20%; background: #a8dadc;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Store</div>
+          <div class="map-area" id="map-park" style="position:absolute;top: 45%; left: 38%; width: 25%; height: 20%; background: #457b9d;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Park</div>
+          <div class="map-area" id="map-shrine" style="position:absolute;top: 45%; left: 10%; width: 25%; height: 20%; background: #9d4edd;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Shrine</div>
+          <div class="map-area" id="map-school" style="position:absolute;top: 45%; left: 65%; width: 25%; height: 20%; background: #f4a261;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">School</div>
+          <div class="map-area" id="map-hostel" style="position:absolute;top: 75%; left: 38%; width: 25%; height: 20%; background: #2a9d8f;display:flex;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;">Hostel</div>
+          <div class="map-area locked" id="map-novo" style="position:absolute;top: 75%; left: 70%; width: 25%; height: 20%; background: #264653;display:flex;align-items:center;justify-content:center;border-radius:8px;opacity:.45;filter:grayscale(.6);cursor:not-allowed;">New District</div>
+        </div>
+        <div style="text-align:right"><button id="close-map" class="btn">Close Map</button></div>
+      </div>
+    </div>
+
+    <!-- School -->
+    <div id="school-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:50;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:560px; width:92vw; text-align:center;">
+        <h2 style="color:#e9c46a; margin-bottom:30px;">Japanese School</h2>
+        <button class="btn" id="vocab-lesson">Study Vocabulary</button>
+        <button class="btn" id="grammar-lesson">Learn Grammar</button>
+        <button class="btn" id="close-school">Back to City</button>
+      </div>
+    </div>
+
+    <!-- Work Panel -->
+    <div id="job-overlay" class="overlay" style="background:rgba(13,27,42,.96);z-index:70;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:620px; width:92vw;">
+        <h3 style="color:#e9c46a; font-size:1.2rem; margin-bottom:8px;">Work</h3>
+        <div id="job-status" style="font-size:.95rem; line-height:1.5; margin-bottom:12px;"></div>
+        <div id="job-actions" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" id="job-start">Start shift</button>
+          <button class="btn" id="job-stop">End shift</button>
+          <button class="btn" id="job-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Work Event -->
+    <div id="workevent-overlay" class="overlay" style="background:rgba(0,0,0,.85);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="width:min(640px,92vw);">
+        <div id="workevent-title" style="color:#e9c46a; font-size:1.1rem; margin-bottom:10px;">Work event</div>
+        <div id="workevent-text" style="line-height:1.5; margin-bottom:14px;"></div>
+        <div id="workevent-choices" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div style="margin-top:12px; text-align:right;">
+          <button class="btn" id="workevent-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start -->
+    <div id="start-screen" class="overlay" style="background:rgba(13,27,42,.98);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px;">
+      <div class="panel" style="max-width:560px;text-align:center">
+        <div id="logo" style="font-size:2rem;color:#e9c46a;margin-bottom:15px;text-shadow:0 0 10px rgba(233,196,106,.5)">Nihongo Journey</div>
+        <div id="instructions" style="margin-bottom:22px;line-height:1.6;font-size:.95rem;">
+          <p>You've arrived in <b>Japan</b> as a backpacker, without knowing the language.</p>
+          <p>Explore the city, <b>learn Japanese words</b>, and make friends to experience authentic culture.</p>
+          <p><b>Move:</b> WASD / Arrows • <b>Interact:</b> E / Space / Enter • Or use on‑screen controls.</p>
+        </div>
+        <button id="start-button" class="btn" style="border-radius:25px;padding:14px 35px;">Start Journey</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Turn-based Battle (JP sentences) -->
+  <div id="battle-overlay" class="overlay">
+    <div id="battle-card">
+      <div id="turn-banner">Your Turn</div>
+      <div id="victory-overlay">
+        <div class="victory-flash"></div>
+        <div class="victory-burst"></div>
+        <div class="victory-confetti"></div>
+        <div class="victory-coins"></div>
+        <div class="victory-banner">Victory!</div>
+      </div>
+      <div id="skills-modal">
+        <div id="skills-card">
+          <div style="font-weight:700; margin-bottom:6px;">Select a Skill</div>
+          <div id="skills-list">
+            <button id="skill-earthquake" class="btn skill-btn">Earthquake</button>
+          </div>
+          <div style="text-align:right; margin-top:10px;">
+            <button id="skills-close" class="btn">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Earthquake overlay -->
+      <div id="eq-overlay">
+        <canvas id="eq-matrix"></canvas>
+        <div id="eq-layer"></div>
+      </div>
+      <div id="battle-title">A wild challenge appeared!</div>
+
+      <div id="hp-wrap">
+        <div id="hp-text">HP: <span id="hp-val">10</span>/10</div>
+        <div id="hp-bar"><div id="hp-fill" style="width:100%"></div></div>
+      </div>
+
+      <div id="enemyhp-wrap">
+        <div id="enemyhp-text">Enemy HP: <span id="enemyhp-val">10</span>/10</div>
+        <div id="enemyhp-bar"><div id="enemyhp-fill" style="width:100%"></div></div>
+      </div>
+
+      <div id="battle-instr">Pick ONE Japanese word. On pick, you ATTACK: if the ORDER so far is correct, you deal damage.</div>
+
+      <div style="font-size:.95rem;opacity:.8;margin-bottom:6px">Word Pool</div>
+      <div id="battle-pool"></div>
+
+      <div style="font-size:.95rem;opacity:.8;margin:8px 0 6px">Your Sentence</div>
+      <div id="battle-ordered"></div>
+
+      <div id="battle-actions">
+        <button id="battle-defend" class="btn">Defend</button>
+        <!-- <button id="battle-attack" class="btn">Attack</button> -->
+        <button id="battle-skills" class="btn">Skills</button>
+        <button id="battle-flee" class="btn">Flee</button>
+      </div>
+
+      <!-- Defense mini-skill (enemy turn) -->
+      <div id="defense-panel">
+        <div id="defense-prompt">Defense: type <b><span id="defense-label">ka</span></b> quickly!</div>
+        <div id="defense-row">
+          <input id="defense-input" type="text" autocomplete="off" />
+          <button id="defense-submit" class="btn">Guard</button>
+          <div id="defense-timer">3.0s</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="skills-overlay">
+    <div id="skills-card">
+      <div id="skills-title">Choose a Skill</div>
+      <div id="skills-list">
+        <button id="skill-earthquake" class="skill-item">Earthquake</button>
+      </div>
+      <div id="skills-actions">
+        <button id="skills-close" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="src/js/entry.js" defer></script>
+  </body>
+</html>
